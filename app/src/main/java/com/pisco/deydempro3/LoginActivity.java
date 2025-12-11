@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
                             SharedPreferences prefs = getSharedPreferences(Constants.PREFS, MODE_PRIVATE);
                             prefs.edit().putInt(Constants.KEY_DRIVER_ID, driverId).apply();
 
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            startActivity(new Intent(LoginActivity.this, AvailableDeliveriesActivity.class));
                             finish();
                         } else {
                             Toast.makeText(this, "Identifiants incorrects", Toast.LENGTH_SHORT).show();
