@@ -19,20 +19,27 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBAmGv7nVuVuYx8Zmph6DmBH1SxIIa9UAM" />
+
         <activity
             android:name=".MapDeliveriesActivity"
-            android:exported="false" />
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".AvailableDeliveriesActivity"
             android:exported="false" />
         <activity
             android:name=".RegisterActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".ListeDescourses"

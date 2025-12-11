@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="deydem_green">#00C26A</color>
+    <color name="colorPrimary">#00C569</color>
+    <color name="colorPrimaryDark">#009e54</color>
+    <color name="colorAccent">#00C569</color>
 </resources>

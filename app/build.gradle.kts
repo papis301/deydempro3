@@ -44,4 +44,8 @@ dependencies {
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.maps.android:android-maps-utils:3.4.0")
 }

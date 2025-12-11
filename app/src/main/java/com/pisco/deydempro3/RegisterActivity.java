@@ -23,7 +23,7 @@ public class RegisterActivity extends AppCompatActivity {
     Button btnRegister, btnGoLogin;
 
     // 🔥 Ton API LOCAL
-    String URL = "http://192.168.1.7/deydemlivraisonphpmysql/register_driver.php";
+    String URL = "http://10.129.16.71/deydemlivraisonphpmysql/register_driver.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
