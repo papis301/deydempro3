@@ -3,31 +3,36 @@ package com.pisco.deydempro3;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.content.SharedPreferences;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
     EditText etPhone, etPassword, etConfirm;
     Button btnRegister, btnGoLogin;
 
+    // 🔥 Ton API LOCAL
+    String URL = "http://192.168.1.7/deydemlivraisonphpmysql/register_driver.php";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        etPhone   = findViewById(R.id.etPhone);
+        etPhone = findViewById(R.id.etPhone);
         etPassword = findViewById(R.id.etPassword);
-        etConfirm  = findViewById(R.id.etConfirm);
+        etConfirm = findViewById(R.id.etConfirm);
 
         btnRegister = findViewById(R.id.btnRegister);
         btnGoLogin = findViewById(R.id.btnGoLogin);
@@ -39,7 +44,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void registerDriver() {
 
         String phone = etPhone.getText().toString().trim();
-        String pass  = etPassword.getText().toString().trim();
+        String pass = etPassword.getText().toString().trim();
         String confirm = etConfirm.getText().toString().trim();
 
         if (phone.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
@@ -52,48 +57,32 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        String url = Constants.BASE_URL + "register_driver.php";
-
-        JSONObject data = new JSONObject();
-        try {
-            data.put("phone", phone);
-            data.put("password", pass);
-            data.put("type", "driver"); // IMPORTANT pour ta base usersdeydem
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        JsonObjectRequest req = new JsonObjectRequest(
+        // ---------- VOLLEY POST REQUEST ----------
+        StringRequest req = new StringRequest(
                 Request.Method.POST,
-                url,
-                data,
+                URL,
                 response -> {
-                    try {
-                        if (response.getBoolean("success")) {
-
-                            int id = response.getInt("driver_id");
-
-                            SharedPreferences prefs = getSharedPreferences(Constants.PREFS, MODE_PRIVATE);
-                            prefs.edit().putInt(Constants.KEY_DRIVER_ID, id).apply();
-
-                            Toast.makeText(this, "Compte créé", Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(this, MainActivity.class));
-                            finish();
-
-                        } else {
-                            Toast.makeText(this,
-                                    response.getString("message"),
-                                    Toast.LENGTH_SHORT
-                            ).show();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(this, "Erreur", Toast.LENGTH_SHORT).show();
-                    }
+                    Log.d("reponse", response);
+                    Toast.makeText(this, response, Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(this, LoginActivity.class));
+                    finish();
                 },
-                error -> Toast.makeText(this, "Erreur réseau !", Toast.LENGTH_SHORT).show()
-        );
+                error -> {
+                    Log.e("Erreur", error.toString());
+                    Toast.makeText(this, "Erreur réseau : " + error.toString(), Toast.LENGTH_LONG).show();
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> data = new HashMap<>();
+                data.put("phone", phone);
+                data.put("password", pass);
+                data.put("type", "driver");
+                return data;
+            }
+        };
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(req);
     }
 }

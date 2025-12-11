@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
@@ -67,7 +68,9 @@ public class ListeDescourses extends AppCompatActivity implements CourseAdapter.
 
     private void startLocationService() {
         Intent svc = new Intent(this, LocationService.class);
-        startForegroundService(svc);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(svc);
+        }
 
         setDriverOnline();
     }
