@@ -168,18 +168,21 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
                         // 🔥 Mettre à jour marker du livreur
                         if (driverMarker == null) {
+
                             driverMarker = mMap.addMarker(new MarkerOptions()
                                     .position(driverPos)
                                     .title("Vous")
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(R.drawable.icmoto, 80, 80)))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(
+                                            resizeMarker(R.drawable.icmoto, 80, 80)
+                                    ))
                             );
 
                         } else {
-
                             driverMarker.setPosition(driverPos);
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(driverPos, 16));
-
                         }
+
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(driverPos, 16));
+
 
                         // 🔥 Trace dynamique selon la phase
                         if (goingToPickup) {
