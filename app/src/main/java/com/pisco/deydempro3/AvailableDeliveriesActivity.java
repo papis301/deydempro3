@@ -20,7 +20,7 @@ public class AvailableDeliveriesActivity extends AppCompatActivity {
 
     RecyclerView recycler;
     ArrayList<Delivery> deliveries;
-    String URL = "http://10.129.16.71/deydemlivraisonphpmysql/get_deliveries.php";
+    String URL = "http://192.168.1.7/deydemlivraisonphpmysql/get_deliveries.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

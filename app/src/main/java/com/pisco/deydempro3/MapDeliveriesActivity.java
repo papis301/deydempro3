@@ -33,8 +33,8 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
 
     HashMap<Marker, MapDelivery> markerDeliveries = new HashMap<>();
 
-    String URL = "http://10.129.16.71/deydemlivraisonphpmysql/get_deliveries_map.php";
-    String URL_ACCEPT = "http://10.129.16.71/deydemlivraisonphpmysql/accept_delivery.php";
+    String URL = "http://192.168.1.7/deydemlivraisonphpmysql/get_deliveries_map.php";
+    String URL_ACCEPT = "http://192.168.1.7/deydemlivraisonphpmysql/accept_delivery.php";
 
     View infoView;
     TextView infoPickup, infoDropoff, infoPrice;
