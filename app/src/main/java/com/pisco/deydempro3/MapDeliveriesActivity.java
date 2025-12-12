@@ -3,6 +3,7 @@ package com.pisco.deydempro3;
 import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -189,13 +190,24 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
     }
 
     private void acceptDelivery() {
-
         if (selectedDelivery == null) return;
 
         StringRequest req = new StringRequest(Request.Method.POST, URL_ACCEPT,
                 response -> {
                     Toast.makeText(this, "Livraison acceptée", Toast.LENGTH_LONG).show();
-                    infoView.setVisibility(View.GONE);
+
+                    // REDIRECTION AVEC LES INFOS
+                    Intent i = new Intent(this, DeliveryNavigationActivity.class);
+                    i.putExtra("delivery_id", selectedDelivery.id);
+                    i.putExtra("pickup_lat", selectedDelivery.pickupLat);
+                    i.putExtra("pickup_lng", selectedDelivery.pickupLng);
+                    i.putExtra("drop_lat", selectedDelivery.dropLat);
+                    i.putExtra("drop_lng", selectedDelivery.dropLng);
+                    i.putExtra("pickup_address", selectedDelivery.pickup);
+                    i.putExtra("dropoff_address", selectedDelivery.dropoff);
+                    i.putExtra("price", selectedDelivery.price);
+                    startActivity(i);
+
                 },
                 error -> Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show()
         ) {
@@ -203,11 +215,12 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
             protected Map<String, String> getParams() {
                 Map<String, String> d = new HashMap<>();
                 d.put("delivery_id", selectedDelivery.id);
-                d.put("driver_id", "1"); // replace with real value from SharedPreferences
+                d.put("driver_id", "1");
                 return d;
             }
         };
 
         Volley.newRequestQueue(this).add(req);
     }
+
 }

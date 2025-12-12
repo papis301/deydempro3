@@ -1,13 +1,14 @@
 package com.pisco.deydempro3;
 
 import android.content.Context;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.Intent;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,24 +47,45 @@ public class DeliveryAdapter extends RecyclerView.Adapter<DeliveryAdapter.MyView
         h.tvDrop.setText("Destination : " + d.dropoff_address);
         h.tvPrice.setText(d.price + " FCFA");
 
-        h.btnAccept.setOnClickListener(v -> acceptDelivery(d.id));
+        // CLIC SUR "ACCEPTER"
+        h.btnAccept.setOnClickListener(v -> acceptDelivery(d));
     }
 
-    private void acceptDelivery(String deliveryId) {
+    /**
+     * Méthode correcte pour accepter une livraison
+     */
+    private void acceptDelivery(Delivery delivery) {
 
         StringRequest req = new StringRequest(Request.Method.POST, acceptUrl,
                 response -> {
-                    Toast.makeText(context, response, Toast.LENGTH_LONG).show();
-                    Log.d("reponse", response);
+                    Toast.makeText(context, "Livraison acceptée ✔", Toast.LENGTH_LONG).show();
+
+                    // ➜ Redirection vers la navigation
+                    Intent i = new Intent(context, DeliveryNavigationActivity.class);
+                    i.putExtra("delivery_id", delivery.id);
+                    i.putExtra("pickup_lat", delivery.pickup_lat);
+                    i.putExtra("pickup_lng", delivery.pickup_lng);
+                    i.putExtra("drop_lat", delivery.dropoff_lat);
+                    i.putExtra("drop_lng", delivery.dropoff_lng);
+                    i.putExtra("pickup_address", delivery.pickup_address);
+                    i.putExtra("dropoff_address", delivery.dropoff_address);
+                    i.putExtra("price", delivery.price);
+
+                    // IMPORTANT : pour démarrer une Activity depuis un adapter
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(i);
                 },
-                error -> Toast.makeText(context, "Erreur réseau", Toast.LENGTH_LONG).show()
+                error -> {
+                    Toast.makeText(context, "Erreur réseau ❌", Toast.LENGTH_SHORT).show();
+                    Log.e("ACCEPT_ERROR", error.toString());
+                }
         ) {
             @Override
             protected Map<String, String> getParams() {
-                Map<String, String> data = new HashMap<>();
-                data.put("delivery_id", deliveryId);
-                data.put("driver_id", "1"); // 🔥 mets driver réel (SharedPreferences)
-                return data;
+                Map<String, String> params = new HashMap<>();
+                params.put("delivery_id", delivery.id);
+                params.put("driver_id", "1");  // Remplacer par SharedPreferences
+                return params;
             }
         };
 
@@ -76,6 +98,7 @@ public class DeliveryAdapter extends RecyclerView.Adapter<DeliveryAdapter.MyView
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView tvPickup, tvDrop, tvPrice;
         Button btnAccept;
+
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             tvPickup = itemView.findViewById(R.id.tvPickup);
@@ -85,4 +108,3 @@ public class DeliveryAdapter extends RecyclerView.Adapter<DeliveryAdapter.MyView
         }
     }
 }
-

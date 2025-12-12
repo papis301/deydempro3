@@ -52,9 +52,14 @@ public class AvailableDeliveriesActivity extends AppCompatActivity {
                             deliveries.add(new Delivery(
                                     o.getString("id"),
                                     o.getString("pickup_address"),
+                                    o.getString("pickup_lat"),
+                                    o.getString("pickup_lng"),
                                     o.getString("dropoff_address"),
+                                    o.getString("dropoff_lat"),
+                                    o.getString("dropoff_lng"),
                                     o.getString("price")
                             ));
+
                         }
 
                         recycler.setAdapter(new DeliveryAdapter(this, deliveries));
