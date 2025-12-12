@@ -8,6 +8,8 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,6 +48,11 @@ public class DeliveryNavigationActivity extends FragmentActivity {
     Polyline routeLine;
 
     boolean goingToPickup = true; // phase 1 : vers le pickup
+    private Bitmap resizeMarker(int drawable, int width, int height) {
+        Bitmap image = BitmapFactory.decodeResource(getResources(), drawable);
+        return Bitmap.createScaledBitmap(image, width, height, false);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,10 +171,14 @@ public class DeliveryNavigationActivity extends FragmentActivity {
                             driverMarker = mMap.addMarker(new MarkerOptions()
                                     .position(driverPos)
                                     .title("Vous")
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.icmoto))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(R.drawable.icmoto, 80, 80)))
                             );
+
                         } else {
+
                             driverMarker.setPosition(driverPos);
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(driverPos, 16));
+
                         }
 
                         // 🔥 Trace dynamique selon la phase
