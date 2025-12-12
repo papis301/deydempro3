@@ -4,6 +4,9 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +17,11 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -42,6 +50,18 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
     Button btnAccept;
 
     MapDelivery selectedDelivery = null;
+    private final int REFRESH_INTERVAL = 3000; // 3 sec
+    private android.os.Handler refreshHandler = new android.os.Handler();
+    boolean firstLocation = true;
+    FusedLocationProviderClient fusedLocationClient;
+    Marker driverMarker;
+    boolean firstFix = true;
+
+    Bitmap resizeMarker(int drawable, int width, int height) {
+        Bitmap image = BitmapFactory.decodeResource(getResources(), drawable);
+        return Bitmap.createScaledBitmap(image, width, height, false);
+    }
+
 
     @SuppressLint("PotentialBehaviorOverride")
     @Override
@@ -61,8 +81,13 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
 
         // Setup map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         mapFragment.getMapAsync(googleMap -> {
             mMap = googleMap;
+
+//            LatLng dakar = new LatLng(14.695, -17.444);
+//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(dakar, 11));
             //mMap.setOnMarkerClickListener(this);
             // 1) Adapter pour remplir l'info window avec notre layout
             mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
@@ -114,23 +139,87 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
             });
 
             loadDeliveries();
+            startAutoRefresh();
+
         });
+        startLocationUpdates();
+
     }
+
+    @SuppressLint("MissingPermission")
+    private void startLocationUpdates() {
+
+        LocationRequest request = LocationRequest.create()
+                .setInterval(2000)
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        fusedLocationClient.requestLocationUpdates(request, new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) return;
+
+                Location loc = locationResult.getLastLocation();
+                if (loc == null) return;
+
+                LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
+
+                // Ajouter / mettre à jour marker du livreur
+                if (driverMarker == null) {
+
+                    driverMarker = mMap.addMarker(new MarkerOptions()
+                            .position(pos)
+                            .title("Moi")
+                            .icon(BitmapDescriptorFactory.fromBitmap(
+                                    resizeMarker(R.drawable.icmoto, 80, 80)
+                            ))
+                    );
+
+                } else {
+                    driverMarker.setPosition(pos);
+                }
+
+                // Centrage automatique AU PREMIER FIX
+                if (firstFix) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 15f));
+                    firstFix = false;
+                }
+            }
+        }, getMainLooper());
+    }
+
+    private void startAutoRefresh() {
+        refreshHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                loadDeliveries(); // recharge proprement
+                refreshHandler.postDelayed(this, REFRESH_INTERVAL);
+            }
+        }, REFRESH_INTERVAL);
+    }
+
 
     private void loadDeliveries() {
 
         StringRequest req = new StringRequest(Request.Method.GET, URL,
                 response -> {
-                    Log.e("DEBUG_JSON", response);
 
                     try {
+
                         JSONArray arr = new JSONArray(response);
 
+                        // Liste temporaire pour savoir quels markers conserver
+                        HashMap<String, Boolean> activeIds = new HashMap<>();
+
                         for (int i = 0; i < arr.length(); i++) {
+
                             JSONObject o = arr.getJSONObject(i);
 
-                            MapDelivery d = new MapDelivery(
-                                    o.getString("id"),
+                            String id = o.getString("id");
+                            activeIds.put(id, true);
+
+                            MapDelivery newDelivery = new MapDelivery(
+                                    id,
                                     o.getString("pickup_address"),
                                     o.getDouble("pickup_lat"),
                                     o.getDouble("pickup_lng"),
@@ -140,38 +229,47 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
                                     o.getString("price")
                             );
 
-                            // Add pickup marker
-                            // Add PICKUP marker (vert)
-                            Marker pickupMarker = mMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(d.pickupLat, d.pickupLng))
-                                    .title("Pickup : " + d.pickup)
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-                            );
+                            // Vérifier si ce marker existe déjà
+                            boolean exists = false;
 
-// Add DROPOFF marker (rouge)
-//                            Marker dropMarker = mMap.addMarker(new MarkerOptions()
-//                                    .position(new LatLng(d.dropLat, d.dropLng))
-//                                    .title("Destination : " + d.dropoff)
-//                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-//                            );
+                            for (Marker m : markerDeliveries.keySet()) {
+                                if (markerDeliveries.get(m).id.equals(id)) {
+                                    exists = true;
+                                    break;
+                                }
+                            }
 
-// Associer les 2 markers à la livraison
-                            markerDeliveries.put(pickupMarker, d);
-                            //markerDeliveries.put(dropMarker, d);
-
+                            // Nouveau marker à ajouter
+                            if (!exists) {
+                                Marker pickupMarker = mMap.addMarker(new MarkerOptions()
+                                        .position(new LatLng(newDelivery.pickupLat, newDelivery.pickupLng))
+                                        .title("Pickup : " + newDelivery.pickup)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                                );
+                                markerDeliveries.put(pickupMarker, newDelivery);
+                            }
                         }
 
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(14.695, -17.444), 12));
+                        // Supprimer les markers qui n'existent plus
+                        for (Marker m : new HashMap<>(markerDeliveries).keySet()) {
+                            if (!activeIds.containsKey(markerDeliveries.get(m).id)) {
+                                m.remove();
+                                markerDeliveries.remove(m);
+                            }
+                        }
 
                     } catch (Exception e) {
                         Log.e("ERR", e.getMessage());
                     }
+
                 },
-                error -> Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show()
+                error -> {}
         );
 
-        Volley.newRequestQueue(this).add(req);
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+
     }
+
 
     @Override
     public boolean onMarkerClick(Marker marker) {
@@ -220,7 +318,17 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
             }
         };
 
-        Volley.newRequestQueue(this).add(req);
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        refreshHandler.removeCallbacksAndMessages(null);
+    }
+
+
+
 
 }

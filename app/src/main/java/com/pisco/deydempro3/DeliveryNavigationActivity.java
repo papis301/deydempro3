@@ -13,6 +13,9 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
@@ -47,8 +50,13 @@ public class DeliveryNavigationActivity extends FragmentActivity {
     Marker driverMarker;
     Polyline routeLine;
 
+    Button btnSurPlace, btnDemarrer, btnTerminer;
+    int deliveryId;
+    String status = "going_to_pickup";
+
+
     boolean goingToPickup = true; // phase 1 : vers le pickup
-    private Bitmap resizeMarker(int drawable, int width, int height) {
+    Bitmap resizeMarker(int drawable, int width, int height) {
         Bitmap image = BitmapFactory.decodeResource(getResources(), drawable);
         return Bitmap.createScaledBitmap(image, width, height, false);
     }
@@ -66,6 +74,18 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        btnSurPlace = findViewById(R.id.btnSurPlace);
+        btnDemarrer = findViewById(R.id.btnDemarrer);
+        btnTerminer = findViewById(R.id.btnTerminer);
+
+        deliveryId = getIntent().getIntExtra("delivery_id", 0);
+
+// Listeners
+        btnSurPlace.setOnClickListener(v -> onSurPlace());
+        btnDemarrer.setOnClickListener(v -> onDemarrer());
+        btnTerminer.setOnClickListener(v -> onTerminer());
+
+
         // service GPS
         startService(new Intent(this, DriverLocationService.class));
 
@@ -78,6 +98,50 @@ public class DeliveryNavigationActivity extends FragmentActivity {
             startLiveTracking();
         });
     }
+
+    private void onSurPlace() {
+        status = "arrived_pickup";
+
+        btnSurPlace.setVisibility(View.GONE);
+        btnDemarrer.setVisibility(View.VISIBLE);
+
+        Toast.makeText(this, "Vous êtes sur place", Toast.LENGTH_SHORT).show();
+    }
+
+    private void onDemarrer() {
+        status = "delivering";
+
+        btnDemarrer.setVisibility(View.GONE);
+        btnTerminer.setVisibility(View.VISIBLE);
+
+        Toast.makeText(this, "Livraison démarrée", Toast.LENGTH_SHORT).show();
+
+        // tracer route pickup -> dropoff
+        drawRouteToDropoff();
+    }
+
+    private void onTerminer() {
+        status = "completed";
+
+        btnTerminer.setVisibility(View.GONE);
+
+        Toast.makeText(this, "Livraison terminée", Toast.LENGTH_LONG).show();
+
+        finish(); // ou redirection vers écran résultat
+    }
+
+    private void drawRouteToDropoff() {
+        LatLng pickup = new LatLng(pickupLat, pickupLng);
+        LatLng drop = new LatLng(dropLat, dropLng);
+
+        mMap.addPolyline(new PolylineOptions()
+                .add(pickup, drop)
+                .width(10)
+                .color(0xFFFF8800)
+        );
+    }
+
+
 
     private void showPickupDropMarkers() {
         mMap.addMarker(new MarkerOptions()

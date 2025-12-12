@@ -9,4 +9,40 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <LinearLayout
+        android:id="@+id/stepButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="@android:color/transparent"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/btnSurPlace"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:text="Sur place" />
+
+        <Button
+            android:id="@+id/btnDemarrer"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:text="Démarrer"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnTerminer"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:text="Terminer"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+
 </FrameLayout>
