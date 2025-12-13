@@ -35,6 +35,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import android.media.MediaPlayer;
+
 
 public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap.OnMarkerClickListener {
 
@@ -62,12 +64,18 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
         return Bitmap.createScaledBitmap(image, width, height, false);
     }
 
+    MediaPlayer newOrderSound;
+    int lastDeliveryCount = 0;
+
+
 
     @SuppressLint("PotentialBehaviorOverride")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_deliveries);
+
+        newOrderSound = MediaPlayer.create(this, R.raw.new_order);
 
         // Load the custom popup
         infoView = getLayoutInflater().inflate(R.layout.delivery_info_window, null);
@@ -207,6 +215,14 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
                     try {
 
                         JSONArray arr = new JSONArray(response);
+                        int currentCount = arr.length();
+
+                        if (currentCount > lastDeliveryCount && lastDeliveryCount != 0) {
+                            playNewOrderSound();
+                        }
+
+                        lastDeliveryCount = currentCount;
+
 
                         // Liste temporaire pour savoir quels markers conserver
                         HashMap<String, Boolean> activeIds = new HashMap<>();
@@ -270,6 +286,17 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
 
     }
 
+    private void playNewOrderSound() {
+        try {
+            if (newOrderSound != null) {
+                newOrderSound.start();
+            }
+        } catch (Exception e) {
+            Log.e("SOUND_ERR", e.getMessage());
+        }
+    }
+
+
 
     @Override
     public boolean onMarkerClick(Marker marker) {
@@ -322,13 +349,14 @@ public class MapDeliveriesActivity extends FragmentActivity implements GoogleMap
 
     }
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         refreshHandler.removeCallbacksAndMessages(null);
+        if (newOrderSound != null) {
+            newOrderSound.release();
+        }
     }
-
-
-
 
 }
