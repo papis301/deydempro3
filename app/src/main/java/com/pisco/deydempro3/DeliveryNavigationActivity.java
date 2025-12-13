@@ -41,6 +41,9 @@ import androidx.core.app.ActivityCompat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class DeliveryNavigationActivity extends FragmentActivity {
 
     GoogleMap mMap;
@@ -51,8 +54,10 @@ public class DeliveryNavigationActivity extends FragmentActivity {
     Polyline routeLine;
 
     Button btnSurPlace, btnDemarrer, btnTerminer;
-    int deliveryId;
+    String deliveryId;
     String status = "going_to_pickup";
+    String URL_STATUS = BASE_URL + "update_delivery_status.php";
+
 
 
     boolean goingToPickup = true; // phase 1 : vers le pickup
@@ -78,7 +83,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnDemarrer = findViewById(R.id.btnDemarrer);
         btnTerminer = findViewById(R.id.btnTerminer);
 
-        deliveryId = getIntent().getIntExtra("delivery_id", 0);
+        deliveryId = getIntent().getStringExtra("delivery_id");
 
 // Listeners
         btnSurPlace.setOnClickListener(v -> onSurPlace());
@@ -99,36 +104,112 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         });
     }
 
+    private void updateStatusOnServer(String newStatus) {
+
+        StringRequest req = new StringRequest(Request.Method.POST, URL_STATUS,
+                response -> {
+                    Log.e("STATUS_UPDATE", "Serveur: " + response);
+                },
+                error -> {
+                    Log.e("STATUS_ERR", error.toString());
+                    Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show();
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> p = new HashMap<>();
+                p.put("delivery_id", String.valueOf(deliveryId));
+                p.put("status", newStatus);
+                return p;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(req);
+    }
+
+    private void savePositionWithStatus(String status) {
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        locationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location == null) return;
+
+            sendPositionToServer(
+                    status,
+                    location.getLatitude(),
+                    location.getLongitude()
+            );
+        });
+    }
+
+    private void sendPositionToServer(String status, double lat, double lng) {
+
+        String url = BASE_URL + "save_delivery_position.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                response -> Log.e("GPS_SAVE", response),
+                error -> Log.e("GPS_ERR", error.toString())
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> p = new HashMap<>();
+                p.put("delivery_id", String.valueOf(deliveryId));
+                p.put("driver_id", "1"); // à remplacer par le vrai ID connecté
+                p.put("status", status);
+                p.put("lat", String.valueOf(lat));
+                p.put("lng", String.valueOf(lng));
+                return p;
+            }
+        };
+
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+    }
+
+
     private void onSurPlace() {
-        status = "arrived_pickup";
+
+        updateStatusOnServer("accepted");
+        savePositionWithStatus("accepted");
 
         btnSurPlace.setVisibility(View.GONE);
         btnDemarrer.setVisibility(View.VISIBLE);
 
-        Toast.makeText(this, "Vous êtes sur place", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Sur place", Toast.LENGTH_SHORT).show();
     }
 
+
+
+
     private void onDemarrer() {
-        status = "delivering";
+
+        updateStatusOnServer("ongoing");
+        savePositionWithStatus("ongoing");
 
         btnDemarrer.setVisibility(View.GONE);
         btnTerminer.setVisibility(View.VISIBLE);
 
-        Toast.makeText(this, "Livraison démarrée", Toast.LENGTH_SHORT).show();
-
-        // tracer route pickup -> dropoff
         drawRouteToDropoff();
+
+        Toast.makeText(this, "Livraison démarrée", Toast.LENGTH_SHORT).show();
     }
 
+
     private void onTerminer() {
-        status = "completed";
+
+        updateStatusOnServer("completed");
+        savePositionWithStatus("completed");
 
         btnTerminer.setVisibility(View.GONE);
 
         Toast.makeText(this, "Livraison terminée", Toast.LENGTH_LONG).show();
 
-        finish(); // ou redirection vers écran résultat
+        finish();
     }
+
+
 
     private void drawRouteToDropoff() {
         LatLng pickup = new LatLng(pickupLat, pickupLng);
