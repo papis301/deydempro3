@@ -15,9 +15,10 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
+        android:layout_gravity="bottom"
         android:padding="16dp"
         android:background="@android:color/transparent"
-        android:layout_alignParentBottom="true">
+        android:layout_marginBottom="50dp">
 
         <Button
             android:id="@+id/btnSurPlace"

@@ -2,9 +2,11 @@ package com.pisco.deydempro3;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -18,8 +20,9 @@ import org.json.JSONObject;
 public class LoginActivity extends AppCompatActivity {
 
     EditText phoneEd, passEd;
-    Button loginBtn;
+    Button loginBtn, registerBtn;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,8 +31,15 @@ public class LoginActivity extends AppCompatActivity {
         phoneEd = findViewById(R.id.etPhone);
         passEd  = findViewById(R.id.etPassword);
         loginBtn = findViewById(R.id.btnLogin);
+        registerBtn = findViewById(R.id.btnRegister);
 
         loginBtn.setOnClickListener(v -> loginDriver());
+        registerBtn.setOnClickListener(v -> RegisterDriver());
+    }
+
+    private void RegisterDriver() {
+        startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        finish();
     }
 
     private void loginDriver() {
@@ -54,15 +64,25 @@ public class LoginActivity extends AppCompatActivity {
                 url,
                 data,
                 response -> {
+                    Log.e("reponse", String.valueOf(response));
                     try {
                         if (response.getBoolean("success")) {
                             JSONObject driver = response.getJSONObject("driver");
                             int driverId = driver.getInt("id");
 
-                            SharedPreferences prefs = getSharedPreferences(Constants.PREFS, MODE_PRIVATE);
-                            prefs.edit().putInt(Constants.KEY_DRIVER_ID, driverId).apply();
+                            String phonerecup = driver.getString("phone");
+                            int solde = driver.getInt("solde");
+                            String status = driver.getString("status");
 
-                            startActivity(new Intent(LoginActivity.this, AvailableDeliveriesActivity.class));
+                            Toast.makeText(this, " id "+driverId, Toast.LENGTH_SHORT).show();
+                            SharedPreferences prefs = getSharedPreferences(Constants.PREFS, MODE_PRIVATE);
+                            prefs.edit().putInt(Constants.KEY_DRIVER_ID, driverId)
+                                    .putString("solde", String.valueOf(solde))
+                                    .apply();
+
+
+
+                            startActivity(new Intent(LoginActivity.this, MapDeliveriesActivity.class));
                             finish();
                         } else {
                             Toast.makeText(this, "Identifiants incorrects", Toast.LENGTH_SHORT).show();

@@ -1,10 +1,13 @@
 package com.pisco.deydempro3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,6 +16,7 @@ import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -46,6 +50,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     private MediaPlayer newOrderSound;
     private MapDelivery selectedDelivery;
+    private TextView txtSolde;
 
     // ==========================
     // LIFECYCLE
@@ -56,31 +61,104 @@ public class MapDeliveriesActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_deliveries);
 
+        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+                .getInt("driver_id", 0);
+
+        if (driverId == 0) {
+            // pas connecté
+            startActivity(new Intent(MapDeliveriesActivity.this, LoginActivity.class));
+            finish();
+        }
+
+
+        txtSolde = findViewById(R.id.txtSolde);
+
         newOrderSound = MediaPlayer.create(this, R.raw.new_order);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        //refreshSolde();
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
 
         mapFragment.getMapAsync(map -> {
             mMap = map;
-            setupMap();
+            setupMap(driverId);
             startLocationUpdates();
             loadDeliveries();
             startAutoRefresh();
         });
+
     }
+
+    private void refreshSolde() {
+
+        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+                .getInt("driver_id", 0);
+
+        String url = BASE_URL + "get_driver_balance.php?driver_id=" + driverId;
+
+        StringRequest req = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    Log.d("reponse solde", response);
+                    try {
+                        JSONObject obj = new JSONObject(response);
+
+                        if (obj.getBoolean("success")) {
+                            int solde = obj.getInt("solde");
+
+
+                            txtSolde.setText("Solde : " + solde + " FCFA");
+
+                            if(solde <= 0){
+                                showBlockedDialog(solde);
+                            }
+
+                            // sauvegarde locale
+                            getSharedPreferences("user", MODE_PRIVATE)
+                                    .edit()
+                                    .putInt("solde", solde)
+                                    .apply();
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {}
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+    }
+
+    private void showBlockedDialog(int solde) {
+
+        new AlertDialog.Builder(this)
+                .setTitle("Compte bloqué")
+                .setMessage(
+                        "Votre compte est bloqué.\n\n" +
+                                "Solde actuel : " + solde + " FCFA\n\n" +
+                                "Veuillez recharger votre compte."
+                )
+                .setCancelable(false)
+                .setPositiveButton("OK", (d, w) -> {
+                    finish();
+                })
+                .show();
+    }
+
 
     // ==========================
     // MAP SETUP
     // ==========================
 
-    private void setupMap() {
+    @SuppressLint("PotentialBehaviorOverride")
+    private void setupMap(int driverId) {
 
         mMap.setOnMarkerClickListener(marker -> {
             MapDelivery d = markerDeliveries.get(marker);
             if (d != null) {
-                showAcceptDialog(d);
+                showAcceptDialog(d, String.valueOf(driverId));
                 return true;
             }
             return false;
@@ -211,7 +289,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ACCEPT DIALOG
     // ==========================
 
-    private void showAcceptDialog(MapDelivery d) {
+    private void showAcceptDialog(MapDelivery d, String driverId) {
 
         new AlertDialog.Builder(this)
                 .setTitle("📦 Nouvelle course")
@@ -223,7 +301,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 .setCancelable(false)
                 .setPositiveButton("✅ ACCEPTER", (dialog, which) -> {
                     selectedDelivery = d;
-                    acceptDelivery();
+                    acceptDelivery(driverId);
                 })
                 .setNegativeButton("❌ ANNULER", (dialog, which) -> dialog.dismiss())
                 .show();
@@ -233,7 +311,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ACCEPT DELIVERY
     // ==========================
 
-    private void acceptDelivery() {
+    private void acceptDelivery(String driverId) {
 
         StringRequest req = new StringRequest(Request.Method.POST, URL_ACCEPT,
                 response -> {
@@ -257,7 +335,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> p = new HashMap<>();
                 p.put("delivery_id", selectedDelivery.id);
-                p.put("driver_id", "1");
+                p.put("driver_id", driverId);
                 return p;
             }
         };
@@ -294,4 +372,11 @@ public class MapDeliveriesActivity extends FragmentActivity {
         handler.removeCallbacksAndMessages(null);
         if (newOrderSound != null) newOrderSound.release();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshSolde();
+    }
+
 }
