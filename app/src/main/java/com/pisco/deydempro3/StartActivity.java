@@ -91,7 +91,7 @@ public class StartActivity extends AppCompatActivity {
                             JSONObject d = obj.getJSONObject("delivery");
 
                             Intent i = new Intent(this, DeliveryNavigationActivity.class);
-                            i.putExtra("delivery_id", d.getInt("id"));
+                            i.putExtra("delivery_id", d.getString("id"));
                             i.putExtra("pickup_lat", d.getDouble("pickup_lat"));
                             i.putExtra("pickup_lng", d.getDouble("pickup_lng"));
                             i.putExtra("drop_lat", d.getDouble("dropoff_lat"));

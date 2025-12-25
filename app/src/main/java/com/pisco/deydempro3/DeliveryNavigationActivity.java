@@ -57,14 +57,30 @@ public class DeliveryNavigationActivity extends FragmentActivity {
     String deliveryId;
     String status = "going_to_pickup";
     String URL_STATUS = BASE_URL + "update_delivery_status.php";
+    float totalDistanceToPickup = -1; // en mètres
+    boolean canSurPlace = false;
 
 
+    int driverId;
 
     boolean goingToPickup = true; // phase 1 : vers le pickup
     Bitmap resizeMarker(int drawable, int width, int height) {
         Bitmap image = BitmapFactory.decodeResource(getResources(), drawable);
         return Bitmap.createScaledBitmap(image, width, height, false);
     }
+
+    private float distanceBetween(double lat1, double lng1, double lat2, double lng2) {
+        Location a = new Location("A");
+        a.setLatitude(lat1);
+        a.setLongitude(lng1);
+
+        Location b = new Location("B");
+        b.setLatitude(lat2);
+        b.setLongitude(lng2);
+
+        return a.distanceTo(b); // en mètres
+    }
+
 
 
     @Override
@@ -83,7 +99,14 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnDemarrer = findViewById(R.id.btnDemarrer);
         btnTerminer = findViewById(R.id.btnTerminer);
 
+         driverId = getSharedPreferences("user", MODE_PRIVATE)
+                .getInt("driver_id", 0);
+
         deliveryId = getIntent().getStringExtra("delivery_id");
+        Toast.makeText(this, "id course"+deliveryId, Toast.LENGTH_SHORT).show();
+//        btnSurPlace.setEnabled(false);
+//        btnSurPlace.setAlpha(0.5f); // effet visuel bouton désactivé
+
 
 // Listeners
         btnSurPlace.setOnClickListener(v -> onSurPlace());
@@ -106,6 +129,8 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
     private void updateStatusOnServer(String newStatus) {
 
+
+
         StringRequest req = new StringRequest(Request.Method.POST, URL_STATUS,
                 response -> {
                     Log.e("STATUS_UPDATE", "Serveur: " + response);
@@ -127,7 +152,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         Volley.newRequestQueue(this).add(req);
     }
 
-    private void savePositionWithStatus(String status) {
+    private void savePositionWithStatus(String status, int driverId) {
 
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -140,12 +165,13 @@ public class DeliveryNavigationActivity extends FragmentActivity {
             sendPositionToServer(
                     status,
                     location.getLatitude(),
-                    location.getLongitude()
+                    location.getLongitude(),
+                    driverId
             );
         });
     }
 
-    private void sendPositionToServer(String status, double lat, double lng) {
+    private void sendPositionToServer(String status, double lat, double lng, int driverId) {
 
         String url = BASE_URL + "save_delivery_position.php";
 
@@ -157,7 +183,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> p = new HashMap<>();
                 p.put("delivery_id", String.valueOf(deliveryId));
-                p.put("driver_id", "1"); // à remplacer par le vrai ID connecté
+                p.put("driver_id", String.valueOf(driverId)); // à remplacer par le vrai ID connecté
                 p.put("status", status);
                 p.put("lat", String.valueOf(lat));
                 p.put("lng", String.valueOf(lng));
@@ -170,14 +196,13 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
 
     private void onSurPlace() {
-
         updateStatusOnServer("accepted");
-        savePositionWithStatus("accepted");
+        savePositionWithStatus("accepted", driverId);
 
         btnSurPlace.setVisibility(View.GONE);
         btnDemarrer.setVisibility(View.VISIBLE);
 
-        Toast.makeText(this, "Sur place", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Sur place "+driverId+":"+deliveryId, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -186,25 +211,25 @@ public class DeliveryNavigationActivity extends FragmentActivity {
     private void onDemarrer() {
 
         updateStatusOnServer("ongoing");
-        savePositionWithStatus("ongoing");
+        savePositionWithStatus("ongoing", driverId);
 
         btnDemarrer.setVisibility(View.GONE);
         btnTerminer.setVisibility(View.VISIBLE);
 
         drawRouteToDropoff();
 
-        Toast.makeText(this, "Livraison démarrée", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Livraison démarrée"+driverId+":"+deliveryId, Toast.LENGTH_SHORT).show();
     }
 
 
     private void onTerminer() {
 
         updateStatusOnServer("completed");
-        savePositionWithStatus("completed");
+        savePositionWithStatus("completed", driverId);
 
         btnTerminer.setVisibility(View.GONE);
 
-        Toast.makeText(this, "Livraison terminée", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Livraison terminée"+driverId+":"+deliveryId, Toast.LENGTH_LONG).show();
 
         finish();
     }
