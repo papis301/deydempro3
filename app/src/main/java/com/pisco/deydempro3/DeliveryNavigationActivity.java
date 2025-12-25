@@ -81,7 +81,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         return a.distanceTo(b); // en mètres
     }
 
-
+    double commission;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +92,16 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         pickupLng = getIntent().getDoubleExtra("pickup_lng", 0);
         dropLat = getIntent().getDoubleExtra("drop_lat", 0);
         dropLng = getIntent().getDoubleExtra("drop_lng", 0);
+        double price = Double.parseDouble(
+                getIntent().getStringExtra("price")
+        );
+
+// 10% de commission
+         commission = price * 0.10;
+
+// Montant net chauffeur
+        double netAmount = price - commission;
+
 
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -230,10 +240,33 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnTerminer.setVisibility(View.GONE);
 
         Toast.makeText(this, "Livraison terminée"+driverId+":"+deliveryId, Toast.LENGTH_LONG).show();
-
+        sendCommissionAndUpdateBalance(commission);
+        Intent i = new Intent(this, StartActivity.class);
+        startActivity(i);
         finish();
     }
 
+
+    private void sendCommissionAndUpdateBalance(double commission) {
+
+        String url = BASE_URL + "process_commission.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                response -> Log.e("COMMISSION", response),
+                error -> Log.e("COMMISSION_ERR", error.toString())
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> p = new HashMap<>();
+                p.put("delivery_id", deliveryId);
+                p.put("driver_id", String.valueOf(driverId));
+                p.put("commission", String.valueOf(commission));
+                return p;
+            }
+        };
+
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+    }
 
 
     private void drawRouteToDropoff() {
