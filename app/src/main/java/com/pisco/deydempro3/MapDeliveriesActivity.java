@@ -246,7 +246,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
                                     o.getString("dropoff_address"),
                                     o.getDouble("dropoff_lat"),
                                     o.getDouble("dropoff_lng"),
-                                    o.getString("price")
+                                    o.getString("price"),
+                                    o.getString("client_id")
                             );
 
                             boolean exists = false;
@@ -327,6 +328,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
                     i.putExtra("pickup_address", selectedDelivery.pickup);
                     i.putExtra("dropoff_address", selectedDelivery.dropoff);
                     i.putExtra("price", selectedDelivery.price);
+                    i.putExtra("client_id", selectedDelivery.client_id);
                     startActivity(i);
                 },
                 error -> Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show()

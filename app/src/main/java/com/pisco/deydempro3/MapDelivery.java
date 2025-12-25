@@ -9,9 +9,10 @@ public class MapDelivery {
     public double dropLat;
     public double dropLng;
     public String price;
+    public String client_id;
 
     public MapDelivery(String id, String pickup, double pLat, double pLng,
-                       String dropoff, double dLat, double dLng, String price) {
+                       String dropoff, double dLat, double dLng, String price, String client_id) {
 
         this.id = id;
         this.pickup = pickup;
@@ -21,6 +22,7 @@ public class MapDelivery {
         this.dropLat = dLat;
         this.dropLng = dLng;
         this.price = price;
+        this.client_id = client_id;
     }
 }
 

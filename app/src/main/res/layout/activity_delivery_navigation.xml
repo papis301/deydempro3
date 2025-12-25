@@ -18,7 +18,7 @@
         android:layout_gravity="bottom"
         android:padding="16dp"
         android:background="@android:color/transparent"
-        android:layout_marginBottom="50dp">
+        android:layout_marginBottom="80dp">
 
         <Button
             android:id="@+id/btnSurPlace"
@@ -42,6 +42,26 @@
             android:layout_height="50dp"
             android:text="Terminer"
             android:visibility="gone" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/stepButtons1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_gravity="bottom"
+        android:padding="16dp"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="10dp">
+
+        <Button
+            android:id="@+id/btnCall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📞 Appeler le client" />
 
     </LinearLayout>
 

@@ -100,6 +100,7 @@ public class StartActivity extends AppCompatActivity {
                             i.putExtra("pickup_address", d.getString("pickup_address"));
                             i.putExtra("dropoff_address", d.getString("dropoff_address"));
                             i.putExtra("price", d.getString("price"));
+                            i.putExtra("client_id", d.getString("client_id"));
 
                             startActivity(i);
 

@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -53,8 +54,8 @@ public class DeliveryNavigationActivity extends FragmentActivity {
     Marker driverMarker;
     Polyline routeLine;
 
-    Button btnSurPlace, btnDemarrer, btnTerminer;
-    String deliveryId;
+    Button btnSurPlace, btnDemarrer, btnTerminer, btnCall;
+    String deliveryId, client_id, phonerecup;
     String status = "going_to_pickup";
     String URL_STATUS = BASE_URL + "update_delivery_status.php";
     float totalDistanceToPickup = -1; // en mètres
@@ -92,6 +93,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         pickupLng = getIntent().getDoubleExtra("pickup_lng", 0);
         dropLat = getIntent().getDoubleExtra("drop_lat", 0);
         dropLng = getIntent().getDoubleExtra("drop_lng", 0);
+        client_id = getIntent().getStringExtra("client_id");
         double price = Double.parseDouble(
                 getIntent().getStringExtra("price")
         );
@@ -108,6 +110,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnSurPlace = findViewById(R.id.btnSurPlace);
         btnDemarrer = findViewById(R.id.btnDemarrer);
         btnTerminer = findViewById(R.id.btnTerminer);
+        btnCall = findViewById(R.id.btnCall);
 
          driverId = getSharedPreferences("user", MODE_PRIVATE)
                 .getInt("driver_id", 0);
@@ -123,7 +126,27 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnDemarrer.setOnClickListener(v -> onDemarrer());
         btnTerminer.setOnClickListener(v -> onTerminer());
 
+        StringRequest req = new StringRequest(Request.Method.POST,
+                BASE_URL + "get_user_by_id.php",
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+                        if (obj.getBoolean("success")) {
+                            JSONObject user = obj.getJSONObject("user");
+                            phonerecup = user.getString("phone");
 
+                        }
+                    } catch (Exception e) {}
+                },
+                error -> {}
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> p = new HashMap<>();
+                p.put("user_id", client_id);
+                return p;
+            }
+        };
         // service GPS
         startService(new Intent(this, DriverLocationService.class));
 
@@ -135,11 +158,20 @@ public class DeliveryNavigationActivity extends FragmentActivity {
             showPickupDropMarkers();
             startLiveTracking();
         });
+
+        btnCall.setOnClickListener(v -> callClient(phonerecup));
+
     }
 
+
+    private void callClient(String phone){
+           Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + phone));
+        startActivity(intent);
+    }
+
+
     private void updateStatusOnServer(String newStatus) {
-
-
 
         StringRequest req = new StringRequest(Request.Method.POST, URL_STATUS,
                 response -> {
@@ -241,7 +273,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
         Toast.makeText(this, "Livraison terminée"+driverId+":"+deliveryId, Toast.LENGTH_LONG).show();
         sendCommissionAndUpdateBalance(commission);
-        Intent i = new Intent(this, StartActivity.class);
+        Intent i = new Intent(this, MapDeliveriesActivity.class);
         startActivity(i);
         finish();
     }
