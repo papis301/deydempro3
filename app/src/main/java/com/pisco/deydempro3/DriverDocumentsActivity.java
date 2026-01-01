@@ -98,8 +98,6 @@ public class DriverDocumentsActivity extends AppCompatActivity {
     // =====================
     private void sendViaWhatsApp(ArrayList<Uri> imageUris, String phone) {
 
-        String adminWhatsApp = "221767741008"; // format international
-
         String message =
                 "Bonjour,\n\n" +
                         "Voici mes documents chauffeur DeyDem.\n\n" +
@@ -115,21 +113,28 @@ public class DriverDocumentsActivity extends AppCompatActivity {
         intent.setType("image/*");
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
         intent.putExtra(Intent.EXTRA_TEXT, message);
-        intent.putExtra("jid", adminWhatsApp + "@s.whatsapp.net");
+
+        // ✅ permission URIs
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        // ✅ forcer WhatsApp
         intent.setPackage("com.whatsapp");
 
         try {
             startActivity(intent);
 
-            // 👉 après WhatsApp → écran attente validation
+            // 🔁 retour app après WhatsApp
             redirectToPending();
 
         } catch (Exception e) {
-            Toast.makeText(this,
+            Toast.makeText(
+                    this,
                     "WhatsApp n'est pas installé",
-                    Toast.LENGTH_LONG).show();
+                    Toast.LENGTH_LONG
+            ).show();
         }
     }
+
 
     // =====================
     // ⏳ Attente validation

@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -20,10 +21,13 @@ import org.json.JSONObject;
 
 public class StartActivity extends AppCompatActivity {
 
+    private static final String TAG = "StartActivity";
+
     TextView txtStatus;
     Button btnAction;
 
-    String CHECK_URL = Constants.BASE_URL + "check_active_delivery.php";
+    String CHECK_DELIVERY_URL = Constants.BASE_URL + "check_active_delivery.php";
+    String CHECK_DRIVER_URL = Constants.BASE_URL + "get_driver.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,72 +37,152 @@ public class StartActivity extends AppCompatActivity {
         txtStatus = findViewById(R.id.txtStatus);
         btnAction = findViewById(R.id.btnAction);
 
+        Log.d(TAG, "onCreate: démarrage de l'application");
         checkAll();
     }
 
     private void checkAll() {
+        Log.d(TAG, "checkAll: Vérification Internet, GPS, Connexion, CGU");
 
         // 🌐 INTERNET
         if (!isInternetAvailable()) {
+            Log.d(TAG, "checkAll: Aucune connexion Internet");
             txtStatus.setText("❌ Aucune connexion Internet");
             btnAction.setText("Ouvrir paramètres");
-            btnAction.setOnClickListener(v ->
-                    startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)));
+            btnAction.setOnClickListener(v -> {
+                Log.d(TAG, "checkAll: ouverture des paramètres WiFi");
+                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            });
             return;
         }
+        Log.d(TAG, "checkAll: Internet OK");
 
         // 📍 GPS
         if (!isGpsEnabled()) {
+            Log.d(TAG, "checkAll: GPS désactivé");
             txtStatus.setText("📍 Activez le GPS");
             btnAction.setText("Activer GPS");
-            btnAction.setOnClickListener(v ->
-                    startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
+            btnAction.setOnClickListener(v -> {
+                Log.d(TAG, "checkAll: ouverture des paramètres GPS");
+                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            });
             return;
         }
+        Log.d(TAG, "checkAll: GPS OK");
 
         // 🔐 CONNEXION CHAUFFEUR
         SharedPreferences userSp = getSharedPreferences("user", MODE_PRIVATE);
         int driverId = userSp.getInt("driver_id", 0);
 
         if (driverId == 0) {
+            Log.d(TAG, "checkAll: Chauffeur non connecté");
             txtStatus.setText("🔐 Connexion requise");
             btnAction.setText("Se connecter");
-            btnAction.setOnClickListener(v ->
-                    startActivity(new Intent(this, LoginActivity.class)));
+            btnAction.setOnClickListener(v -> {
+                Log.d(TAG, "checkAll: ouverture LoginActivity");
+                startActivity(new Intent(this, LoginActivity.class));
+            });
             return;
         }
+        Log.d(TAG, "checkAll: Chauffeur connecté avec ID=" + driverId);
 
         // 📄 CGU
         if (!isCguAccepted()) {
+            Log.d(TAG, "checkAll: CGU non acceptées");
             txtStatus.setText("📄 Acceptation des CGU requise");
             btnAction.setText("Lire les CGU");
-            btnAction.setOnClickListener(v ->
-                    startActivity(new Intent(this, CguActivity.class)));
+            btnAction.setOnClickListener(v -> {
+                Log.d(TAG, "checkAll: ouverture CguActivity");
+                startActivity(new Intent(this, CguActivity.class));
+            });
             return;
         }
+        Log.d(TAG, "checkAll: CGU acceptées");
 
-        // 🚀 COURSE ACTIVE
-        txtStatus.setText("⏳ Vérification des courses...");
+        // 🚀 Vérification du statut chauffeur avant les courses
+        Log.d(TAG, "checkAll: Vérification du statut chauffeur...");
+        txtStatus.setText("⏳ Vérification du statut chauffeur...");
         btnAction.setEnabled(false);
-        checkActiveDelivery(driverId);
+        checkDriverStatus(driverId);
+    }
+
+    // ======================================
+    // 🚚 Vérifier si chauffeur actif
+    // ======================================
+    private void checkDriverStatus(int driverId) {
+        String url = CHECK_DRIVER_URL + "?driver_id=" + driverId;
+        Log.d(TAG, "checkDriverStatus: URL=" + url);
+
+        StringRequest req = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    Log.d(TAG, "checkDriverStatus: réponse reçue: " + response);
+                    try {
+                        JSONObject obj = new JSONObject(response);
+
+                        if (obj.getBoolean("success")) {
+                            JSONObject driver = obj.getJSONObject("driver");
+                            Log.d(TAG, "checkDriverStatus: driver=" + driver.toString());
+
+                            String status = driver.getString("status");
+                            boolean bloque = driver.getInt("bloque_par_admin") == 1;
+
+                            if (!status.equals("active") || bloque) {
+                                Log.d(TAG, "checkDriverStatus: Chauffeur inactif ou bloqué");
+                                txtStatus.setText("⛔ Votre compte est inactif ou bloqué");
+                                btnAction.setText("Contacter support");
+//                                btnAction.setOnClickListener(v ->
+//                                        startActivity(new Intent(this, ContactSupportActivity.class)));
+//                                return;
+                            }
+
+                            // ✅ Chauffeur actif, on continue avec la vérification des courses
+                            Log.d(TAG, "checkDriverStatus: Chauffeur actif, vérification des courses");
+                            checkActiveDelivery(driverId);
+
+                        } else {
+                            Log.d(TAG, "checkDriverStatus: chauffeur introuvable");
+                            txtStatus.setText("⚠ Impossible de récupérer le statut du chauffeur");
+                            btnAction.setText("Réessayer");
+                            btnAction.setEnabled(true);
+                            btnAction.setOnClickListener(v -> checkAll());
+                        }
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "checkDriverStatus: Erreur JSON", e);
+                        txtStatus.setText("⚠ Erreur lors de la récupération du statut");
+                        btnAction.setText("Réessayer");
+                        btnAction.setEnabled(true);
+                        btnAction.setOnClickListener(v -> checkAll());
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "checkDriverStatus: Erreur réseau", error);
+                    txtStatus.setText("⚠ Erreur réseau");
+                    btnAction.setText("Réessayer");
+                    btnAction.setEnabled(true);
+                    btnAction.setOnClickListener(v -> checkAll());
+                }
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
     }
 
     // ======================================
     // 🚚 Vérifier course active
     // ======================================
     private void checkActiveDelivery(int driverId) {
-
-        String url = CHECK_URL + "?driver_id=" + driverId;
+        String url = CHECK_DELIVERY_URL + "?driver_id=" + driverId;
+        Log.d(TAG, "checkActiveDelivery: URL=" + url);
 
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
+                    Log.d(TAG, "checkActiveDelivery: réponse reçue: " + response);
                     try {
                         JSONObject obj = new JSONObject(response);
 
-                        if (obj.getBoolean("success")
-                                && obj.getBoolean("has_delivery")) {
-
+                        if (obj.getBoolean("success") && obj.getBoolean("has_delivery")) {
                             JSONObject d = obj.getJSONObject("delivery");
+                            Log.d(TAG, "checkActiveDelivery: livraison trouvée: " + d.toString());
 
                             Intent i = new Intent(this, DeliveryNavigationActivity.class);
                             i.putExtra("delivery_id", d.getString("id"));
@@ -115,17 +199,20 @@ public class StartActivity extends AppCompatActivity {
                             startActivity(i);
 
                         } else {
+                            Log.d(TAG, "checkActiveDelivery: aucune course active, ouverture MapDeliveriesActivity");
                             startActivity(new Intent(this, MapDeliveriesActivity.class));
                         }
 
                         finish();
 
                     } catch (Exception e) {
+                        Log.e(TAG, "checkActiveDelivery: Erreur JSON", e);
                         startActivity(new Intent(this, MapDeliveriesActivity.class));
                         finish();
                     }
                 },
                 error -> {
+                    Log.e(TAG, "checkActiveDelivery: Erreur réseau", error);
                     startActivity(new Intent(this, MapDeliveriesActivity.class));
                     finish();
                 }
@@ -141,7 +228,9 @@ public class StartActivity extends AppCompatActivity {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo net = cm.getActiveNetworkInfo();
-        return net != null && net.isConnected();
+        boolean connected = net != null && net.isConnected();
+        Log.d(TAG, "isInternetAvailable: " + connected);
+        return connected;
     }
 
     // ===============================
@@ -150,7 +239,9 @@ public class StartActivity extends AppCompatActivity {
     private boolean isGpsEnabled() {
         LocationManager lm =
                 (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        Log.d(TAG, "isGpsEnabled: " + enabled);
+        return enabled;
     }
 
     // ===============================
@@ -158,12 +249,15 @@ public class StartActivity extends AppCompatActivity {
     // ===============================
     private boolean isCguAccepted() {
         SharedPreferences sp = getSharedPreferences("DeydemPro", MODE_PRIVATE);
-        return sp.getBoolean("cgu_accepted", false);
+        boolean accepted = sp.getBoolean("cgu_accepted", false);
+        Log.d(TAG, "isCguAccepted: " + accepted);
+        return accepted;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume: re-vérification de tous les checks");
         checkAll(); // re-check après retour paramètres ou CGU
     }
 }
