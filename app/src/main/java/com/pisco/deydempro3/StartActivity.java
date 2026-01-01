@@ -109,68 +109,170 @@ public class StartActivity extends AppCompatActivity {
     // ======================================
     // 🚚 Vérifier si chauffeur actif
     // ======================================
+//    private void checkDriverStatus(int driverId) {
+//        String url = CHECK_DRIVER_URL + "?driver_id=" + driverId;
+//        Log.d(TAG, "checkDriverStatus: URL=" + url);
+//
+//        StringRequest req = new StringRequest(Request.Method.GET, url,
+//                response -> {
+//                    Log.d(TAG, "checkDriverStatus: réponse reçue: " + response);
+//                    try {
+//                        JSONObject obj = new JSONObject(response);
+//
+//                        if (obj.getBoolean("success")) {
+//                            JSONObject driver = obj.getJSONObject("driver");
+//                            Log.d(TAG, "checkDriverStatus: driver=" + driver.toString());
+//
+//                            String status = driver.getString("status");
+//                            boolean bloque = driver.getInt("bloque_par_admin") == 1;
+//
+//                            if (!status.equals("active") || bloque) {
+//                                Log.d(TAG, "checkDriverStatus: Chauffeur inactif ou bloqué");
+//                                txtStatus.setText("⛔ Votre compte est inactif ou bloqué");
+//                                btnAction.setText("Contacter support");
+//                                btnAction.setEnabled(true);
+//                                btnAction.setOnClickListener(v -> {
+//                                    String phoneNumber = "221767741008"; // numéro support sans +
+//                                    String message = "Mon compte est inactif";
+//
+//                                    try {
+//                                        message = java.net.URLEncoder.encode(message, "UTF-8");
+//                                    } catch (Exception e) {
+//                                        e.printStackTrace();
+//                                    }
+//
+//                                    // URL universelle pour WhatsApp
+//                                    String urlw = "https://wa.me/" + phoneNumber + "?text=" + message;
+//
+//                                    Intent i = new Intent(Intent.ACTION_VIEW);
+//                                    i.setData(android.net.Uri.parse(urlw));
+//
+//                                    // Ouvre WhatsApp ou le navigateur si WhatsApp installé
+//                                    startActivity(i);
+//                                });
+//
+//                                return;
+//                            }
+//
+//                            // ✅ Chauffeur actif, on continue avec la vérification des courses
+//                            Log.d(TAG, "checkDriverStatus: Chauffeur actif, vérification des courses");
+//                            checkActiveDelivery(driverId);
+//
+//                        } else {
+//                            Log.d(TAG, "checkDriverStatus: chauffeur introuvable");
+//                            txtStatus.setText("⚠ Impossible de récupérer le statut du chauffeur");
+//                            btnAction.setText("Réessayer");
+//                            btnAction.setEnabled(true);
+//                            btnAction.setOnClickListener(v -> checkAll());
+//                        }
+//
+//                    } catch (Exception e) {
+//                        Log.e(TAG, "checkDriverStatus: Erreur JSON", e);
+//                        txtStatus.setText("⚠ Erreur lors de la récupération du statut");
+//                        btnAction.setText("Réessayer");
+//                        btnAction.setEnabled(true);
+//                        btnAction.setOnClickListener(v -> checkAll());
+//                    }
+//                },
+//                error -> {
+//                    Log.e(TAG, "checkDriverStatus: Erreur réseau", error);
+//                    txtStatus.setText("⚠ Erreur réseau");
+//                    btnAction.setText("Réessayer");
+//                    btnAction.setEnabled(true);
+//                    btnAction.setOnClickListener(v -> checkAll());
+//                }
+//        );
+//
+//        VolleySingleton.getInstance(this).addToRequestQueue(req);
+//    }
+
     private void checkDriverStatus(int driverId) {
         String url = CHECK_DRIVER_URL + "?driver_id=" + driverId;
         Log.d(TAG, "checkDriverStatus: URL=" + url);
 
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
-                    Log.d(TAG, "checkDriverStatus: réponse reçue: " + response);
+                    Log.d(TAG, "checkDriverStatus: réponse = " + response);
+
                     try {
                         JSONObject obj = new JSONObject(response);
 
-                        if (obj.getBoolean("success")) {
-                            JSONObject driver = obj.getJSONObject("driver");
-                            Log.d(TAG, "checkDriverStatus: driver=" + driver.toString());
-
-                            String status = driver.getString("status");
-                            boolean bloque = driver.getInt("bloque_par_admin") == 1;
-
-                            if (!status.equals("active") || bloque) {
-                                Log.d(TAG, "checkDriverStatus: Chauffeur inactif ou bloqué");
-                                txtStatus.setText("⛔ Votre compte est inactif ou bloqué");
-                                btnAction.setText("Contacter support");
-                                btnAction.setEnabled(true);
-                                btnAction.setOnClickListener(v -> {
-                                    String phoneNumber = "221767741008"; // numéro support sans +
-                                    String message = "Mon compte est inactif";
-
-                                    try {
-                                        message = java.net.URLEncoder.encode(message, "UTF-8");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-
-                                    // URL universelle pour WhatsApp
-                                    String urlw = "https://wa.me/" + phoneNumber + "?text=" + message;
-
-                                    Intent i = new Intent(Intent.ACTION_VIEW);
-                                    i.setData(android.net.Uri.parse(urlw));
-
-                                    // Ouvre WhatsApp ou le navigateur si WhatsApp installé
-                                    startActivity(i);
-                                });
-
-
-
-                                return;
-                            }
-
-                            // ✅ Chauffeur actif, on continue avec la vérification des courses
-                            Log.d(TAG, "checkDriverStatus: Chauffeur actif, vérification des courses");
-                            checkActiveDelivery(driverId);
-
-                        } else {
-                            Log.d(TAG, "checkDriverStatus: chauffeur introuvable");
-                            txtStatus.setText("⚠ Impossible de récupérer le statut du chauffeur");
+                        if (!obj.getBoolean("success")) {
+                            Log.d(TAG, "checkDriverStatus: success=false");
+                            txtStatus.setText("⚠ Erreur de récupération du compte");
                             btnAction.setText("Réessayer");
                             btnAction.setEnabled(true);
                             btnAction.setOnClickListener(v -> checkAll());
+                            return;
                         }
+
+                        JSONObject driver = obj.getJSONObject("driver");
+
+                        String status = driver.getString("status");
+                        int bloque = driver.getInt("bloque_par_admin");
+                        String docsStatus = driver.getString("docs_status");
+
+                        Log.d(TAG, "checkDriverStatus:");
+                        Log.d(TAG, "status=" + status);
+                        Log.d(TAG, "bloque_par_admin=" + bloque);
+                        Log.d(TAG, "docs_status=" + docsStatus);
+
+                        // ⛔ Compte bloqué ou inactif
+                        if (!"active".equals(status) || bloque == 1) {
+                            Log.d(TAG, "Compte bloqué ou inactif");
+
+                            txtStatus.setText("⛔ Votre compte est inactif ou bloqué");
+                            btnAction.setText("Contacter support");
+                            btnAction.setEnabled(true);
+
+                            btnAction.setOnClickListener(v -> {
+                                String phoneNumber = "221767741008"; // numéro support sans +
+                                String message = "Mon compte est inactif";
+
+                                try {
+                                    message = java.net.URLEncoder.encode(message, "UTF-8");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                // URL universelle pour WhatsApp
+                                String urlw = "https://wa.me/" + phoneNumber + "?text=" + message;
+
+                                Intent i = new Intent(Intent.ACTION_VIEW);
+                                i.setData(android.net.Uri.parse(urlw));
+
+                                // Ouvre WhatsApp ou le navigateur si WhatsApp installé
+                                startActivity(i);
+                            });
+                            return; // ⛔ STOP TOTAL
+                        }
+
+                        // 📄 Documents non approuvés
+                        if (!"approved".equals(docsStatus)) {
+                            Log.d(TAG, "Documents non approuvés → redirection");
+
+                            txtStatus.setText("📄 Documents requis");
+                            btnAction.setText("Compléter les documents");
+                            btnAction.setEnabled(true);
+
+                            btnAction.setOnClickListener(v -> {
+                                Intent i = new Intent(this, DriverDocumentsActivity.class);
+                                i.putExtra("docs_status", docsStatus);
+                                startActivity(i);
+                                finish();
+                            });
+                            return; // ⛔ STOP ICI
+                        }
+
+                        // ✅ TOUT EST OK → vérifier les courses
+                        Log.d(TAG, "Chauffeur OK + docs approuvés → vérification courses");
+                        txtStatus.setText("⏳ Vérification des courses...");
+                        btnAction.setEnabled(false);
+                        checkActiveDelivery(driverId);
 
                     } catch (Exception e) {
                         Log.e(TAG, "checkDriverStatus: Erreur JSON", e);
-                        txtStatus.setText("⚠ Erreur lors de la récupération du statut");
+                        txtStatus.setText("⚠ Erreur interne");
                         btnAction.setText("Réessayer");
                         btnAction.setEnabled(true);
                         btnAction.setOnClickListener(v -> checkAll());
@@ -187,6 +289,7 @@ public class StartActivity extends AppCompatActivity {
 
         VolleySingleton.getInstance(this).addToRequestQueue(req);
     }
+
 
     // ======================================
     // 🚚 Vérifier course active

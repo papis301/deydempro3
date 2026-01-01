@@ -124,7 +124,7 @@ public class DriverDocumentsActivity extends AppCompatActivity {
             startActivity(intent);
 
             // 🔁 retour app après WhatsApp
-            redirectToPending();
+            //redirectToPending();
 
         } catch (Exception e) {
             Toast.makeText(
