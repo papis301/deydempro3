@@ -130,9 +130,30 @@ public class StartActivity extends AppCompatActivity {
                                 Log.d(TAG, "checkDriverStatus: Chauffeur inactif ou bloqué");
                                 txtStatus.setText("⛔ Votre compte est inactif ou bloqué");
                                 btnAction.setText("Contacter support");
-//                                btnAction.setOnClickListener(v ->
-//                                        startActivity(new Intent(this, ContactSupportActivity.class)));
-//                                return;
+                                btnAction.setEnabled(true);
+                                btnAction.setOnClickListener(v -> {
+                                    String phoneNumber = "221767741008"; // numéro support sans +
+                                    String message = "Mon compte est inactif";
+
+                                    try {
+                                        message = java.net.URLEncoder.encode(message, "UTF-8");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    // URL universelle pour WhatsApp
+                                    String urlw = "https://wa.me/" + phoneNumber + "?text=" + message;
+
+                                    Intent i = new Intent(Intent.ACTION_VIEW);
+                                    i.setData(android.net.Uri.parse(urlw));
+
+                                    // Ouvre WhatsApp ou le navigateur si WhatsApp installé
+                                    startActivity(i);
+                                });
+
+
+
+                                return;
                             }
 
                             // ✅ Chauffeur actif, on continue avec la vérification des courses
