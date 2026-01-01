@@ -1,3 +1,48 @@
 <resources>
     <string name="app_name">DeyDemPro3</string>
+
+    <string name="cgu_privacy_title">
+        Conditions Générales d’Utilisation
+    </string>
+
+    <string name="cgu_privacy_content">
+        En utilisant cette application, vous acceptez les Conditions Générales d’Utilisation et la Politique de confidentialité.\n\n
+
+        L’application agit comme une plateforme de mise en relation entre clients et chauffeurs/livreurs indépendants.
+        Elle n’est pas une société de transport et n’emploie pas les chauffeurs.\n\n
+
+        L’inscription et l’utilisation du service sont réservées aux personnes âgées d’au moins 18 ans.
+        Chaque utilisateur est responsable des informations fournies et de l’utilisation de son compte.\n\n
+
+        Les chauffeurs sont seuls responsables de leur conduite, du respect du code de la route
+        et de la sécurité des personnes et des biens transportés.\n\n
+
+        Les paiements peuvent être effectués via Mobile Money ou en espèces selon les options disponibles.
+        Une commission peut être prélevée sur chaque course effectuée.\n\n
+
+        Les données personnelles (numéro de téléphone, localisation pendant les courses, historique)
+        sont collectées uniquement pour assurer le bon fonctionnement du service, la sécurité des utilisateurs
+        et la prévention de la fraude.\n\n
+
+        Aucune donnée personnelle n’est vendue à des tiers.
+        Les échanges sont sécurisés et les accès aux données sont strictement limités.\n\n
+
+        Toute utilisation frauduleuse, tentative de contournement du système, usage de faux GPS
+        ou comportement illégal entraînera la suspension ou la suppression définitive du compte.\n\n
+
+        Les présentes conditions peuvent être modifiées à tout moment.
+        La poursuite de l’utilisation de l’application vaut acceptation des nouvelles conditions.\n\n
+
+        En cliquant sur « Continuer », vous reconnaissez avoir lu et accepté
+        les Conditions Générales d’Utilisation et la Politique de confidentialité.
+    </string>
+
+    <string name="cgu_checkbox">
+        J’ai lu et j’accepte les Conditions Générales d’Utilisation et la Politique de confidentialité
+    </string>
+
+    <string name="cgu_continue">
+        Continuer
+    </string>
+
 </resources>

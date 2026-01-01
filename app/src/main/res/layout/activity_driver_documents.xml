@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 📝 Instructions -->
+    <TextView
+        android:id="@+id/txtInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Veuillez ajouter les documents suivants pour validation de votre compte chauffeur :\n\n• Permis de conduire\n• Carte d'identité (CNI)\n• Carte grise du véhicule\n• Photos du véhicule (avant, arrière, côté)\n\n⚠️ Sans validation, l’accès aux courses sera bloqué."
+        android:textSize="15sp"
+        android:textColor="#333333"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/btnPick"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Sélectionner les documents" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="10dp"/>
+
+    <Button
+        android:id="@+id/btnSend"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Envoyer à l'administration"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="50dp"/>
+</LinearLayout>

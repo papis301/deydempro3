@@ -2,6 +2,7 @@ package com.pisco.deydempro3;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -37,7 +38,7 @@ public class StartActivity extends AppCompatActivity {
 
     private void checkAll() {
 
-        // 🔌 Internet
+        // 🌐 INTERNET
         if (!isInternetAvailable()) {
             txtStatus.setText("❌ Aucune connexion Internet");
             btnAction.setText("Ouvrir paramètres");
@@ -55,9 +56,9 @@ public class StartActivity extends AppCompatActivity {
             return;
         }
 
-        // 🔐 Connexion chauffeur
-        int driverId = getSharedPreferences("user", MODE_PRIVATE)
-                .getInt("driver_id", 0);
+        // 🔐 CONNEXION CHAUFFEUR
+        SharedPreferences userSp = getSharedPreferences("user", MODE_PRIVATE);
+        int driverId = userSp.getInt("driver_id", 0);
 
         if (driverId == 0) {
             txtStatus.setText("🔐 Connexion requise");
@@ -67,14 +68,23 @@ public class StartActivity extends AppCompatActivity {
             return;
         }
 
-        // 🚀 Vérifier course active
+        // 📄 CGU
+        if (!isCguAccepted()) {
+            txtStatus.setText("📄 Acceptation des CGU requise");
+            btnAction.setText("Lire les CGU");
+            btnAction.setOnClickListener(v ->
+                    startActivity(new Intent(this, CguActivity.class)));
+            return;
+        }
+
+        // 🚀 COURSE ACTIVE
         txtStatus.setText("⏳ Vérification des courses...");
         btnAction.setEnabled(false);
         checkActiveDelivery(driverId);
     }
 
     // ======================================
-    // 🔥 Vérifier course acceptée / en cours
+    // 🚚 Vérifier course active
     // ======================================
     private void checkActiveDelivery(int driverId) {
 
@@ -125,7 +135,7 @@ public class StartActivity extends AppCompatActivity {
     }
 
     // ===============================
-    // 🔌 Vérification Internet
+    // 🌐 INTERNET
     // ===============================
     private boolean isInternetAvailable() {
         ConnectivityManager cm =
@@ -135,7 +145,7 @@ public class StartActivity extends AppCompatActivity {
     }
 
     // ===============================
-    // 📍 Vérification GPS
+    // 📍 GPS
     // ===============================
     private boolean isGpsEnabled() {
         LocationManager lm =
@@ -143,9 +153,17 @@ public class StartActivity extends AppCompatActivity {
         return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
+    // ===============================
+    // 📄 CGU
+    // ===============================
+    private boolean isCguAccepted() {
+        SharedPreferences sp = getSharedPreferences("DeydemPro", MODE_PRIVATE);
+        return sp.getBoolean("cgu_accepted", false);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        checkAll(); // re-vérifier après retour paramètres
+        checkAll(); // re-check après retour paramètres ou CGU
     }
 }

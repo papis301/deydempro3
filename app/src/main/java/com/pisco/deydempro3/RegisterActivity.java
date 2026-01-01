@@ -64,7 +64,7 @@ public class RegisterActivity extends AppCompatActivity {
                 response -> {
                     Log.d("reponse", response);
                     Toast.makeText(this, response, Toast.LENGTH_LONG).show();
-                    startActivity(new Intent(this, LoginActivity.class));
+                    startActivity(new Intent(this, DriverDocumentsActivity.class));
                     finish();
                 },
                 error -> {
