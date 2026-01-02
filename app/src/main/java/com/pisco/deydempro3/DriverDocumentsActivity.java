@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -12,20 +13,28 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DriverDocumentsActivity extends AppCompatActivity {
 
-    Button btnPick, btnSend;
+    Button btnPick, btnSend, btnRefresh;
     RecyclerView recycler;
 
     ArrayList<Uri> images = new ArrayList<>();
     ImageAdapter adapter;
 
     static final int PICK = 101;
-
+    int driverId;
     String driverPhone = "";
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
@@ -37,6 +46,10 @@ public class DriverDocumentsActivity extends AppCompatActivity {
         btnPick = findViewById(R.id.btnPick);
         btnSend = findViewById(R.id.btnSend);
         recycler = findViewById(R.id.recycler);
+        btnRefresh = findViewById(R.id.btnRefresh);
+
+        SharedPreferences userSp = getSharedPreferences("user", MODE_PRIVATE);
+         driverId = userSp.getInt("driver_id", 0);
 
         recycler.setLayoutManager(new GridLayoutManager(this, 3));
         adapter = new ImageAdapter(this, images);
@@ -52,6 +65,7 @@ public class DriverDocumentsActivity extends AppCompatActivity {
         // 🎯 Actions
         // =====================
         btnPick.setOnClickListener(v -> pickImages());
+        btnRefresh.setOnClickListener(v -> checkDocsStatus(driverId));
         btnSend.setOnClickListener(v -> {
             if (images.isEmpty()) {
                 Toast.makeText(this,
@@ -93,6 +107,63 @@ public class DriverDocumentsActivity extends AppCompatActivity {
         }
     }
 
+    private void checkDocsStatus(int driverId) {
+
+        String url = "https://pisco.alwaysdata.net/check_docs_status.php?driver_id=" + driverId;
+
+        StringRequest req = new StringRequest(
+                Request.Method.GET,
+                url,
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+
+                        if (!obj.getBoolean("success")) {
+                            Toast.makeText(this,
+                                    "Erreur serveur",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        String status = obj.getString("docs_status");
+
+                        if ("approved".equals(status)) {
+
+                            Toast.makeText(this,
+                                    "✅ Compte approuvé",
+                                    Toast.LENGTH_SHORT).show();
+
+                            // 👉 redirection vers les courses
+                            startActivity(new Intent(
+                                    this,
+                                    MapDeliveriesActivity.class
+                            ));
+                            finish();
+
+                        } else if ("rejected".equals(status)) {
+                            Toast.makeText(this,
+                                    "❌ Documents rejetés",
+                                    Toast.LENGTH_LONG).show();
+
+                        } else {
+                            Toast.makeText(this,
+                                    "⏳ Toujours en attente de validation",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Toast.makeText(this,
+                        "Erreur réseau",
+                        Toast.LENGTH_SHORT).show()
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+    }
+
+
     // =====================
     // 📤 Envoi WhatsApp
     // =====================
@@ -121,6 +192,8 @@ public class DriverDocumentsActivity extends AppCompatActivity {
         intent.setPackage("com.whatsapp");
 
         try {
+
+            markDocsAsSent(driverId);
             startActivity(intent);
 
             // 🔁 retour app après WhatsApp
@@ -134,6 +207,32 @@ public class DriverDocumentsActivity extends AppCompatActivity {
             ).show();
         }
     }
+
+    private void markDocsAsSent(int driverId) {
+
+        String url = "https://pisco.alwaysdata.net/mark_docs_sent.php";
+
+        StringRequest req = new StringRequest(
+                Request.Method.POST,
+                url,
+                response -> {
+                    // OK silencieux
+                },
+                error -> {
+                    // log seulement
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> p = new HashMap<>();
+                p.put("driver_id", String.valueOf(driverId));
+                return p;
+            }
+        };
+
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+    }
+
 
 
     // =====================

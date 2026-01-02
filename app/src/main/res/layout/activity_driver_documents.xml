@@ -2,7 +2,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:layout_marginTop="30dp">
 
     <!-- 📝 Instructions -->
     <TextView
@@ -33,6 +34,12 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="Envoyer à l'administration"
+        android:layout_marginTop="10dp"/>
+    <Button
+        android:id="@+id/btnRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Rafrichir"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="50dp"/>
 </LinearLayout>
