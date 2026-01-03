@@ -22,6 +22,9 @@
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".DriverBlockedActivity"
+            android:exported="false" />
+        <activity
             android:name=".DriverStatusActivity"
             android:exported="false" />
         <activity

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <fragment
         android:id="@+id/mapNav"
@@ -64,6 +65,53 @@
             android:text="📞 Appeler le client" />
 
     </LinearLayout>
+
+    <TextView
+        android:text="Navigation livraison"
+        style="@style/Text.Title"
+        android:layout_marginBottom="12dp"/>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Card.Pro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:padding="16dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="📍 En route vers le client"
+                style="@style/Text.Subtitle"/>
+
+            <TextView
+                android:text="Distance restante : 1.2 km"
+                style="@style/Text.Body"/>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <Button
+        android:text="Démarrer"
+        style="@style/Button.Primary"
+        android:layout_marginTop="16dp"/>
+
+    <LinearLayout
+        android:id="@+id/bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_bottomsheet"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <include layout="@layout/bottomsheet_delivery_actions"/>
+
+    </LinearLayout>
+
+
 
 
 </FrameLayout>

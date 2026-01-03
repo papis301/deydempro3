@@ -2,6 +2,7 @@ package com.pisco.deydempro3;
 
 import static com.pisco.deydempro3.Constants.BASE_URL;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -15,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,7 +45,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     private final String URL_ACCEPT = "https://pisco.alwaysdata.net/accept_delivery.php";
 
     private final int REFRESH_INTERVAL = 3000;
-    private android.os.Handler handler = new android.os.Handler();
+    private final Handler handler = new Handler();
 
     private boolean firstFix = true;
     private int lastDeliveryCount = 0;
@@ -51,6 +53,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
     private MediaPlayer newOrderSound;
     private MapDelivery selectedDelivery;
     private TextView txtSolde;
+
+    private final int LOCATION_REQUEST_CODE = 1001;
 
     // ==========================
     // LIFECYCLE
@@ -70,13 +74,13 @@ public class MapDeliveriesActivity extends FragmentActivity {
             finish();
         }
 
-
         txtSolde = findViewById(R.id.txtSolde);
 
         newOrderSound = MediaPlayer.create(this, R.raw.new_order);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        //refreshSolde();
+        // Vérifier les permissions et lancer la localisation
+        checkLocationPermission();
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
@@ -84,15 +88,46 @@ public class MapDeliveriesActivity extends FragmentActivity {
         mapFragment.getMapAsync(map -> {
             mMap = map;
             setupMap(driverId);
-            startLocationUpdates();
             loadDeliveries();
             startAutoRefresh();
         });
-
     }
 
-    private void refreshSolde() {
+    // ==========================
+    // PERMISSIONS
+    // ==========================
 
+    private void checkLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    LOCATION_REQUEST_CODE);
+        } else {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startLocationUpdates();
+            } else {
+                Toast.makeText(this, "Permission de localisation refusée", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // ==========================
+    // SOLDE
+    // ==========================
+
+    private void refreshSolde() {
         int driverId = getSharedPreferences("user", MODE_PRIVATE)
                 .getInt("driver_id", 0);
 
@@ -100,21 +135,17 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
-                    Log.d("reponse solde", response);
                     try {
                         JSONObject obj = new JSONObject(response);
 
                         if (obj.getBoolean("success")) {
                             int solde = obj.getInt("solde");
-
-
                             txtSolde.setText("Solde : " + solde + " FCFA");
 
-                            if(solde <= 0){
+                            if (solde <= 0) {
                                 showBlockedDialog(solde);
                             }
 
-                            // sauvegarde locale
                             getSharedPreferences("user", MODE_PRIVATE)
                                     .edit()
                                     .putInt("solde", solde)
@@ -125,14 +156,13 @@ public class MapDeliveriesActivity extends FragmentActivity {
                         e.printStackTrace();
                     }
                 },
-                error -> {}
+                error -> Log.e("SOLDE_ERR", error.toString())
         );
 
         VolleySingleton.getInstance(this).addToRequestQueue(req);
     }
 
     private void showBlockedDialog(int solde) {
-
         new AlertDialog.Builder(this)
                 .setTitle("Compte bloqué")
                 .setMessage(
@@ -141,12 +171,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
                                 "Veuillez recharger votre compte."
                 )
                 .setCancelable(false)
-                .setPositiveButton("OK", (d, w) -> {
-                    finish();
-                })
+                .setPositiveButton("OK", (d, w) -> finish())
                 .show();
     }
-
 
     // ==========================
     // MAP SETUP
@@ -154,7 +181,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     @SuppressLint("PotentialBehaviorOverride")
     private void setupMap(int driverId) {
-
         mMap.setOnMarkerClickListener(marker -> {
             MapDelivery d = markerDeliveries.get(marker);
             if (d != null) {
@@ -163,12 +189,17 @@ public class MapDeliveriesActivity extends FragmentActivity {
             }
             return false;
         });
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true); // Affiche le point bleu
+        }
     }
 
     // ==========================
     // GPS LIVREUR
     // ==========================
 
+    @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
 
         LocationRequest request = LocationRequest.create()
@@ -176,16 +207,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 .setFastestInterval(1000)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
         locationClient.requestLocationUpdates(request, new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult result) {
@@ -199,8 +220,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
                     driverMarker = mMap.addMarker(new MarkerOptions()
                             .position(pos)
                             .title("Moi")
-                            .icon(BitmapDescriptorFactory.fromBitmap(
-                                    resizeMarker(R.drawable.icmoto, 80, 80)))
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                     );
                 } else {
                     driverMarker.setPosition(pos);
@@ -219,7 +239,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
 
     private void loadDeliveries() {
-
         StringRequest req = new StringRequest(Request.Method.GET, URL_LIST,
                 response -> {
                     try {
@@ -262,8 +281,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
                                 Marker m = mMap.addMarker(new MarkerOptions()
                                         .position(new LatLng(d.pickupLat, d.pickupLng))
                                         .title("Pickup")
-                                        .icon(BitmapDescriptorFactory.defaultMarker(
-                                                BitmapDescriptorFactory.HUE_GREEN))
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                                 );
                                 markerDeliveries.put(m, d);
                             }
@@ -291,7 +309,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
 
     private void showAcceptDialog(MapDelivery d, String driverId) {
-
         new AlertDialog.Builder(this)
                 .setTitle("📦 Nouvelle course")
                 .setMessage(
@@ -313,10 +330,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
 
     private void acceptDelivery(String driverId) {
-
         StringRequest req = new StringRequest(Request.Method.POST, URL_ACCEPT,
                 response -> {
-
                     Toast.makeText(this, "Livraison acceptée", Toast.LENGTH_SHORT).show();
 
                     Intent i = new Intent(this, DeliveryNavigationActivity.class);
@@ -349,11 +364,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // UTILS
     // ==========================
 
-    private Bitmap resizeMarker(int res, int w, int h) {
-        Bitmap b = BitmapFactory.decodeResource(getResources(), res);
-        return Bitmap.createScaledBitmap(b, w, h, false);
-    }
-
     private void playNewOrderSound() {
         if (newOrderSound != null) newOrderSound.start();
     }
@@ -380,5 +390,4 @@ public class MapDeliveriesActivity extends FragmentActivity {
         super.onResume();
         refreshSolde();
     }
-
 }

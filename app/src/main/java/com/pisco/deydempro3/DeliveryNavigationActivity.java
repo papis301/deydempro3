@@ -89,6 +89,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delivery_navigation);
 
+
         pickupLat = getIntent().getDoubleExtra("pickup_lat", 0);
         pickupLng = getIntent().getDoubleExtra("pickup_lng", 0);
         dropLat = getIntent().getDoubleExtra("drop_lat", 0);
@@ -170,6 +171,60 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         startActivity(intent);
     }
 
+    private void checkSecurityAndSendPosition(
+            String statusc,
+            Location loc
+    ) {
+
+        String url = BASE_URL + "save_delivery_position.php";
+
+        StringRequest req = new StringRequest(
+                Request.Method.POST,
+                url,
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+
+                        // 🚨 BLOQUÉ PAR LE SERVEUR
+                        if (!obj.getBoolean("success")
+                                && obj.optBoolean("blocked")) {
+
+                            String message = obj.optString(
+                                    "message",
+                                    "Compte bloqué pour activité suspecte"
+                            );
+
+                            Intent i = new Intent(
+                                    this,
+                                    DriverBlockedActivity.class
+                            );
+                            i.putExtra("message", message);
+                            startActivity(i);
+                            finish();
+                            return;
+                        }
+
+                    } catch (Exception e) {
+                        Log.e("SECURITY_PARSE", e.getMessage());
+                    }
+                },
+                error -> Log.e("SECURITY_ERR", error.toString())
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> p = new HashMap<>();
+                p.put("delivery_id", deliveryId);
+                p.put("driver_id", String.valueOf(driverId));
+                p.put("status", statusc);
+                p.put("lat", String.valueOf(loc.getLatitude()));
+                p.put("lng", String.valueOf(loc.getLongitude()));
+                return p;
+            }
+        };
+
+        VolleySingleton.getInstance(this).addToRequestQueue(req);
+    }
+
 
     private void updateStatusOnServer(String newStatus) {
 
@@ -204,12 +259,16 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         locationClient.getLastLocation().addOnSuccessListener(location -> {
             if (location == null) return;
 
-            sendPositionToServer(
+            checkSecurityAndSendPosition(
                     status,
-                    location.getLatitude(),
-                    location.getLongitude(),
-                    driverId
+                    location
             );
+//            sendPositionToServer(
+//                    status,
+//                    location.getLatitude(),
+//                    location.getLongitude(),
+//                    driverId
+//            );
         });
     }
 
@@ -258,7 +317,6 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnDemarrer.setVisibility(View.GONE);
         btnTerminer.setVisibility(View.VISIBLE);
 
-        drawRouteToDropoff();
 
         Toast.makeText(this, "Livraison démarrée"+driverId+":"+deliveryId, Toast.LENGTH_SHORT).show();
     }
@@ -298,18 +356,6 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         };
 
         VolleySingleton.getInstance(this).addToRequestQueue(req);
-    }
-
-
-    private void drawRouteToDropoff() {
-        LatLng pickup = new LatLng(pickupLat, pickupLng);
-        LatLng drop = new LatLng(dropLat, dropLng);
-
-        mMap.addPolyline(new PolylineOptions()
-                .add(pickup, drop)
-                .width(10)
-                .color(0xFFFF8800)
-        );
     }
 
 
@@ -398,6 +444,8 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
                         Location loc = result.getLastLocation();
                         if (loc == null) return;
+
+                        checkSecurityAndSendPosition(status, loc);
 
                         LatLng driverPos = new LatLng(loc.getLatitude(), loc.getLongitude());
 

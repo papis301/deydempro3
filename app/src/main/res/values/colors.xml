@@ -6,4 +6,22 @@
     <color name="colorPrimary">#00C569</color>
     <color name="colorPrimaryDark">#009e54</color>
     <color name="colorAccent">#00C569</color>
+    <!-- Brand -->
+    <color name="primary">#0066FF</color>
+    <color name="primary_variant">#004FCC</color>
+
+    <!-- Status -->
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FF9800</color>
+    <color name="danger">#E53935</color>
+
+    <!-- Neutrals -->
+    <color name="background">#F8F9FB</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#1E1E1E</color>
+    <color name="text_secondary">#7A7A7A</color>
+    <color name="divider">#E0E0E0</color>
 </resources>
+
+
+
