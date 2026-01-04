@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -44,17 +46,34 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
 
 public class DeliveryNavigationActivity extends FragmentActivity {
 
     GoogleMap mMap;
     double pickupLat, pickupLng, dropLat, dropLng;
 
+    BottomSheetBehavior<View> bottomSheetBehavior;
+    View bottomSheet;
+
+    Button btnSurPlace, btnDemarrer, btnTerminer;
+    TextView txtStatus;
+
+    private enum CourseState {
+        GOING_TO_PICKUP,
+        ARRIVED,
+        ONGOING,
+        COMPLETED
+    }
+
+    CourseState currentState = CourseState.GOING_TO_PICKUP;
+
     FusedLocationProviderClient locationClient;
     Marker driverMarker;
     Polyline routeLine;
 
-    Button btnSurPlace, btnDemarrer, btnTerminer, btnCall;
+    Button btnCall;
     String deliveryId, client_id, phonerecup;
     String status = "going_to_pickup";
     String URL_STATUS = BASE_URL + "update_delivery_status.php";
@@ -108,24 +127,59 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        btnSurPlace = findViewById(R.id.btnSurPlace);
-        btnDemarrer = findViewById(R.id.btnDemarrer);
-        btnTerminer = findViewById(R.id.btnTerminer);
+
+
+
+         bottomSheet = findViewById(R.id.bottomSheet);
+        BottomSheetBehavior<View> bottomSheetBehavior =
+                BottomSheetBehavior.from(bottomSheet);
+
+// 🔥 OBLIGATOIRE
+        bottomSheetBehavior.setPeekHeight(260); // hauteur visible
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+// Facultatif mais pro
+        bottomSheetBehavior.setHideable(false);
+
+        btnSurPlace = bottomSheet.findViewById(R.id.btnSurPlace);
+        btnDemarrer = bottomSheet.findViewById(R.id.btnDemarrer);
+        btnTerminer = bottomSheet.findViewById(R.id.btnTerminer);
+        txtStatus = bottomSheet.findViewById(R.id.txtStatus);
         btnCall = findViewById(R.id.btnCall);
 
-         driverId = getSharedPreferences("user", MODE_PRIVATE)
+        updateBottomSheetUI();
+
+        btnSurPlace.setOnClickListener(v -> {
+            currentState = CourseState.ARRIVED;
+            onSurPlace();
+            updateBottomSheetUI();
+        });
+
+        btnDemarrer.setOnClickListener(v -> {
+            currentState = CourseState.ONGOING;
+            onDemarrer();
+            updateBottomSheetUI();
+        });
+
+        btnTerminer.setOnClickListener(v -> {
+            currentState = CourseState.COMPLETED;
+            onTerminer();
+        });
+
+
+        driverId = getSharedPreferences("user", MODE_PRIVATE)
                 .getInt("driver_id", 0);
 
         deliveryId = getIntent().getStringExtra("delivery_id");
-        Toast.makeText(this, "id course"+deliveryId, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(this, "id course"+deliveryId, Toast.LENGTH_SHORT).show();
 //        btnSurPlace.setEnabled(false);
 //        btnSurPlace.setAlpha(0.5f); // effet visuel bouton désactivé
 
 
 // Listeners
-        btnSurPlace.setOnClickListener(v -> onSurPlace());
-        btnDemarrer.setOnClickListener(v -> onDemarrer());
-        btnTerminer.setOnClickListener(v -> onTerminer());
+//        btnSurPlace.setOnClickListener(v -> onSurPlace());
+//        btnDemarrer.setOnClickListener(v -> onDemarrer());
+//        btnTerminer.setOnClickListener(v -> onTerminer());
 
         StringRequest req = new StringRequest(Request.Method.POST,
                 BASE_URL + "get_user_by_id.php",
@@ -158,6 +212,21 @@ public class DeliveryNavigationActivity extends FragmentActivity {
             mMap = googleMap;
             showPickupDropMarkers();
             startLiveTracking();
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            locationClient.getLastLocation().addOnSuccessListener(loc -> {
+                if (loc != null) {
+                    requestRoute(loc.getLatitude(), loc.getLongitude(), pickupLat, pickupLng);
+                }
+            });
         });
 
         btnCall.setOnClickListener(v -> callClient(phonerecup));
@@ -249,6 +318,37 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         Volley.newRequestQueue(this).add(req);
     }
 
+    private void updateBottomSheetUI() {
+
+        btnSurPlace.setVisibility(View.GONE);
+        btnDemarrer.setVisibility(View.GONE);
+        btnTerminer.setVisibility(View.GONE);
+
+        switch (currentState) {
+
+            case GOING_TO_PICKUP:
+                txtStatus.setText("📦 En route vers le client");
+                btnSurPlace.setVisibility(View.VISIBLE);
+                break;
+
+            case ARRIVED:
+                txtStatus.setText("📍 Sur place");
+                btnDemarrer.setVisibility(View.VISIBLE);
+                break;
+
+            case ONGOING:
+                txtStatus.setText("🚚 Livraison en cours");
+                btnTerminer.setVisibility(View.VISIBLE);
+                break;
+
+            case COMPLETED:
+                txtStatus.setText("✅ Livraison terminée");
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                break;
+        }
+    }
+
+
     private void savePositionWithStatus(String status, int driverId) {
 
         if (ActivityCompat.checkSelfPermission(this,
@@ -303,8 +403,27 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnSurPlace.setVisibility(View.GONE);
         btnDemarrer.setVisibility(View.VISIBLE);
 
-        Toast.makeText(this, "Sur place "+driverId+":"+deliveryId, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(this, "Sur place "+driverId+":"+deliveryId, Toast.LENGTH_SHORT).show();
+
+        // 🔹 Démarrage du traceroute vers pickup
+        goingToPickup = true;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationClient.getLastLocation().addOnSuccessListener(loc -> {
+            if (loc != null) {
+                requestRoute(loc.getLatitude(), loc.getLongitude(), pickupLat, pickupLng);
+            }
+        });
     }
+
 
 
 
@@ -335,7 +454,6 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         startActivity(i);
         finish();
     }
-
 
     private void sendCommissionAndUpdateBalance(double commission) {
 
