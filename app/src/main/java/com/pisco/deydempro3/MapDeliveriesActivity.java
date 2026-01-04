@@ -18,6 +18,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,6 +55,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
     private MediaPlayer newOrderSound;
     private MapDelivery selectedDelivery;
     private TextView txtSolde;
+    TextView badgeNotif;
+    ImageView btnNotif;
 
     private final int LOCATION_REQUEST_CODE = 1001;
 
@@ -64,6 +68,18 @@ public class MapDeliveriesActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_deliveries);
+
+        badgeNotif = findViewById(R.id.badgeNotif);
+        btnNotif = findViewById(R.id.btnNotif);
+
+        int notifCount = 3;
+
+        if(notifCount > 0){
+            badgeNotif.setText(String.valueOf(notifCount));
+            badgeNotif.setVisibility(View.VISIBLE);
+        }else{
+            badgeNotif.setVisibility(View.GONE);
+        }
 
         int driverId = getSharedPreferences("user", MODE_PRIVATE)
                 .getInt("driver_id", 0);
@@ -91,6 +107,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
             loadDeliveries();
             startAutoRefresh();
         });
+
+        btnNotif.setOnClickListener(v ->
+                startActivity(new Intent(this, NotificationsActivity.class))
+        );
     }
 
     // ==========================
