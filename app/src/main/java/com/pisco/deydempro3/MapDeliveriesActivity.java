@@ -19,7 +19,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -64,10 +67,27 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // LIFECYCLE
     // ==========================
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_deliveries);
+
+        FrameLayout bottomSheet = findViewById(R.id.bottomSheetInfo);
+
+        BottomSheetBehavior<FrameLayout> behavior =
+                BottomSheetBehavior.from(bottomSheet);
+
+// 🔥 FORCER L’AFFICHAGE
+        behavior.setPeekHeight(500); // DOIT matcher la hauteur
+        behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+// 🔒 FIXE (NON EXPANDABLE)
+        behavior.setDraggable(false);
+        behavior.setHideable(false);
+
+
 
         badgeNotif = findViewById(R.id.badgeNotif);
         btnNotif = findViewById(R.id.btnNotif);

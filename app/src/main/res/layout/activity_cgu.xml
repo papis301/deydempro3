@@ -22,7 +22,7 @@
         <TextView
             android:id="@+id/tvCgu"
             android:textSize="14sp"
-            android:text="@string/cgu_privacy_content"
+            android:text="@string/cgu_driver_delivery_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </ScrollView>

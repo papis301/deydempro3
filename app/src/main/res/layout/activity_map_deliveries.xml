@@ -1,68 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="30dp">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="16dp">
-
-        <!-- SOLDE -->
-        <TextView
-            android:id="@+id/txtSolde"
-            android:text="0 FCFA"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="#1E88E5"
-            android:padding="12dp"
-            android:background="@drawable/bg_solde"
-            android:layout_marginEnd="24dp"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
-
-        <!-- NOTIFICATION ICON + BADGE -->
-        <FrameLayout
-            android:id="@+id/layoutNotif"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/btnNotif"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_notification"
-                app:tint="#1E88E5" />
-
-            <!-- BADGE -->
-            <TextView
-                android:id="@+id/badgeNotif"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:text="3"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:gravity="center"
-                android:layout_gravity="end|top"
-                android:background="@drawable/bg_badge"
-                android:visibility="gone"/>
-        </FrameLayout>
-
-    </LinearLayout>
-
-
-
-
+    <!-- 🗺️ MAP -->
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="60dp"/>
+        android:layout_height="match_parent" />
 
-</FrameLayout>
+    <!-- ⬆️ FIXED BOTTOM SHEET -->
+    <FrameLayout
+        android:id="@+id/bottomSheetInfo"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_bottomsheet"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- HANDLE -->
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_handle"/>
+
+            <!-- SOLDE + NOTIFS -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/txtSolde"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 FCFA"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#1E88E5"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_solde"/>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/btnNotif"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_notification"
+                        app:tint="#1E88E5"/>
+
+                    <TextView
+                        android:id="@+id/badgeNotif"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:text="3"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:gravity="center"
+                        android:layout_gravity="end|top"
+                        android:background="@drawable/bg_badge"
+                        android:visibility="gone"/>
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
