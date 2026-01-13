@@ -48,4 +48,13 @@ dependencies {
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.maps.android:android-maps-utils:3.4.0")
+    // Glide pour charger les images
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+
+    // Optionnel: pour les transformations d'image
+    implementation ("jp.wasabeef:glide-transformations:4.3.0")
+
+    // Si vous voulez charger depuis URL HTTPS
+    implementation ("com.github.bumptech.glide:okhttp3-integration:4.16.0")
 }

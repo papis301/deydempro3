@@ -9,14 +9,19 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -66,13 +71,38 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
     // LIFECYCLE
     // ==========================
-
+    private BackgroundLocationService backgroundService;
+    private boolean serviceBound = false;
+//    private final ServiceConnection serviceConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            BackgroundLocationService.LocalBinder binder =
+//                    (BackgroundLocationService.LocalBinder) service;
+//            backgroundService = binder.getService();
+//            serviceBound = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            serviceBound = false;
+//        }
+//    };
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_deliveries);
+
+        Intent serviceIntent = new Intent(this, BackgroundLocationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+
+        // Binder le service
+        //bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         FrameLayout bottomSheet = findViewById(R.id.bottomSheetInfo);
 
@@ -113,6 +143,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
         txtSolde = findViewById(R.id.txtSolde);
 
         newOrderSound = MediaPlayer.create(this, R.raw.new_order);
+        newOrderSound.setVolume(1.0f, 1.0f);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Vérifier les permissions et lancer la localisation
@@ -405,7 +436,12 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
 
     private void playNewOrderSound() {
-        if (newOrderSound != null) newOrderSound.start();
+        //if (newOrderSound != null) newOrderSound.start();
+        if (newOrderSound != null) {
+            // S'assurer que le volume est au maximum
+            newOrderSound.setVolume(1.0f, 1.0f);
+            newOrderSound.start();
+        }
     }
 
     private void startAutoRefresh() {
