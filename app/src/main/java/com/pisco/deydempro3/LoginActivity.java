@@ -94,6 +94,9 @@ public class LoginActivity extends AppCompatActivity {
                 error -> Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show()
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 }

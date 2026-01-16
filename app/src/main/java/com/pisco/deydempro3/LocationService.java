@@ -101,7 +101,10 @@ public class LocationService extends Service {
                 error -> {}
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     @Override

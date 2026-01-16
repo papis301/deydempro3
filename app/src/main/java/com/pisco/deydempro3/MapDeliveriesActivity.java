@@ -64,7 +64,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     private MapDelivery selectedDelivery;
     private TextView txtSolde;
     TextView badgeNotif;
-    ImageView btnNotif;
+    ImageView btnNotif, btnNp;
 
     private final int LOCATION_REQUEST_CODE = 1001;
 
@@ -89,6 +89,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
 //    };
 
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,17 +120,26 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
 
 
-        badgeNotif = findViewById(R.id.badgeNotif);
+       // badgeNotif = findViewById(R.id.badgeNotif);
+        btnNp = findViewById(R.id.btnNp);
         btnNotif = findViewById(R.id.btnNotif);
 
         int notifCount = 3;
 
-        if(notifCount > 0){
-            badgeNotif.setText(String.valueOf(notifCount));
-            badgeNotif.setVisibility(View.VISIBLE);
-        }else{
-            badgeNotif.setVisibility(View.GONE);
-        }
+        btnNp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MapDeliveriesActivity.this, CompleteProfileActivity.class));
+                finish();
+            }
+        });
+
+//        if(notifCount > 0){
+//            badgeNotif.setText(String.valueOf(notifCount));
+//            badgeNotif.setVisibility(View.VISIBLE);
+//        }else{
+//            badgeNotif.setVisibility(View.GONE);
+//        }
 
         int driverId = getSharedPreferences("user", MODE_PRIVATE)
                 .getInt("driver_id", 0);
@@ -230,7 +240,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 error -> Log.e("SOLDE_ERR", error.toString())
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     private void showBlockedDialog(int solde) {
@@ -372,7 +385,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 error -> Log.e("NETWORK", error.toString())
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     // ==========================
@@ -428,7 +444,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
             }
         };
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     // ==========================

@@ -103,7 +103,8 @@
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusTopEnd="8dp"
             app:boxCornerRadiusTopStart="8dp"
-            app:endIconMode="clear_text">
+            app:endIconMode="clear_text"
+            android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
@@ -123,7 +124,8 @@
             android:textColor="@color/primary"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -135,7 +137,8 @@
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusTopEnd="8dp"
             app:boxCornerRadiusTopStart="8dp"
-            app:endIconMode="clear_text">
+            app:endIconMode="clear_text"
+            android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etVehicleType"
@@ -156,7 +159,8 @@
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusTopEnd="8dp"
             app:boxCornerRadiusTopStart="8dp"
-            app:endIconMode="clear_text">
+            app:endIconMode="clear_text"
+            android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPlateNumber"
@@ -175,7 +179,8 @@
             android:textColor="@color/primary"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"/>
 
         <!-- Permis de conduire -->
         <LinearLayout
@@ -184,7 +189,8 @@
             android:orientation="horizontal"
             android:paddingVertical="12dp"
             android:background="@drawable/document_background"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivPermis"
@@ -229,7 +235,8 @@
             android:orientation="horizontal"
             android:paddingVertical="12dp"
             android:background="@drawable/document_background"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivCarte"
@@ -274,7 +281,8 @@
             android:orientation="horizontal"
             android:paddingVertical="12dp"
             android:background="@drawable/document_background"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivAssurance"
@@ -320,7 +328,8 @@
             android:paddingVertical="12dp"
             android:background="@drawable/document_background"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="24dp"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivVehicule"
@@ -380,7 +389,8 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="24dp"
             app:cornerRadius="8dp"
-            app:backgroundTint="@color/red"/>
+            app:backgroundTint="@color/red"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

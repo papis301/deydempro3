@@ -9,7 +9,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:ignore="PhotoAndVideoPolicy" />
 
     <application
         android:allowBackup="true"
@@ -22,7 +24,7 @@
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".DriverProfileActivity"
+            android:name=".CompleteProfileActivity"
             android:exported="false" />
         <activity
             android:name=".NotificationsActivity"

@@ -209,7 +209,10 @@ public class StartActivity extends AppCompatActivity {
                 }
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
 
@@ -264,7 +267,10 @@ public class StartActivity extends AppCompatActivity {
                 }
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     // ===============================

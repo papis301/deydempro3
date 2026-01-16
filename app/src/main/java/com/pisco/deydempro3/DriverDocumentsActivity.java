@@ -160,7 +160,10 @@ public class DriverDocumentsActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show()
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
 
@@ -230,7 +233,10 @@ public class DriverDocumentsActivity extends AppCompatActivity {
             }
         };
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
 

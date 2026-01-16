@@ -46,7 +46,7 @@
                     android:id="@+id/txtSolde"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="5"
                     android:text="0 FCFA"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -55,8 +55,9 @@
                     android:background="@drawable/bg_solde"/>
 
                 <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
 
                     <ImageView
                         android:id="@+id/btnNotif"
@@ -65,19 +66,17 @@
                         android:src="@drawable/ic_notification"
                         app:tint="#1E88E5"/>
 
-                    <TextView
-                        android:id="@+id/badgeNotif"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:text="3"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/white"
-                        android:gravity="center"
-                        android:layout_gravity="end|top"
-                        android:background="@drawable/bg_badge"
-                        android:visibility="gone"/>
+
+
                 </FrameLayout>
+
+                <ImageView
+                    android:id="@+id/btnNp"
+                    android:layout_width="0dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_person"
+                    app:tint="#000000"/>
 
             </LinearLayout>
 

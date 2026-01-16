@@ -266,7 +266,10 @@ public class DeliveryNavigationActivity extends FragmentActivity {
                 return p;
             }
         };
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     private void updateStatusOnServer(String newStatus) {
@@ -312,7 +315,10 @@ public class DeliveryNavigationActivity extends FragmentActivity {
                 return p;
             }
         };
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     private void showPickupDropMarkers() {

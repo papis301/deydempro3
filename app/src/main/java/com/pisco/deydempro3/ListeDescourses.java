@@ -63,7 +63,10 @@ public class ListeDescourses extends AppCompatActivity implements CourseAdapter.
                 error -> Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show()
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     private void startLocationService() {
@@ -91,7 +94,10 @@ public class ListeDescourses extends AppCompatActivity implements CourseAdapter.
                 error -> {}
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 
     @Override
@@ -122,6 +128,9 @@ public class ListeDescourses extends AppCompatActivity implements CourseAdapter.
                 error -> Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show()
         );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(req);
+        VolleySingleton.getInstance(this).add(
+        req
+);
+
     }
 }

@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class SecurityUtils {
 
-    public static void checkDriverSecurity(
+    public void checkDriverSecurity(
             Activity activity,
             int driverId,
             double lat,
@@ -76,7 +76,10 @@ public class SecurityUtils {
             }
         };
 
-        VolleySingleton.getInstance(activity).addToRequestQueue(req);
+        VolleySingleton.getInstance(activity.getApplicationContext()).add(
+                req
+        );
+
     }
 }
 
