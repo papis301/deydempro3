@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -63,9 +64,10 @@ public class ListeDescourses extends AppCompatActivity implements CourseAdapter.
                 error -> Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show()
         );
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 
@@ -94,9 +96,10 @@ public class ListeDescourses extends AppCompatActivity implements CourseAdapter.
                 error -> {}
         );
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 
@@ -128,9 +131,10 @@ public class ListeDescourses extends AppCompatActivity implements CourseAdapter.
                 error -> Toast.makeText(this, "Erreur réseau", Toast.LENGTH_SHORT).show()
         );
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 }

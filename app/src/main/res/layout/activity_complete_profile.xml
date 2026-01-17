@@ -1,33 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:gravity="center"
+    android:background="#F2F4F7"
+    android:padding="20dp">
 
-    <ImageView
-        android:id="@+id/imgProfile"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/ic_user"
-        android:scaleType="centerCrop"
-        android:background="@drawable/bg_circle"
-        android:clickable="true"
-        android:focusable="true"/>
-
-    <EditText
-        android:id="@+id/etFullName"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nom complet"
-        android:layout_marginTop="20dp"/>
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        android:padding="24dp">
 
-    <Button
-        android:id="@+id/btnSubmit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Valider"
-        android:layout_marginTop="20dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- Photo profil -->
+            <ImageView
+                android:id="@+id/imgProfile"
+                android:layout_width="130dp"
+                android:layout_height="130dp"
+                android:src="@drawable/ic_user"
+                android:scaleType="centerCrop"
+                android:background="@drawable/bg_circle"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <!-- Nom complet -->
+            <EditText
+                android:id="@+id/etFullName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:hint="Nom complet"
+                android:padding="14dp"
+                android:background="@drawable/bg_input"
+                android:textSize="16sp"
+                android:inputType="textPersonName"/>
+
+            <!-- Bouton -->
+            <Button
+                android:id="@+id/btnSubmit"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:text="Valider"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:backgroundTint="#1E88E5"
+                android:textColor="@android:color/white"/>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
 </LinearLayout>

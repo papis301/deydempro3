@@ -266,9 +266,10 @@ public class DeliveryNavigationActivity extends FragmentActivity {
                 return p;
             }
         };
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 
@@ -315,9 +316,10 @@ public class DeliveryNavigationActivity extends FragmentActivity {
                 return p;
             }
         };
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 

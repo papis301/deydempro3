@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
@@ -240,9 +241,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 error -> Log.e("SOLDE_ERR", error.toString())
         );
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 
@@ -385,9 +387,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 error -> Log.e("NETWORK", error.toString())
         );
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 
@@ -444,9 +447,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
             }
         };
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 

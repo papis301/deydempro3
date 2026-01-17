@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
 
@@ -160,9 +161,10 @@ public class DriverDocumentsActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show()
         );
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 
@@ -233,9 +235,10 @@ public class DriverDocumentsActivity extends AppCompatActivity {
             }
         };
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 

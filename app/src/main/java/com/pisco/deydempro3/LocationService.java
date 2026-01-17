@@ -20,6 +20,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.*;
 
 import org.json.JSONObject;
@@ -101,9 +102,10 @@ public class LocationService extends Service {
                 error -> {}
         );
 
-        VolleySingleton.getInstance(this).add(
-        req
-);
+        Volley.newRequestQueue(this).add(req);
+
+
+
 
     }
 
