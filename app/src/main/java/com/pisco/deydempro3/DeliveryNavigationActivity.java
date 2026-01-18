@@ -63,7 +63,8 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
     BottomSheetBehavior<View> bottomSheetBehavior;
     View bottomSheet;
-    Button btnSurPlace, btnDemarrer, btnTerminer, btnCall;
+    Button btnSurPlace, btnDemarrer, btnTerminer, btnCall,  btnAnnuler;
+    ;
     TextView txtStatus;
 
     private enum CourseState { GOING_TO_PICKUP, ARRIVED, ONGOING, COMPLETED }
@@ -101,6 +102,8 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnTerminer = bottomSheet.findViewById(R.id.btnTerminer);
         txtStatus = bottomSheet.findViewById(R.id.txtStatus);
         btnCall = findViewById(R.id.btnCall);
+        btnAnnuler = bottomSheet.findViewById(R.id.btnAnnuler);
+
 
         updateBottomSheetUI();
 
@@ -182,6 +185,28 @@ public class DeliveryNavigationActivity extends FragmentActivity {
             currentState = CourseState.COMPLETED;
             onTerminer();
         });
+
+        btnAnnuler.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Annuler la course")
+                    .setMessage("Voulez-vous vraiment annuler cette course ?")
+                    .setPositiveButton("Oui", (dialog, which) -> {
+
+                        // 🔴 Annulation réelle de la course
+                        cancelCourse(
+                                "driver",
+                                driverId,
+                                "NO_SHOW",
+                                "Client absent au point de retrait"
+                        );
+                        annulerCourse();
+
+                    })
+                    .setNegativeButton("Non", null)
+                    .show();
+        });
+
+
     }
 
     private void callClient(String phone){
@@ -189,6 +214,35 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         intent.setData(Uri.parse("tel:" + phone));
         startActivity(intent);
     }
+
+    private void annulerCourse() {
+        StringRequest req = new StringRequest(
+                Request.Method.POST,
+                BASE_URL + "cancel_course_by_driver.php",
+                response -> {
+                    Toast.makeText(this,
+                            "Course annulée",
+                            Toast.LENGTH_SHORT).show();
+
+                    startActivity(new Intent(this, MapDeliveriesActivity.class));
+                    finish();
+                },
+                error -> Toast.makeText(this,
+                        "Erreur annulation",
+                        Toast.LENGTH_SHORT).show()
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> p = new HashMap<>();
+                p.put("delivery_id", deliveryId);
+                p.put("status", "cancelled_by_driver");
+                return p;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(req);
+    }
+
 
     private void updateBottomSheetUI() {
         btnSurPlace.setVisibility(View.GONE);
@@ -213,6 +267,13 @@ public class DeliveryNavigationActivity extends FragmentActivity {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 break;
         }
+        // 🔴 Bouton Annuler autorisé uniquement avant démarrage
+        if (currentState == CourseState.GOING_TO_PICKUP ||
+                currentState == CourseState.ARRIVED) {
+            btnAnnuler.setVisibility(View.VISIBLE);
+        } else {
+            btnAnnuler.setVisibility(View.GONE);
+        }
     }
 
     private void clearRouteLine() {
@@ -221,6 +282,84 @@ public class DeliveryNavigationActivity extends FragmentActivity {
             routeLine = null;
         }
     }
+
+    private void cancelCourse(
+            String cancelledBy,      // "driver"
+            int userId,               // driver_id
+            String reasonCode,        // ex: "NO_SHOW"
+            String reasonText         // ex: "Client absent"
+    ) {
+
+        String url = BASE_URL + "add_course_cancellation.php";
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Localisation non autorisée", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        locationClient.getLastLocation().addOnSuccessListener(location -> {
+
+            double lat = location != null ? location.getLatitude() : 0;
+            double lng = location != null ? location.getLongitude() : 0;
+
+            StringRequest request = new StringRequest(
+                    Request.Method.POST,
+                    url,
+                    response -> {
+                        Log.e("CANCEL_COURSE", response);
+
+                        try {
+                            JSONObject obj = new JSONObject(response);
+                            if (obj.getBoolean("success")) {
+
+                                Toast.makeText(
+                                        DeliveryNavigationActivity.this,
+                                        "Course annulée avec succès",
+                                        Toast.LENGTH_LONG
+                                ).show();
+
+                                // 🔁 Retour à l'écran principal
+                                Intent intent = new Intent(
+                                        DeliveryNavigationActivity.this,
+                                        MapDeliveriesActivity.class
+                                );
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
+
+                            } else {
+                                Toast.makeText(
+                                        DeliveryNavigationActivity.this,
+                                        obj.getString("message"),
+                                        Toast.LENGTH_LONG
+                                ).show();
+                            }
+                        } catch (Exception e) {
+                            Log.e("CANCEL_PARSE_ERR", e.getMessage());
+                        }
+                    },
+                    error -> Log.e("CANCEL_ERR", error.toString())
+            ) {
+                @Override
+                protected Map<String, String> getParams() {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("course_id", deliveryId); // ID de la course
+                    params.put("cancelled_by", cancelledBy); // driver
+                    params.put("user_id", String.valueOf(userId));
+                    params.put("reason_code", reasonCode);
+                    params.put("reason_text", reasonText);
+                    params.put("latitude", String.valueOf(lat));
+                    params.put("longitude", String.valueOf(lng));
+                    return params;
+                }
+            };
+
+            Volley.newRequestQueue(this).add(request);
+        });
+    }
+
 
     private void onSurPlace() {
         updateStatusOnServer("onplace");

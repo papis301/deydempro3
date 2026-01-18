@@ -53,5 +53,14 @@
         android:layout_marginTop="12dp"
         android:text="📞 Appeler le client"
         style="@style/Button.Primary"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAnnuler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="❌ Annuler la course"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@android:color/holo_red_dark"/>
+
 
 </LinearLayout>

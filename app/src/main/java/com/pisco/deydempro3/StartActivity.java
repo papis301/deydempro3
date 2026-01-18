@@ -271,9 +271,6 @@ public class StartActivity extends AppCompatActivity {
 
         Volley.newRequestQueue(this).add(req);
 
-
-
-
     }
 
     // ===============================
