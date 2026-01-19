@@ -74,6 +74,10 @@ public class DeliveryNavigationActivity extends FragmentActivity {
     String status = "going_to_pickup";
     float commission;
     String URL_STATUS = BASE_URL + "update_delivery_status.php";
+    TextView txtPrice ;
+    double price;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +90,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         dropLng = getIntent().getDoubleExtra("drop_lng", 0);
         client_id = getIntent().getStringExtra("client_id");
         deliveryId = getIntent().getStringExtra("delivery_id");
-        double price = Double.parseDouble(getIntent().getStringExtra("price"));
+         price = Double.parseDouble(getIntent().getStringExtra("price"));
         commission = (float) (price * 0.10); // 10% commission
 
         locationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -101,9 +105,10 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnDemarrer = bottomSheet.findViewById(R.id.btnDemarrer);
         btnTerminer = bottomSheet.findViewById(R.id.btnTerminer);
         txtStatus = bottomSheet.findViewById(R.id.txtStatus);
+        txtPrice = bottomSheet.findViewById(R.id.txtPrice);
         btnCall = findViewById(R.id.btnCall);
         btnAnnuler = bottomSheet.findViewById(R.id.btnAnnuler);
-
+        txtPrice = bottomSheet.findViewById(R.id.txtPrice);
 
         updateBottomSheetUI();
 
@@ -252,18 +257,22 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         switch (currentState) {
             case GOING_TO_PICKUP:
                 txtStatus.setText("📦 En route vers le client");
+                txtPrice.setText(String.format("%,.0f FCFA", price));
                 btnSurPlace.setVisibility(View.VISIBLE);
                 break;
             case ARRIVED:
                 txtStatus.setText("📍 Sur place");
+                txtPrice.setText(String.format("%,.0f FCFA", price));
                 btnDemarrer.setVisibility(View.VISIBLE);
                 break;
             case ONGOING:
                 txtStatus.setText("🚚 Livraison en cours");
+                txtPrice.setText(String.format("%,.0f FCFA", price));
                 btnTerminer.setVisibility(View.VISIBLE);
                 break;
             case COMPLETED:
                 txtStatus.setText("✅ Livraison terminée");
+                txtPrice.setText(String.format("%,.0f FCFA", price));
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 break;
         }
@@ -406,9 +415,6 @@ public class DeliveryNavigationActivity extends FragmentActivity {
             }
         };
         Volley.newRequestQueue(this).add(req);
-
-
-
 
     }
 
