@@ -95,6 +95,22 @@ public class MapDeliveriesActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_deliveries);
+        View root = findViewById(android.R.id.content);
+
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            int bottomInset = insets.getSystemWindowInsetBottom();
+
+            View bottomSheet = findViewById(R.id.bottomSheetInfo);
+            bottomSheet.setPadding(
+                    bottomSheet.getPaddingLeft(),
+                    bottomSheet.getPaddingTop(),
+                    bottomSheet.getPaddingRight(),
+                    bottomInset + 16
+            );
+
+            return insets;
+        });
+
 
         Intent serviceIntent = new Intent(this, BackgroundLocationService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -106,9 +122,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
         // Binder le service
         //bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        FrameLayout bottomSheet = findViewById(R.id.bottomSheetInfo);
+        View bottomSheet = findViewById(R.id.bottomSheetInfo);
 
-        BottomSheetBehavior<FrameLayout> behavior =
+        BottomSheetBehavior<View> behavior =
                 BottomSheetBehavior.from(bottomSheet);
 
 // 🔥 FORCER L’AFFICHAGE
