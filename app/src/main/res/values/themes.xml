@@ -63,14 +63,21 @@
         <item name="cornerSize">16dp</item>
     </style>
 
+<!--    <style name="DocImage">-->
+<!--        <item name="android:layout_width">match_parent</item>-->
+<!--        <item name="android:layout_height">160dp</item>-->
+<!--        <item name="android:layout_marginTop">8dp</item>-->
+<!--        <item name="android:background">#E0E0E0</item>-->
+<!--        <item name="android:scaleType">centerCrop</item>-->
+<!--        <item name="android:clickable">true</item>-->
+<!--    </style>-->
     <style name="DocImage">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">160dp</item>
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:background">#E0E0E0</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">120dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">6dp</item>
+        <item name="android:background">@drawable/bg_input</item>
         <item name="android:scaleType">centerCrop</item>
-        <item name="android:clickable">true</item>
     </style>
-
 
 </resources>

@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#F2F4F7"
-    android:layout_marginBottom="16dp"
-    android:layout_marginTop="20dp">
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,101 +15,165 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="20dp"
             app:cardCornerRadius="20dp"
-            app:cardElevation="8dp"
-            android:padding="20dp">
+            app:cardElevation="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- PHOTO PROFIL -->
+                <!-- PHOTO -->
                 <ImageView
                     android:id="@+id/imgProfile"
                     android:layout_width="130dp"
                     android:layout_height="130dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_user"
-                    android:scaleType="centerCrop"
                     android:background="@drawable/bg_circle"
-                    android:padding="4dp"
-                    android:clickable="true"/>
+                    android:scaleType="centerCrop"/>
 
-                <!-- NOM -->
                 <EditText
                     android:id="@+id/etFullName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
                     android:hint="Nom complet"
-                    android:padding="14dp"
-                    android:background="@drawable/bg_input"/>
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_input"
+                    android:padding="12dp"/>
 
-                <!-- VEHICULE -->
                 <Spinner
                     android:id="@+id/spVehicleType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"/>
+                    android:layout_marginTop="10dp"/>
 
-                <!-- ================= DOCUMENTS ================= -->
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Carte d'identité (Recto / Verso)"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
-
-                <ImageView android:id="@+id/imgIdFront" style="@style/DocImage"/>
-                <ImageView android:id="@+id/imgIdBack" style="@style/DocImage"/>
+                <!-- ================= ID CARD ================= -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Permis (Recto / Verso)"
+                    android:text="Carte d'identité"
                     android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
-
-                <ImageView android:id="@+id/imgPermitFront" style="@style/DocImage"/>
-                <ImageView android:id="@+id/imgPermitBack" style="@style/DocImage"/>
-
-                <TextView
-                    android:layout_width="match_parent"
+                    android:layout_marginTop="20dp"
                     android:layout_height="wrap_content"
-                    android:text="Carte grise (Recto / Verso)"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
+                    android:layout_width="wrap_content"/>
 
-                <ImageView android:id="@+id/imgCgFront" style="@style/DocImage"/>
-                <ImageView android:id="@+id/imgCgBack" style="@style/DocImage"/>
-
-                <TextView
+                <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Photos du véhicule"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
+                    android:layout_height="wrap_content">
 
-                <ImageView android:id="@+id/imgVeh1" style="@style/DocImage"/>
-                <ImageView android:id="@+id/imgVeh2" style="@style/DocImage"/>
-                <ImageView android:id="@+id/imgVeh3" style="@style/DocImage"/>
-                <ImageView android:id="@+id/imgVeh4" style="@style/DocImage"/>
+                    <ImageView android:id="@+id/imgIdFront" style="@style/DocImage"/>
+                    <ImageView android:id="@+id/imgIdBack" style="@style/DocImage"/>
+                </LinearLayout>
 
-                <!-- BOUTON -->
                 <Button
-                    android:id="@+id/btnSubmit"
+                    android:id="@+id/btnUploadId"
+                    android:text="Envoyer carte d'identité"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="24dp"
-                    android:text="Valider"
-                    android:textAllCaps="false"
+                    android:layout_height="wrap_content"
                     android:backgroundTint="#1E88E5"
                     android:textColor="@android:color/white"/>
 
-            </LinearLayout>
+                <!-- ================= PERMIS ================= -->
 
+                <TextView
+                    android:text="Permis"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView android:id="@+id/imgPermitFront" style="@style/DocImage"/>
+                    <ImageView android:id="@+id/imgPermitBack" style="@style/DocImage"/>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnUploadPermit"
+                    android:text="Envoyer permis"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#1E88E5"
+                    android:textColor="@android:color/white"/>
+
+                <!-- ================= CARTE GRISE ================= -->
+
+                <TextView
+                    android:text="Carte grise"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView android:id="@+id/imgCgFront" style="@style/DocImage"/>
+                    <ImageView android:id="@+id/imgCgBack" style="@style/DocImage"/>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnUploadCg"
+                    android:text="Envoyer carte grise"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#1E88E5"
+                    android:textColor="@android:color/white"/>
+
+                <!-- ================= VEHICULE ================= -->
+
+                <TextView
+                    android:text="Photos du véhicule"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp"
+                    android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView android:id="@+id/imgVeh1" style="@style/DocImage"/>
+                    <ImageView android:id="@+id/imgVeh2" style="@style/DocImage"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView android:id="@+id/imgVeh3" style="@style/DocImage"/>
+                    <ImageView android:id="@+id/imgVeh4" style="@style/DocImage"/>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnUploadVeh"
+                    android:text="Envoyer photos véhicule"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#1E88E5"
+                    android:textColor="@android:color/white"/>
+
+                <!-- VALIDATION PROFIL -->
+                <Button
+                    android:id="@+id/btnSubmit"
+                    android:text="Valider profil"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="24dp"
+                    android:backgroundTint="#0F9D58"
+                    android:textColor="@android:color/white"
+                    android:layout_marginBottom="50dp"/>
+
+            </LinearLayout>
         </androidx.cardview.widget.CardView>
 
     </LinearLayout>
