@@ -46,7 +46,8 @@ public class CompleteProfileActivity extends AppCompatActivity {
 
     private Map<String, ImageView> imageMap = new HashMap<>();
 
-    Button btnUploadId, btnUploadPermit, btnUploadCg, btnUploadVeh;
+    Button btnUploadId, btnUploadPermit, btnUploadCg, btnUploadVeh, btnLogout;
+    Map<DocType, Boolean> documentStatus = new HashMap<>();
 
     enum DocType {
         PROFILE("profile_photo"),
@@ -78,7 +79,34 @@ public class CompleteProfileActivity extends AppCompatActivity {
         initViews();
         bindClicks();
         loadDriverDocuments();
+        initDocumentStatus();
     }
+
+    private void initDocumentStatus(){
+        for(DocType t : DocType.values()){
+            documentStatus.put(t,false);
+        }
+    }
+
+    private void markDocumentAsExisting(String type){
+
+        for(DocType t : DocType.values()){
+            if(t.value.equals(type)){
+                documentStatus.put(t,true);
+                break;
+            }
+        }
+    }
+
+    private boolean areDocsUploaded(DocType... types){
+        for(DocType t : types){
+            if(!documentStatus.getOrDefault(t,false)){
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     private void initViews(){
 
@@ -98,6 +126,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
         btnUploadPermit = findViewById(R.id.btnUploadPermit);
         btnUploadCg = findViewById(R.id.btnUploadCg);
         btnUploadVeh = findViewById(R.id.btnUploadVeh);
+        btnLogout = findViewById(R.id.btnLogout);
     }
 
     private void bindClicks(){
@@ -123,6 +152,10 @@ public class CompleteProfileActivity extends AppCompatActivity {
         btnUploadCg.setOnClickListener(v -> {
             uploadDocument(DocType.CG_FRONT);
             uploadDocument(DocType.CG_BACK);
+        });
+
+        btnLogout.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
         });
 
         btnUploadVeh.setOnClickListener(v -> {
@@ -179,6 +212,44 @@ public class CompleteProfileActivity extends AppCompatActivity {
         return true;
     }
 
+    private void refreshUploadButtons(){
+
+        btnUploadId.setEnabled(!areDocsUploaded(
+                DocType.ID_FRONT,
+                DocType.ID_BACK
+        ));
+
+        btnUploadPermit.setEnabled(!areDocsUploaded(
+                DocType.PERMIT_FRONT,
+                DocType.PERMIT_BACK
+        ));
+
+        btnUploadCg.setEnabled(!areDocsUploaded(
+                DocType.CG_FRONT,
+                DocType.CG_BACK
+        ));
+
+        btnUploadVeh.setEnabled(!areDocsUploaded(
+                DocType.VEH1,
+                DocType.VEH2,
+                DocType.VEH3,
+                DocType.VEH4
+        ));
+
+        styleButton(btnUploadId);
+        styleButton(btnUploadPermit);
+        styleButton(btnUploadCg);
+        styleButton(btnUploadVeh);
+    }
+
+    private void styleButton(Button btn){
+        if(!btn.isEnabled()){
+            btn.setAlpha(0.5f);
+        }else{
+            btn.setAlpha(1f);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode,int resultCode,@Nullable Intent data){
         super.onActivityResult(requestCode,resultCode,data);
@@ -213,7 +284,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
                 response -> {
                     dialog.dismiss();
                     Toast.makeText(this,"Upload réussi "+type.value,Toast.LENGTH_SHORT).show();
-
+                    refreshUploadButtons();
                 },
                 error -> {
                     dialog.dismiss();
@@ -273,6 +344,8 @@ public class CompleteProfileActivity extends AppCompatActivity {
                             JSONObject d = docs.getJSONObject(i);
                             String type = d.getString("document_type");
                             String path = d.getString("file_path");
+                            markDocumentAsExisting(type);
+                            refreshUploadButtons();
                             Log.d("DOC_FULL", type+" -> "+path);
                             ImageView img = imageMap.get(type);
                             if(img!=null){

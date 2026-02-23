@@ -7,6 +7,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- TYPE VEHICULE -->
+    <Spinner
+        android:id="@+id/spVehicleType"
+        android:layout_marginTop="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- TELEPHONE -->
     <EditText
         android:id="@+id/etPhone"
         android:hint="Numéro de téléphone"
@@ -14,6 +22,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+
+
+    <!-- PASSWORD -->
     <EditText
         android:id="@+id/etPassword"
         android:hint="Mot de passe"
@@ -22,6 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <!-- CONFIRM PASSWORD -->
     <EditText
         android:id="@+id/etConfirm"
         android:hint="Confirmer le mot de passe"
@@ -30,6 +42,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <!-- REGISTER -->
     <Button
         android:id="@+id/btnRegister"
         android:text="Créer un compte chauffeur"
@@ -37,6 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <!-- LOGIN -->
     <Button
         android:id="@+id/btnGoLogin"
         android:text="Déjà inscrit ? Connexion"

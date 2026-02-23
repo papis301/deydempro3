@@ -32,7 +32,8 @@
                     android:layout_gravity="center"
                     android:src="@drawable/ic_user"
                     android:background="@drawable/bg_circle"
-                    android:scaleType="centerCrop"/>
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"/>
 
                 <EditText
                     android:id="@+id/etFullName"
@@ -41,13 +42,15 @@
                     android:hint="Nom complet"
                     android:layout_marginTop="20dp"
                     android:background="@drawable/bg_input"
-                    android:padding="12dp"/>
+                    android:padding="12dp"
+                    android:visibility="gone"/>
 
                 <Spinner
                     android:id="@+id/spVehicleType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"/>
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone"/>
 
                 <!-- ================= ID CARD ================= -->
 
@@ -164,8 +167,8 @@
 
                 <!-- VALIDATION PROFIL -->
                 <Button
-                    android:id="@+id/btnSubmit"
-                    android:text="Valider profil"
+                    android:id="@+id/btnLogout"
+                    android:text="Deconnexion"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="24dp"
