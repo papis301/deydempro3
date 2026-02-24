@@ -24,6 +24,9 @@
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".TripHistoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".CompleteProfileActivity"
             android:exported="false" />
         <activity

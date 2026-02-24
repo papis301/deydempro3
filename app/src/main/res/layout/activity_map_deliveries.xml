@@ -62,6 +62,13 @@
                 android:src="@drawable/ic_notification"
                 app:tint="#1E88E5"
                 android:visibility="gone"/>
+            <ImageView
+                android:id="@+id/histo"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/historique"
+                app:tint="#1E88E5"/>
 
             <ImageView
                 android:id="@+id/btnNp"

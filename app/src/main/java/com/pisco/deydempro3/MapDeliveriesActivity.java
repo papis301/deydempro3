@@ -65,7 +65,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     private MapDelivery selectedDelivery;
     private TextView txtSolde;
     TextView badgeNotif;
-    ImageView btnNotif, btnNp;
+    ImageView btnNotif, btnNp, histor;
 
     private final int LOCATION_REQUEST_CODE = 1001;
     private String driverVehicleType = "";
@@ -141,6 +141,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
        // badgeNotif = findViewById(R.id.badgeNotif);
         btnNp = findViewById(R.id.btnNp);
         btnNotif = findViewById(R.id.btnNotif);
+        histor = findViewById(R.id.histo);
 
         int notifCount = 3;
 
@@ -148,6 +149,14 @@ public class MapDeliveriesActivity extends FragmentActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(MapDeliveriesActivity.this, CompleteProfileActivity.class));
+                finish();
+            }
+        });
+
+        histor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MapDeliveriesActivity.this, TripHistoryActivity.class));
                 finish();
             }
         });
