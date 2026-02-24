@@ -68,6 +68,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     ImageView btnNotif, btnNp;
 
     private final int LOCATION_REQUEST_CODE = 1001;
+    private String driverVehicleType = "";
 
     // ==========================
     // LIFECYCLE
@@ -136,7 +137,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
         behavior.setHideable(false);
 
 
-
+        getDriverVehicleType();
        // badgeNotif = findViewById(R.id.badgeNotif);
         btnNp = findViewById(R.id.btnNp);
         btnNotif = findViewById(R.id.btnNotif);
@@ -341,6 +342,12 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
 
     private void loadDeliveries() {
+
+        // 🚨 ATTENDRE TYPE VEHICULE
+//        if(driverVehicleType.isEmpty()){
+//            Log.d("FILTER", "Vehicle type pas encore chargé");
+//            return;
+//        }
         StringRequest req = new StringRequest(Request.Method.GET, URL_LIST,
                 response -> {
                     try {
@@ -368,8 +375,19 @@ public class MapDeliveriesActivity extends FragmentActivity {
                                     o.getDouble("dropoff_lat"),
                                     o.getDouble("dropoff_lng"),
                                     o.getString("price"),
-                                    o.getString("client_id")
+                                    o.getString("client_id"),
+                                    o.getString("vehicle_type")
                             );
+
+                            // 🔥 FILTRAGE AUTOMATIQUE
+                            if(!driverVehicleType.isEmpty()){
+
+                                String deliveryVehicle = d.type_vehicule.toLowerCase();
+
+                                if(!deliveryVehicle.contains(driverVehicleType)){
+                                    continue; // ignore livraison incompatible
+                                }
+                            }
 
                             boolean exists = false;
                             for (Marker m : markerDeliveries.keySet()) {
@@ -380,10 +398,22 @@ public class MapDeliveriesActivity extends FragmentActivity {
                             }
 
                             if (!exists) {
+
+                                String vehicleType = d.type_vehicule.toLowerCase();
+
+                                float markerColor = BitmapDescriptorFactory.HUE_GREEN;
+
+                                if(vehicleType.contains("voiture")){
+                                    markerColor = BitmapDescriptorFactory.HUE_YELLOW;
+                                }
+                                else if(vehicleType.contains("moto")){
+                                    markerColor = BitmapDescriptorFactory.HUE_RED;
+                                }
+
                                 Marker m = mMap.addMarker(new MarkerOptions()
                                         .position(new LatLng(d.pickupLat, d.pickupLng))
                                         .title("Pickup")
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                                        .icon(BitmapDescriptorFactory.defaultMarker(markerColor))
                                 );
                                 markerDeliveries.put(m, d);
                             }
@@ -406,8 +436,68 @@ public class MapDeliveriesActivity extends FragmentActivity {
         Volley.newRequestQueue(this).add(req);
 
 
+    }
 
+//    private void getVehicleType() {
+//
+//        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+//                .getInt("driver_id", 0);
+//
+//        String url = BASE_URL + "get_driver_vehicle.php?driver_id=" + driverId;
+//
+//        StringRequest req = new StringRequest(Request.Method.GET, url,
+//                response -> {
+//                    try {
+//                        JSONObject obj = new JSONObject(response);
+//
+//                        if(obj.getBoolean("success")){
+//
+//                            String typeVehicule = obj.getString("type_vehicule");
+//
+//                            Log.d("VEHICLE", typeVehicule);
+//
+//                            Toast.makeText(this, "Votre véhicule : " + typeVehicule, Toast.LENGTH_LONG).show();
+//
+//                        }
+//
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                },
+//                error -> Log.e("ERR", error.toString())
+//        );
+//
+//        Volley.newRequestQueue(this).add(req);
+//    }
 
+    private void getDriverVehicleType() {
+
+        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+                .getInt("driver_id", 0);
+
+        String url = BASE_URL + "get_driver_vehicle.php?driver_id=" + driverId;
+
+        StringRequest req = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+
+                        if(obj.getBoolean("success")){
+
+                            driverVehicleType = obj.getString("type_vehicule").toLowerCase();
+
+                            Log.d("VEHICLE_TYPE", driverVehicleType);
+
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.e("VEHICLE_ERR", error.toString())
+        );
+
+        Volley.newRequestQueue(this).add(req);
     }
 
     // ==========================
@@ -464,9 +554,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
         };
 
         Volley.newRequestQueue(this).add(req);
-
-
-
 
     }
 
