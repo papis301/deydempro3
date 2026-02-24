@@ -91,7 +91,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         client_id = getIntent().getStringExtra("client_id");
         deliveryId = getIntent().getStringExtra("delivery_id");
          price = Double.parseDouble(getIntent().getStringExtra("price"));
-        commission = (float) (price * 0.10); // 10% commission
+        commission = (float) (price * 0.12); // 10% commission
 
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -189,6 +189,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         btnTerminer.setOnClickListener(v -> {
             currentState = CourseState.COMPLETED;
             onTerminer();
+            completeTrip(deliveryId);
         });
 
         btnAnnuler.setOnClickListener(v -> {
@@ -218,6 +219,45 @@ public class DeliveryNavigationActivity extends FragmentActivity {
         Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.setData(Uri.parse("tel:" + phone));
         startActivity(intent);
+    }
+
+    private void completeTrip(String deliveryId){
+
+        String url = BASE_URL + "complete_trip.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                response -> {
+
+                    try {
+
+                        JSONObject obj = new JSONObject(response);
+
+                        if(obj.getBoolean("success")){
+
+                            Toast.makeText(this,
+                                    "Course terminée\nGain : "
+                                            + obj.getInt("driver_gain") + " FCFA",
+                                    Toast.LENGTH_LONG).show();
+
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                },
+                error -> Toast.makeText(this, "Erreur", Toast.LENGTH_SHORT).show()
+        ){
+
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<>();
+                params.put("delivery_id", deliveryId);
+                return params;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(req);
     }
 
     private void annulerCourse() {
@@ -393,7 +433,7 @@ public class DeliveryNavigationActivity extends FragmentActivity {
 
         btnTerminer.setVisibility(View.GONE);
 
-        Toast.makeText(this, "Livraison terminée "+driverId+":"+deliveryId, Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Livraison terminée "+driverId+":"+deliveryId, Toast.LENGTH_LONG).show();
         sendCommissionAndUpdateBalance(commission);
         startActivity(new Intent(this, MapDeliveriesActivity.class));
         finish();
