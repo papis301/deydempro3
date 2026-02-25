@@ -77,6 +77,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     TextView textStatus;
 
     boolean isOnline = false;
+    boolean assignmentRequested = false;
 
     // ==========================
     // LIFECYCLE
@@ -265,6 +266,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
             textStatus.setText("En ligne");
             textStatus.setTextColor(getResources().getColor(R.color.online_green));
+            
+                autoAssignDriver();
+            
 
         } else {
 
@@ -272,6 +276,51 @@ public class MapDeliveriesActivity extends FragmentActivity {
             textStatus.setText("Hors ligne");
             textStatus.setTextColor(getResources().getColor(R.color.uber_yellow));
         }
+    }
+
+    private void autoAssignDriver(){
+
+        if(assignmentRequested) return;
+        assignmentRequested = true;
+        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+                .getInt("driver_id", 0);
+
+        String url = Constants.BASE_URL + "auto_assign_driver.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                response -> {
+
+                    try {
+
+                        JSONObject obj = new JSONObject(response);
+
+                        if(obj.getBoolean("success")){
+
+                            int deliveryId = obj.getInt("delivery_id");
+
+                            Toast.makeText(this,
+                                    "Nouvelle course assignée",
+                                    Toast.LENGTH_LONG).show();
+
+                        }
+
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                },
+                error -> Log.e("ASSIGN_ERR", error.toString())
+        ){
+
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<>();
+                params.put("driver_id", String.valueOf(driverId));
+                return params;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(req);
     }
 
     private int dpToPx(int dp){
@@ -317,13 +366,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
         Volley.newRequestQueue(this).add(req);
     }
 
-    private void saveOnlineStatus(boolean online){
-
-        getSharedPreferences("user", MODE_PRIVATE)
-                .edit()
-                .putBoolean("is_online", online)
-                .apply();
-    }
+   
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -422,6 +465,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
 
+
         LocationRequest request = LocationRequest.create()
                 .setInterval(2000)
                 .setFastestInterval(1000)
@@ -433,6 +477,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
                 Location loc = result.getLastLocation();
                 if (loc == null) return;
+                if(isOnline){
+                    autoAssignDriver();
+                }
 
                 LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
 
@@ -460,11 +507,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     private void loadDeliveries() {
 
-        // 🚨 ATTENDRE TYPE VEHICULE
-//        if(driverVehicleType.isEmpty()){
-//            Log.d("FILTER", "Vehicle type pas encore chargé");
-//            return;
-//        }
+        if(!isOnline){
+            return;
+        }
         StringRequest req = new StringRequest(Request.Method.GET, URL_LIST,
                 response -> {
                     try {
