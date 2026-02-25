@@ -20,10 +20,12 @@ import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -78,6 +80,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     boolean isOnline = false;
     boolean assignmentRequested = false;
+    boolean hasActiveTrip = false;
+    boolean popupVisible = false;
 
     // ==========================
     // LIFECYCLE
@@ -254,6 +258,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
         btnNotif.setOnClickListener(v ->
                 startActivity(new Intent(this, NotificationsActivity.class))
         );
+
+        startDispatchLoop();
     }
     private void updateUI(boolean online){
 
@@ -280,8 +286,13 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     private void autoAssignDriver(){
 
+        if(!isOnline) return;
+        if(hasActiveTrip) return;
+        if(popupVisible) return;
         if(assignmentRequested) return;
+
         assignmentRequested = true;
+
         int driverId = getSharedPreferences("user", MODE_PRIVATE)
                 .getInt("driver_id", 0);
 
@@ -290,18 +301,29 @@ public class MapDeliveriesActivity extends FragmentActivity {
         StringRequest req = new StringRequest(Request.Method.POST, url,
                 response -> {
 
+                    assignmentRequested = false;
+
                     try {
 
                         JSONObject obj = new JSONObject(response);
 
                         if(obj.getBoolean("success")){
 
-                            int deliveryId = obj.getInt("delivery_id");
+                            selectedDelivery = new MapDelivery(
+                                    obj.getString("delivery_id"),
+                                    obj.getString("pickup_address"),
+                                    obj.getDouble("pickup_lat"),
+                                    obj.getDouble("pickup_lng"),
+                                    obj.getString("dropoff_address"),
+                                    obj.getDouble("dropoff_lat"),
+                                    obj.getDouble("dropoff_lng"),
+                                    obj.getString("price"),
+                                    obj.optString("client_id","0"),
+                                    obj.getString("vehicle_type")
+                            );
 
-                            Toast.makeText(this,
-                                    "Nouvelle course assignée",
-                                    Toast.LENGTH_LONG).show();
-
+                            popupVisible = true;
+                            showIncomingTrip(selectedDelivery);
                         }
 
                     } catch (Exception e){
@@ -309,7 +331,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
                     }
 
                 },
-                error -> Log.e("ASSIGN_ERR", error.toString())
+                error -> {
+                    assignmentRequested = false;
+                    Log.e("ASSIGN_ERR", error.toString());
+                }
         ){
 
             @Override
@@ -479,6 +504,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 if (loc == null) return;
                 if(isOnline){
                     autoAssignDriver();
+                    sendDriverLocation();
                 }
 
                 LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
@@ -499,6 +525,50 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 }
             }
         }, getMainLooper());
+    }
+
+    private void startDispatchLoop(){
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if(isOnline && !hasActiveTrip && !popupVisible){
+                    autoAssignDriver();
+                }
+
+                handler.postDelayed(this, 5000);
+            }
+        },5000);
+    }
+
+    private void sendDriverLocation(){
+
+        if(driverMarker == null) return;
+
+        double lat = driverMarker.getPosition().latitude;
+        double lng = driverMarker.getPosition().longitude;
+
+        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+                .getInt("driver_id", 0);
+
+        String url = Constants.BASE_URL + "update_driver_location.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                response -> Log.d("LOCATION_UPDATE", response),
+                error -> Log.e("LOCATION_ERR", error.toString())
+        ){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<>();
+                params.put("driver_id", String.valueOf(driverId));
+                params.put("lat", String.valueOf(lat));
+                params.put("lng", String.valueOf(lng));
+                return params;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(req);
     }
 
     // ==========================
@@ -600,37 +670,60 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     }
 
-//    private void getVehicleType() {
-//
-//        int driverId = getSharedPreferences("user", MODE_PRIVATE)
-//                .getInt("driver_id", 0);
-//
-//        String url = BASE_URL + "get_driver_vehicle.php?driver_id=" + driverId;
-//
-//        StringRequest req = new StringRequest(Request.Method.GET, url,
-//                response -> {
-//                    try {
-//                        JSONObject obj = new JSONObject(response);
-//
-//                        if(obj.getBoolean("success")){
-//
-//                            String typeVehicule = obj.getString("type_vehicule");
-//
-//                            Log.d("VEHICLE", typeVehicule);
-//
-//                            Toast.makeText(this, "Votre véhicule : " + typeVehicule, Toast.LENGTH_LONG).show();
-//
-//                        }
-//
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                },
-//                error -> Log.e("ERR", error.toString())
-//        );
-//
-//        Volley.newRequestQueue(this).add(req);
-//    }
+    private void showIncomingTrip(MapDelivery trip){
+
+        AlertDialog dialog;
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_accept_trip,null);
+
+        TextView txtInfo = view.findViewById(R.id.txtTripInfo);
+        TextView txtTimer = view.findViewById(R.id.txtTimer);
+        Button btnAccept = view.findViewById(R.id.btnAccept);
+
+        txtInfo.setText(
+                "📍 " + trip.pickup +
+                        "\n🏁 " + trip.dropoff +
+                        "\n💰 " + trip.price + " FCFA"
+        );
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(view);
+        builder.setCancelable(false);
+
+        dialog = builder.create();
+        dialog.show();
+
+        // ⏳ COUNTDOWN 15s
+        new CountDownTimer(15000,1000){
+
+            public void onTick(long millisUntilFinished){
+                txtTimer.setText("Temps restant : " + millisUntilFinished/1000 + "s");
+            }
+
+            public void onFinish(){
+                popupVisible = false;
+                dialog.dismiss();
+                Toast.makeText(MapDeliveriesActivity.this,
+                        "Course expirée",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+        }.start();
+
+        btnAccept.setOnClickListener(v -> {
+            popupVisible = false;
+            hasActiveTrip = true;
+
+            dialog.dismiss();
+
+            int driverId = getSharedPreferences("user",MODE_PRIVATE)
+                    .getInt("driver_id",0);
+
+            acceptDelivery(String.valueOf(driverId));
+        });
+
+
+    }
 
     private void getDriverVehicleType() {
 
@@ -753,5 +846,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         refreshSolde();
+        hasActiveTrip = false;
     }
 }
