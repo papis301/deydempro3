@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginTop="50dp">
 
     <!-- 🗺️ MAP -->
     <fragment
@@ -11,6 +12,9 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <include layout="@layout/btn_online"/>
+    <include layout="@layout/button_online"/>
+    <include layout="@layout/button_online_toggle"/>
 
     <!-- ⬆️ FIXED BOTTOM SHEET -->
     <!-- ⬆️ BOTTOM SHEET (VISIBLE GARANTI) -->

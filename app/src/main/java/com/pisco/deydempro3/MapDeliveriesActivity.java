@@ -27,6 +27,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +71,12 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     private final int LOCATION_REQUEST_CODE = 1001;
     private String driverVehicleType = "";
+    Switch switchOnline;
+    RelativeLayout container;
+    FrameLayout slider;
+    TextView textStatus;
+
+    boolean isOnline = false;
 
     // ==========================
     // LIFECYCLE
@@ -112,6 +120,52 @@ public class MapDeliveriesActivity extends FragmentActivity {
             return insets;
         });
 
+        container = findViewById(R.id.toggleContainer);
+        slider = findViewById(R.id.slider);
+        textStatus = findViewById(R.id.textStatus);
+
+        // Charger état sauvegardé
+        isOnline = getSharedPreferences("user", MODE_PRIVATE)
+                .getBoolean("is_online", false);
+
+        updateUI(isOnline);
+
+        container.setOnClickListener(v -> {
+
+            int endPosition = container.getWidth() - slider.getWidth() - dpToPx(8);
+
+            if (!isOnline) {
+
+                slider.animate()
+                        .translationX(endPosition)
+                        .setDuration(300)
+                        .start();
+
+                textStatus.setText("En ligne");
+                textStatus.setTextColor(getResources().getColor(R.color.online_green));
+
+            } else {
+
+                slider.animate()
+                        .translationX(0)
+                        .setDuration(300)
+                        .start();
+
+                textStatus.setText("Hors ligne");
+                textStatus.setTextColor(getResources().getColor(R.color.uber_yellow));
+            }
+
+            isOnline = !isOnline;
+
+            // Sauvegarder
+            getSharedPreferences("user", MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("is_online", isOnline)
+                    .apply();
+
+            // API update
+            updateOnlineStatusAPI(isOnline);
+        });
 
         Intent serviceIntent = new Intent(this, BackgroundLocationService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -200,6 +254,29 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 startActivity(new Intent(this, NotificationsActivity.class))
         );
     }
+    private void updateUI(boolean online){
+
+        if(online){
+
+            slider.post(() -> {
+                int endPosition = container.getWidth() - slider.getWidth() - dpToPx(8);
+                slider.setTranslationX(endPosition);
+            });
+
+            textStatus.setText("En ligne");
+            textStatus.setTextColor(getResources().getColor(R.color.online_green));
+
+        } else {
+
+            slider.setTranslationX(0);
+            textStatus.setText("Hors ligne");
+            textStatus.setTextColor(getResources().getColor(R.color.uber_yellow));
+        }
+    }
+
+    private int dpToPx(int dp){
+        return (int) (dp * getResources().getDisplayMetrics().density);
+    }
 
     // ==========================
     // PERMISSIONS
@@ -215,6 +292,37 @@ public class MapDeliveriesActivity extends FragmentActivity {
         } else {
             startLocationUpdates();
         }
+    }
+
+    private void updateOnlineStatusAPI(boolean online){
+
+        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+                .getInt("driver_id", 0);
+
+        String url = Constants.BASE_URL + "update_online_status.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                response -> Log.d("ONLINE_STATUS", response),
+                error -> Toast.makeText(this,"Erreur réseau",Toast.LENGTH_SHORT).show()
+        ){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<>();
+                params.put("driver_id", String.valueOf(driverId));
+                params.put("is_online", online ? "1" : "0");
+                return params;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(req);
+    }
+
+    private void saveOnlineStatus(boolean online){
+
+        getSharedPreferences("user", MODE_PRIVATE)
+                .edit()
+                .putBoolean("is_online", online)
+                .apply();
     }
 
     @Override

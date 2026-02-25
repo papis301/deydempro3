@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="gone">
+
+    <Switch
+        android:id="@+id/switchOnline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hors ligne"
+        android:textSize="16sp"
+        android:padding="8dp"
+        android:thumbTint="@color/white"
+        android:trackTint="@color/red"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+</LinearLayout>
