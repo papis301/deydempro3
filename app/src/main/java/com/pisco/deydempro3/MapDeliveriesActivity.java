@@ -82,6 +82,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
     boolean assignmentRequested = false;
     boolean hasActiveTrip = false;
     boolean popupVisible = false;
+    long lastProposalTime = 0;
+    final long COOLDOWN_TIME = 30000; // 30s
 
     // ==========================
     // LIFECYCLE
@@ -239,6 +241,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
         txtSolde = findViewById(R.id.txtSolde);
 
         newOrderSound = MediaPlayer.create(this, R.raw.new_order);
+        newOrderSound.setLooping(false);
         newOrderSound.setVolume(1.0f, 1.0f);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -291,6 +294,12 @@ public class MapDeliveriesActivity extends FragmentActivity {
         if(popupVisible) return;
         if(assignmentRequested) return;
 
+        // 🔥 COOLDOWN 1 MINUTE
+        long now = System.currentTimeMillis();
+        if(now - lastProposalTime < COOLDOWN_TIME){
+            return;
+        }
+
         assignmentRequested = true;
 
         int driverId = getSharedPreferences("user", MODE_PRIVATE)
@@ -323,6 +332,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
                             );
 
                             popupVisible = true;
+                            lastProposalTime = System.currentTimeMillis();
+                            playTripSound();
                             showIncomingTrip(selectedDelivery);
                         }
 
@@ -444,10 +455,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
         );
 
         Volley.newRequestQueue(this).add(req);
-
-
-
-
     }
 
     private void showBlockedDialog(int solde) {
@@ -540,6 +547,24 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 handler.postDelayed(this, 5000);
             }
         },5000);
+    }
+
+    private void playTripSound(){
+
+        try{
+
+            if(newOrderSound != null){
+
+                if(newOrderSound.isPlaying()){
+                    newOrderSound.seekTo(0);
+                }
+
+                newOrderSound.start();
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void sendDriverLocation(){
@@ -703,6 +728,10 @@ public class MapDeliveriesActivity extends FragmentActivity {
             public void onFinish(){
                 popupVisible = false;
                 dialog.dismiss();
+                if(newOrderSound != null && newOrderSound.isPlaying()){
+                    newOrderSound.stop();
+                    newOrderSound = MediaPlayer.create(MapDeliveriesActivity.this, R.raw.new_order);
+                }
                 Toast.makeText(MapDeliveriesActivity.this,
                         "Course expirée",
                         Toast.LENGTH_SHORT).show();
@@ -713,8 +742,14 @@ public class MapDeliveriesActivity extends FragmentActivity {
         btnAccept.setOnClickListener(v -> {
             popupVisible = false;
             hasActiveTrip = true;
+            lastProposalTime = 0;
 
             dialog.dismiss();
+
+            if(newOrderSound != null && newOrderSound.isPlaying()){
+                newOrderSound.stop();
+                newOrderSound = MediaPlayer.create(MapDeliveriesActivity.this, R.raw.new_order);
+            }
 
             int driverId = getSharedPreferences("user",MODE_PRIVATE)
                     .getInt("driver_id",0);
