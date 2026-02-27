@@ -276,7 +276,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
             textStatus.setText("En ligne");
             textStatus.setTextColor(getResources().getColor(R.color.online_green));
             
-                autoAssignDriver();
+               // autoAssignDriver();
             
 
         } else {
@@ -293,6 +293,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
         if(hasActiveTrip) return;
         if(popupVisible) return;
         if(assignmentRequested) return;
+        if(!driverVehicleType.equalsIgnoreCase("voiture")) return;
 
         // 🔥 COOLDOWN 1 MINUTE
         long now = System.currentTimeMillis();
@@ -476,17 +477,36 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     @SuppressLint("PotentialBehaviorOverride")
     private void setupMap(int driverId) {
+
         mMap.setOnMarkerClickListener(marker -> {
+
+            // 🚫 Si hors ligne → on bloque
+            if(!isOnline){
+                Toast.makeText(
+                        MapDeliveriesActivity.this,
+                        "Vous êtes hors ligne",
+                        Toast.LENGTH_SHORT
+                ).show();
+                return true; // empêche le clic
+            }
+
+            // 🚗 Si voiture → pas de clic
+            if(driverVehicleType.equalsIgnoreCase("voiture")){
+                return true;
+            }
+
             MapDelivery d = markerDeliveries.get(marker);
+
             if (d != null) {
                 showAcceptDialog(d, String.valueOf(driverId));
                 return true;
             }
+
             return false;
         });
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true); // Affiche le point bleu
+            mMap.setMyLocationEnabled(true);
         }
     }
 
@@ -510,7 +530,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 Location loc = result.getLastLocation();
                 if (loc == null) return;
                 if(isOnline){
-                    autoAssignDriver();
+                   // autoAssignDriver();
                     sendDriverLocation();
                 }
 
@@ -540,13 +560,18 @@ public class MapDeliveriesActivity extends FragmentActivity {
             @Override
             public void run() {
 
-                if(isOnline && !hasActiveTrip && !popupVisible){
+                if(
+                        isOnline &&
+                                !hasActiveTrip &&
+                                !popupVisible &&
+                                driverVehicleType.equalsIgnoreCase("voiture")
+                ){
                     autoAssignDriver();
                 }
 
-                handler.postDelayed(this, 5000);
+                handler.postDelayed(this, 7000);
             }
-        },5000);
+        },7000);
     }
 
     private void playTripSound(){
@@ -605,6 +630,15 @@ public class MapDeliveriesActivity extends FragmentActivity {
         if(!isOnline){
             return;
         }
+        if(driverVehicleType.isEmpty()){
+            return; // attendre chargement type
+        }
+
+        // 🚗 Si chauffeur voiture → pas d'affichage
+        if(driverVehicleType.equalsIgnoreCase("voiture")){
+            return;
+        }
+
         StringRequest req = new StringRequest(Request.Method.GET, URL_LIST,
                 response -> {
                     try {
@@ -637,14 +671,20 @@ public class MapDeliveriesActivity extends FragmentActivity {
                             );
 
                             // 🔥 FILTRAGE AUTOMATIQUE
-                            if(!driverVehicleType.isEmpty()){
+                            if(driverVehicleType.equalsIgnoreCase("moto")){
 
-                                String deliveryVehicle = d.type_vehicule.toLowerCase();
-
-                                if(!deliveryVehicle.contains(driverVehicleType)){
-                                    continue; // ignore livraison incompatible
+                                if(!d.type_vehicule.equalsIgnoreCase("moto")){
+                                    continue;
                                 }
                             }
+//                            if(!driverVehicleType.isEmpty()){
+//
+//                                String deliveryVehicle = d.type_vehicule.toLowerCase();
+//
+//                                if(!deliveryVehicle.contains(driverVehicleType)){
+//                                    continue; // ignore livraison incompatible
+//                                }
+//                            }
 
                             boolean exists = false;
                             for (Marker m : markerDeliveries.keySet()) {
