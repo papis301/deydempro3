@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Google Maps -->
+    <fragment
+        android:id="@+id/map_fragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- MENU FLOATANT EN HAUT À DROITE -->
+    <LinearLayout
+        android:id="@+id/tiktokMenu"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|end"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="12dp">
+
+        <!-- Bouton Profile -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btnTaxi"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="27dp"
+            app:cardElevation="6dp"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="12dp"
+                android:src="@drawable/iccar"
+                />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Bouton Courses -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btnCourses"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="27dp"
+            app:cardElevation="6dp"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="12dp"
+                android:src="@drawable/icmoto" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Bouton Paramètres -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btnSettings"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="27dp"
+            app:cardElevation="6dp"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="12dp"
+                android:src="@drawable/ic_dashboard" />
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btnProfil"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="27dp"
+            app:cardElevation="6dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="12dp"
+                android:src="@drawable/ic_person" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</FrameLayout>

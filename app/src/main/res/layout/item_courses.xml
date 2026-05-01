@@ -1,0 +1,66 @@
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardCourse"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="12dp"
+    app:cardElevation="6dp"
+    app:cardCornerRadius="16dp"
+    app:strokeWidth="3dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="14dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView android:id="@+id/tvPickup"
+            android:text="Pickup"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:id="@+id/tvDropoff"
+            android:text="Dropoff"
+            android:layout_marginBottom="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:id="@+id/tvStatus"
+            android:text="pending"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:id="@+id/tvPrice"
+            android:text="0 FCFA"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:id="@+id/tvPhone"
+            android:text="Date : "
+            android:layout_marginTop="2dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Annuler"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            android:layout_marginTop="6dp"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            app:strokeColor="@color/red"
+            app:strokeWidth="2dp"
+            app:icon="@drawable/ic_cancel"
+            app:iconTint="@color/red"/>
+
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

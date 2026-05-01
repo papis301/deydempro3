@@ -21,14 +21,13 @@
     <LinearLayout
         android:id="@+id/bottomSheetInfo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         android:background="@drawable/bg_bottomsheet"
         android:orientation="vertical"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="60dp"
         android:padding="16dp"
-        android:elevation="12dp"
+        android:elevation="60dp"
         app:behavior_hideable="false"
-        app:behavior_peekHeight="180dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <!-- HANDLE -->

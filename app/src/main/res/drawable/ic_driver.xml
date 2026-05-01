@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- fond cercle -->
+    <path
+        android:fillColor="#E0F2F1"
+        android:pathData="M12,2A10,10 0,1,1 2,12A10,10 0,0,1 12,2Z"/>
+
+    <!-- voiture -->
+    <path
+        android:fillColor="#00695C"
+        android:pathData="M5,11l1.5,-4.5c0.2,-0.6 0.8,-1 1.4,-1h8.2c0.6,0 1.2,0.4 1.4,1L19,11v5c0,0.6 -0.4,1 -1,1h-1c-0.6,0 -1,-0.4 -1,-1v-1H8v1c0,0.6 -0.4,1 -1,1H6c-0.6,0 -1,-0.4 -1,-1v-5zm3,-1h8l-1,-3H9L8,10zm1.5,3c0.8,0 1.5,-0.7 1.5,-1.5S10.3,10 9.5,10 8,10.7 8,11.5 8.7,13 9.5,13zm5,0c0.8,0 1.5,-0.7 1.5,-1.5S15.3,10 14.5,10 13,10.7 13,11.5 13.7,13 14.5,13z"/>
+</vector>

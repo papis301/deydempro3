@@ -111,21 +111,21 @@ public class MapDeliveriesActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_deliveries);
-        View root = findViewById(android.R.id.content);
-
-        root.setOnApplyWindowInsetsListener((v, insets) -> {
-            int bottomInset = insets.getSystemWindowInsetBottom();
-
-            View bottomSheet = findViewById(R.id.bottomSheetInfo);
-            bottomSheet.setPadding(
-                    bottomSheet.getPaddingLeft(),
-                    bottomSheet.getPaddingTop(),
-                    bottomSheet.getPaddingRight(),
-                    bottomInset + 16
-            );
-
-            return insets;
-        });
+//        View root = findViewById(android.R.id.content);
+//
+//        root.setOnApplyWindowInsetsListener((v, insets) -> {
+//            int bottomInset = insets.getSystemWindowInsetBottom();
+//
+//            View bottomSheet = findViewById(R.id.bottomSheetInfo);
+//            bottomSheet.setPadding(
+//                    bottomSheet.getPaddingLeft(),
+//                    bottomSheet.getPaddingTop(),
+//                    bottomSheet.getPaddingRight(),
+//                    bottomInset + 16
+//            );
+//
+//            return insets;
+//        });
 
         container = findViewById(R.id.toggleContainer);
         slider = findViewById(R.id.slider);

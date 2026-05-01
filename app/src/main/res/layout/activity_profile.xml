@@ -1,0 +1,103 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- PHOTO -->
+        <ImageView
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_profile"
+            android:background="@drawable/bg_circle"
+            android:padding="20dp"/>
+
+        <!-- PHONE -->
+        <TextView
+            android:id="@+id/tvPhone"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- REFERRAL CARD -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Mon code de parrainage"
+                android:textStyle="bold"
+                android:textSize="16sp" android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tvReferralCode"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnCopy"
+                android:text="Copier le code"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnShare"
+                android:text="Partager"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- STATS -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tvRefCount"
+                android:textSize="16sp" android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tvFreeRides"
+                android:textSize="16sp"
+                android:layout_marginTop="6dp" android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tvBonus"
+                android:textSize="16sp"
+                android:layout_marginTop="6dp" android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+        </LinearLayout>
+
+        <!-- LOGOUT -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogout"
+            android:text="Se déconnecter"
+            android:textAllCaps="false"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="#E53935"
+            android:textColor="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+</ScrollView>

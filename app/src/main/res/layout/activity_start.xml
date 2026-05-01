@@ -20,4 +20,12 @@
         android:text="Continuer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnRetry"
+        android:text="Activer Internet / Réessayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:visibility="gone"/>
 </LinearLayout>

@@ -2,18 +2,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Android 10+ -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
-        android:name="android.permission.READ_MEDIA_IMAGES"
-        tools:ignore="PhotoAndVideoPolicy" />
+        android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
+        tools:ignore="BackgroundLocationPolicy" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
+        android:name="deydemv3.MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -23,6 +29,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".ModeManager"
+            android:exported="false" />
+        <activity
+            android:name=".SelectRoleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="deydemv3.HomeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SelectPartnerActivity"
+            android:exported="false" />
         <activity
             android:name=".TripHistoryActivity"
             android:exported="false" />
@@ -45,14 +78,8 @@
             android:name=".CguActivity"
             android:exported="false" />
         <activity
-            android:name=".StartActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:name=".StartActivitypro"
+            android:exported="true" />
         <activity
             android:name=".DeliveryNavigationActivity"
             android:exported="false" />
@@ -84,6 +111,43 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+        <activity android:name="deydemv3.StartActivity" />
+        <activity
+            android:name="deydemv3.DriverProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.SupportActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.CourseMapActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.CourseDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.DashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.CoursesActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.CguActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.PickupDeliveryActivity"
+            android:exported="true" />
+        <activity
+            android:name="deydemv3.SearchLocationActivity"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.LoginActivityc"
+            android:exported="false" />
+        <activity
+            android:name="deydemv3.RegisterActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

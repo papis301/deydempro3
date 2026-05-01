@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="20dp">
+
+        <!-- LOGO -->
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/logodeydempro"
+            android:layout_marginTop="30dp"/>
+
+        <!-- TITRE -->
+        <TextView
+            android:text="Choisissez votre profil"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#333"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- DESCRIPTION -->
+        <TextView
+            android:text="Veuillez sélectionner une option pour continuer"
+            android:textSize="14sp"
+            android:textColor="#777"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- CONTAINER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="30dp">
+
+            <!-- CLIENT -->
+            <LinearLayout
+                android:id="@+id/btnClient"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/card_bg"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:layout_marginEnd="10dp">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/client"
+                    android:layout_gravity="center"/>
+
+                <TextView
+                    android:text="Client"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="#00C853"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+                <TextView
+                    android:text="Réservez un trajet facilement"
+                    android:textSize="12sp"
+                    android:textColor="#555"
+                    android:gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+            </LinearLayout>
+
+            <!-- CHAUFFEUR -->
+            <LinearLayout
+                android:id="@+id/btnDriver"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/card_bg"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/chauffeur"
+                    android:layout_gravity="center"/>
+
+                <TextView
+                    android:text="Chauffeur"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="#00695C"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+                <TextView
+                    android:text="Gagnez de l'argent en conduisant"
+                    android:textSize="12sp"
+                    android:textColor="#555"
+                    android:gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tvPickup"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:text="Pickup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/tvDropoff"
+        android:text="Dropoff"
+        android:layout_marginTop="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/tvPrice"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:text="Prix"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:text="Status"
+        android:layout_marginBottom="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnMap"
+        android:text="📍 Voir sur la carte"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:visibility="gone"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDetails"
+        android:text="📄 Voir détails"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCancel"
+        android:text="❌ Annuler la course"
+        android:layout_marginTop="8dp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@android:color/holo_red_dark"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:visibility="gone"/>
+
+</LinearLayout>

@@ -1,21 +1,20 @@
 package com.pisco.deydempro3;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.*;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
@@ -31,10 +30,6 @@ import java.util.Map;
 
 public class CompleteProfileActivity extends AppCompatActivity {
 
-    private static final int CAMERA_REQUEST = 100;
-    private static final int GALLERY_REQUEST = 101;
-    private static final int PERMISSION_IMAGE = 200;
-
     private Uri cameraUri;
     private ImageView currentImage;
     private DocType currentType;
@@ -43,11 +38,10 @@ public class CompleteProfileActivity extends AppCompatActivity {
     private int driverId;
 
     private Map<DocType, Uri> imageUris = new HashMap<>();
-
     private Map<String, ImageView> imageMap = new HashMap<>();
+    private Map<DocType, Boolean> documentStatus = new HashMap<>();
 
     Button btnUploadId, btnUploadPermit, btnUploadCg, btnUploadVeh, btnLogout;
-    Map<DocType, Boolean> documentStatus = new HashMap<>();
 
     enum DocType {
         PROFILE("profile_photo"),
@@ -66,6 +60,26 @@ public class CompleteProfileActivity extends AppCompatActivity {
         DocType(String v){ value=v; }
     }
 
+    // 📸 GALERIE MODERNE (PAS DE PERMISSION)
+    private ActivityResultLauncher<String> galleryLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null) {
+                    currentImage.setImageURI(uri);
+                    imageUris.put(currentType, uri);
+                    uploadDocument(currentType); // 🚀 upload auto
+                }
+            });
+
+    // 📷 CAMERA MODERNE
+    private ActivityResultLauncher<Intent> cameraLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && cameraUri != null) {
+                    currentImage.setImageURI(cameraUri);
+                    imageUris.put(currentType, cameraUri);
+                    uploadDocument(currentType); // 🚀 upload auto
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,35 +92,9 @@ public class CompleteProfileActivity extends AppCompatActivity {
 
         initViews();
         bindClicks();
-        loadDriverDocuments();
         initDocumentStatus();
+        loadDriverDocuments();
     }
-
-    private void initDocumentStatus(){
-        for(DocType t : DocType.values()){
-            documentStatus.put(t,false);
-        }
-    }
-
-    private void markDocumentAsExisting(String type){
-
-        for(DocType t : DocType.values()){
-            if(t.value.equals(type)){
-                documentStatus.put(t,true);
-                break;
-            }
-        }
-    }
-
-    private boolean areDocsUploaded(DocType... types){
-        for(DocType t : types){
-            if(!documentStatus.getOrDefault(t,false)){
-                return false;
-            }
-        }
-        return true;
-    }
-
 
     private void initViews(){
 
@@ -139,30 +127,8 @@ public class CompleteProfileActivity extends AppCompatActivity {
             });
         }
 
-        btnUploadId.setOnClickListener(v -> {
-            uploadDocument(DocType.ID_FRONT);
-            uploadDocument(DocType.ID_BACK);
-        });
-
-        btnUploadPermit.setOnClickListener(v -> {
-            uploadDocument(DocType.PERMIT_FRONT);
-            uploadDocument(DocType.PERMIT_BACK);
-        });
-
-        btnUploadCg.setOnClickListener(v -> {
-            uploadDocument(DocType.CG_FRONT);
-            uploadDocument(DocType.CG_BACK);
-        });
-
         btnLogout.setOnClickListener(v -> {
             startActivity(new Intent(this, LoginActivity.class));
-        });
-
-        btnUploadVeh.setOnClickListener(v -> {
-            uploadDocument(DocType.VEH1);
-            uploadDocument(DocType.VEH2);
-            uploadDocument(DocType.VEH3);
-            uploadDocument(DocType.VEH4);
         });
     }
 
@@ -181,101 +147,49 @@ public class CompleteProfileActivity extends AppCompatActivity {
                 }).show();
     }
 
-    private void openCamera(){
+    private void openGallery(){
+        galleryLauncher.launch("image/*");
+    }
 
-        if(!checkPermission()) return;
+    private void openCamera(){
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE,"doc_"+System.currentTimeMillis());
-        cameraUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values);
+
+        cameraUri = getContentResolver()
+                .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
         Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        i.putExtra(MediaStore.EXTRA_OUTPUT,cameraUri);
-        startActivityForResult(i,CAMERA_REQUEST);
+        i.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
+
+        cameraLauncher.launch(i);
     }
 
-    private void openGallery(){
-        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(i,GALLERY_REQUEST);
-    }
-
-    private boolean checkPermission(){
-
-        String perm = Build.VERSION.SDK_INT >=33 ?
-                Manifest.permission.READ_MEDIA_IMAGES :
-                Manifest.permission.READ_EXTERNAL_STORAGE;
-
-        if(ContextCompat.checkSelfPermission(this,perm)!= PackageManager.PERMISSION_GRANTED){
-            requestPermissions(new String[]{perm},PERMISSION_IMAGE);
-            return false;
-        }
-        return true;
-    }
-
-    private void refreshUploadButtons(){
-
-        btnUploadId.setEnabled(!areDocsUploaded(
-                DocType.ID_FRONT,
-                DocType.ID_BACK
-        ));
-
-        btnUploadPermit.setEnabled(!areDocsUploaded(
-                DocType.PERMIT_FRONT,
-                DocType.PERMIT_BACK
-        ));
-
-        btnUploadCg.setEnabled(!areDocsUploaded(
-                DocType.CG_FRONT,
-                DocType.CG_BACK
-        ));
-
-        btnUploadVeh.setEnabled(!areDocsUploaded(
-                DocType.VEH1,
-                DocType.VEH2,
-                DocType.VEH3,
-                DocType.VEH4
-        ));
-
-        styleButton(btnUploadId);
-        styleButton(btnUploadPermit);
-        styleButton(btnUploadCg);
-        styleButton(btnUploadVeh);
-    }
-
-    private void styleButton(Button btn){
-        if(!btn.isEnabled()){
-            btn.setAlpha(0.5f);
-        }else{
-            btn.setAlpha(1f);
+    private void initDocumentStatus(){
+        for(DocType t : DocType.values()){
+            documentStatus.put(t,false);
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode,int resultCode,@Nullable Intent data){
-        super.onActivityResult(requestCode,resultCode,data);
-
-        if(resultCode!=RESULT_OK) return;
-
-        Uri uri = requestCode==CAMERA_REQUEST ? cameraUri :
-                data!=null ? data.getData() : null;
-
-        if(uri==null) return;
-
-        currentImage.setImageURI(uri);
-        imageUris.put(currentType,uri);
+    private void markDocumentAsExisting(String type){
+        for(DocType t : DocType.values()){
+            if(t.value.equals(type)){
+                documentStatus.put(t,true);
+                break;
+            }
+        }
     }
-
-    /* ================= UPLOAD ================= */
 
     private void uploadDocument(DocType type){
 
         Uri uri = imageUris.get(type);
-        if(uri==null){
-            Toast.makeText(this,"Sélectionnez image "+type.value,Toast.LENGTH_SHORT).show();
+
+        if(uri == null){
+            Toast.makeText(this,"Image requise",Toast.LENGTH_SHORT).show();
             return;
         }
 
-        dialog.setMessage("Upload...");
+        dialog.setMessage("Upload en cours...");
         dialog.show();
 
         VolleySingleton req = new VolleySingleton(
@@ -283,8 +197,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
                 Constants.BASE_URL+"upload_driver_documents.php",
                 response -> {
                     dialog.dismiss();
-                    Toast.makeText(this,"Upload réussi "+type.value,Toast.LENGTH_SHORT).show();
-                    refreshUploadButtons();
+                    Toast.makeText(this,"Upload réussi ✔",Toast.LENGTH_SHORT).show();
                 },
                 error -> {
                     dialog.dismiss();
@@ -304,12 +217,12 @@ public class CompleteProfileActivity extends AppCompatActivity {
 
                 Map<String,DataPart> map = new HashMap<>();
 
-                try(InputStream is=getContentResolver().openInputStream(uri);
-                    ByteArrayOutputStream buffer=new ByteArrayOutputStream()){
+                try{
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
 
-                    byte[] data=new byte[4096];
-                    int n;
-                    while((n=is.read(data))!=-1) buffer.write(data,0,n);
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, buffer);
 
                     map.put("file", new DataPart(
                             type.value+"_"+System.currentTimeMillis()+".jpg",
@@ -317,7 +230,9 @@ public class CompleteProfileActivity extends AppCompatActivity {
                             "image/jpeg"
                     ));
 
-                }catch(Exception e){ e.printStackTrace(); }
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
 
                 return map;
             }
@@ -325,8 +240,6 @@ public class CompleteProfileActivity extends AppCompatActivity {
 
         VolleySingleton.getInstance(this).add(req);
     }
-
-    /* ================= LOAD ================= */
 
     private void loadDriverDocuments(){
 
@@ -344,21 +257,21 @@ public class CompleteProfileActivity extends AppCompatActivity {
                             JSONObject d = docs.getJSONObject(i);
                             String type = d.getString("document_type");
                             String path = d.getString("file_path");
+
                             markDocumentAsExisting(type);
-                            refreshUploadButtons();
-                            Log.d("DOC_FULL", type+" -> "+path);
+
                             ImageView img = imageMap.get(type);
                             if(img!=null){
 
                                 Glide.with(this)
                                         .load(Constants.BASE_URL+"uploads/driver_documents/"+path)
-                                        .placeholder(R.drawable.ic_upload)
-                                        .error(R.drawable.ic_error)
                                         .into(img);
                             }
                         }
 
-                    }catch(Exception e){ e.printStackTrace(); }
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
 
                 },error -> {}
         );

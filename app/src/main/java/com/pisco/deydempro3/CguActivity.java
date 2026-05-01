@@ -6,11 +6,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class CguActivity extends AppCompatActivity {
 
@@ -30,7 +26,7 @@ public class CguActivity extends AppCompatActivity {
             SharedPreferences sp = getSharedPreferences("DeydemPro", MODE_PRIVATE);
             sp.edit().putBoolean("cgu_accepted", true).apply();
 
-            startActivity(new Intent(this, StartActivity.class));
+            startActivity(new Intent(this, StartActivitypro.class));
             finish();
         });
     }

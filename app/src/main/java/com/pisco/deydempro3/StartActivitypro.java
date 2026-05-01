@@ -20,9 +20,9 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
 
-public class StartActivity extends AppCompatActivity {
+public class StartActivitypro extends AppCompatActivity {
 
-    private static final String TAG = "StartActivity";
+    private static final String TAG = "StartActivitypro";
 
     TextView txtStatus;
     Button btnAction;
@@ -128,7 +128,7 @@ public class StartActivity extends AppCompatActivity {
                         String status = driver.getString("status");
                         int bloque = driver.getInt("bloque_par_admin");
                         String docsStatus = driver.getString("docs_status");
-
+                        int partenaireId = driver.optInt("partner_id", 0);
                         // ⛔ Compte bloqué
                         if (!"active".equals(status) || bloque == 1) {
 
@@ -166,6 +166,21 @@ public class StartActivity extends AppCompatActivity {
                                 Intent i = new Intent(this, DriverDocumentsActivity.class);
                                 i.putExtra("docs_status", docsStatus);
                                 startActivity(i);
+                                finish();
+                            });
+
+                            return;
+                        }
+
+                        // 🤝 Vérifier partenaire
+                        if(partenaireId == 0){
+
+                            txtStatus.setText("🤝 Contacter un partenaire");
+                            btnAction.setText("Voir les partenaires");
+                            btnAction.setEnabled(true);
+
+                            btnAction.setOnClickListener(v -> {
+                                startActivity(new Intent(this, SelectPartnerActivity.class));
                                 finish();
                             });
 

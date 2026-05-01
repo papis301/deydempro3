@@ -12,7 +12,7 @@ android {
         applicationId = "com.pisco.deydempro3"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
+        versionCode = 7
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -57,4 +57,7 @@ dependencies {
 
     // Si vous voulez charger depuis URL HTTPS
     implementation ("com.github.bumptech.glide:okhttp3-integration:4.16.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.google.android.libraries.places:places:3.4.0")
+
 }

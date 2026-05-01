@@ -21,7 +21,7 @@ public class DriverStatusActivity extends AppCompatActivity {
         txtMessage = findViewById(R.id.txtMessage);
         btnAction = findViewById(R.id.btnAction);
 
-        // Données envoyées depuis StartActivity / API
+        // Données envoyées depuis StartActivitypro / API
         String status = getIntent().getStringExtra("status");
         String reason = getIntent().getStringExtra("reason");
 
