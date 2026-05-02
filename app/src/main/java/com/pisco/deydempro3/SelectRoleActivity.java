@@ -6,6 +6,7 @@ import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import deydemv3.RideSelectActivity;
 import deydemv3.StartActivity;
 
 
@@ -26,7 +27,9 @@ public class SelectRoleActivity extends AppCompatActivity {
 
         btnClient.setOnClickListener(v -> {
             modeManager.setMode(ModeManager.MODE_CLIENT);
-            startActivity(new Intent(this, StartActivity.class));
+            startActivity(new Intent(this, RideSelectActivity.class));
+            //startActivity(new Intent(this, StartActivity.class));
+
             //finish();
         });
 

@@ -30,6 +30,9 @@
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
         <activity
+            android:name="deydemv3.RideSelectActivity"
+            android:exported="false" />
+        <activity
             android:name=".ModeManager"
             android:exported="false" />
         <activity

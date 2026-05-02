@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- MAP -->
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!-- TOP SEARCH PANEL -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="@drawable/top_card"
+        android:elevation="6dp"
+        android:layout_marginTop="40dp">
+
+        <!-- BOUTON -->
+        <Button
+            android:text="BOOK FOR A FRIEND"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:visibility="gone"/>
+
+        <!-- PICKUP -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/prise"
+                android:text="Prise"
+                android:textColor="#2196F3"
+                android:textStyle="bold"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"/>
+
+            <EditText
+                android:id="@+id/tvadress"
+                android:hint="vous etes ou ?"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textColor="#333"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- LIGNE -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginVertical="8dp"/>
+
+        <!-- DROP -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/depot"
+                android:text="Depot"
+                android:textColor="#4CAF50"
+                android:textStyle="bold"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"/>
+
+            <EditText
+                android:hint="Where are you going?"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- BOTTOM PANEL -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:elevation="10dp"
+        android:layout_marginBottom="30dp">
+
+        <!-- VEHICULES -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
+
+            <!-- BIKE -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:src="@drawable/paquet"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"/>
+
+                <TextView
+                    android:text="Livraison"
+                    android:textSize="15sp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+            </LinearLayout>
+
+            <!-- TUK -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:src="@drawable/course"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"/>
+
+                <TextView
+                    android:text="Course"
+                    android:textSize="15sp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+
+            </LinearLayout>
+
+            <!-- CAR -->
+
+
+        </LinearLayout>
+
+        <!-- DESTINATION -->
+        <TextView
+            android:text="Queen’s Road, Colombo"
+            android:textColor="#FFFFFF"
+            android:background="#2196F3"
+            android:padding="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- VEHICULES -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp">
+
+            <!-- BIKE -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:src="@drawable/ic_driver"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
+
+                <TextView
+                    android:text="Bike"
+                    android:textSize="12sp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+                <TextView
+                    android:text="1000 FCFA"
+                    android:textColor="#00C853"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            </LinearLayout>
+
+            <!-- TUK -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:src="@drawable/ic_driver"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
+
+                <TextView
+                    android:text="Taxi"
+                    android:textSize="12sp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+                <TextView
+                    android:text="2000 FCFA"
+                    android:textColor="#00C853"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            </LinearLayout>
+
+            <!-- CAR -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:src="@drawable/ic_driver"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
+
+                <TextView
+                    android:text="Car"
+                    android:textSize="12sp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+                <TextView
+                    android:text="3000 FCFA"
+                    android:textColor="#00C853"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- PRIX -->
+        <TextView
+            android:text="Enter drop location to estimate fare"
+            android:layout_marginTop="10dp"
+            android:textColor="#777"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+
+        <!-- PAIEMENT -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp">
+
+            <Button
+                android:text="Cash"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:backgroundTint="#00C853"
+                android:textColor="#FFFFFF"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:text="Card"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:text="Promo"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <!-- BOOK -->
+        <Button
+            android:text="PASSER COMMANDE"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#FFC107"
+            android:textColor="#000"
+            android:layout_marginTop="10dp"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
