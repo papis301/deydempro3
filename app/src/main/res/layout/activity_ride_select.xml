@@ -8,7 +8,8 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottomPanel"/>
 
     <!-- TOP SEARCH PANEL -->
     <LinearLayout
@@ -18,7 +19,9 @@
         android:padding="12dp"
         android:background="@drawable/top_card"
         android:elevation="6dp"
-        android:layout_marginTop="40dp">
+        android:layout_marginTop="40dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
 
         <!-- BOUTON -->
         <Button
@@ -47,7 +50,7 @@
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"/>
 
-            <EditText
+            <TextView
                 android:id="@+id/tvadress"
                 android:hint="vous etes ou ?"
                 android:layout_width="0dp"
@@ -77,8 +80,9 @@
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"/>
 
-            <EditText
-                android:hint="Where are you going?"
+            <TextView
+                android:id="@+id/tvadress2"
+                android:hint="Vous allez ou ?"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"/>
@@ -88,6 +92,7 @@
 
     <!-- BOTTOM PANEL -->
     <LinearLayout
+        android:id="@+id/bottomPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -155,12 +160,13 @@
 
         <!-- DESTINATION -->
         <TextView
-            android:text="Queen’s Road, Colombo"
+            android:text="Prix"
             android:textColor="#FFFFFF"
             android:background="#2196F3"
             android:padding="8dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
 
         <!-- VEHICULES -->
         <LinearLayout
@@ -251,7 +257,7 @@
 
         <!-- PRIX -->
         <TextView
-            android:text="Enter drop location to estimate fare"
+            android:text=""
             android:layout_marginTop="10dp"
             android:textColor="#777"
             android:layout_height="wrap_content"
