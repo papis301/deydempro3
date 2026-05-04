@@ -24,17 +24,16 @@
         android:layout_marginRight="10dp">
 
         <!-- BOUTON -->
-        <Button
-            android:text="BOOK FOR A FRIEND"
+        <TextView
+            android:id="@+id/distance"
+            android:text="Distance 0.0 km"
             android:textAllCaps="false"
-            android:textSize="12sp"
-            android:backgroundTint="#2196F3"
-            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textColor="#2196F3"
             android:layout_gravity="center"
             android:layout_marginBottom="10dp"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:visibility="gone"/>
+            android:layout_width="wrap_content"/>
 
         <!-- PICKUP -->
         <LinearLayout
@@ -116,7 +115,8 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:visibility="gone">
 
                 <ImageView
                     android:src="@drawable/paquet"
@@ -177,6 +177,7 @@
 
             <!-- BIKE -->
             <LinearLayout
+                android:id="@+id/layoutParticulier"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:orientation="vertical"
@@ -189,13 +190,14 @@
                     android:layout_height="40dp"/>
 
                 <TextView
-                    android:text="Bike"
+                    android:text="Particulier"
                     android:textSize="12sp"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"/>
 
                 <TextView
-                    android:text="1000 FCFA"
+                    android:id="@+id/priceParticulier"
+                    android:text="0 FCFA"
                     android:textColor="#00C853"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"/>
@@ -203,6 +205,7 @@
 
             <!-- TUK -->
             <LinearLayout
+                android:id="@+id/layoutTaxi"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:orientation="vertical"
@@ -221,7 +224,8 @@
                     android:layout_width="wrap_content"/>
 
                 <TextView
-                    android:text="2000 FCFA"
+                    android:id="@+id/priceTaxi"
+                    android:text="0 FCFA"
                     android:textColor="#00C853"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"/>
@@ -229,6 +233,7 @@
 
             <!-- CAR -->
             <LinearLayout
+                android:id="@+id/layoutConfort"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:orientation="vertical"
@@ -241,13 +246,14 @@
                     android:layout_height="40dp"/>
 
                 <TextView
-                    android:text="Car"
+                    android:text="Confort"
                     android:textSize="12sp"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"/>
 
                 <TextView
-                    android:text="3000 FCFA"
+                    android:id="@+id/priceConfort"
+                    android:text="0 FCFA"
                     android:textColor="#00C853"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"/>
@@ -268,7 +274,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
 
             <Button
                 android:text="Cash"
@@ -294,6 +301,7 @@
 
         <!-- BOOK -->
         <Button
+            android:id="@+id/commande"
             android:text="PASSER COMMANDE"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

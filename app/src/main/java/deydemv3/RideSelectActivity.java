@@ -1,9 +1,15 @@
 package deydemv3;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -12,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.common.api.ResolvableApiException;
 import android.content.IntentSender;
@@ -22,6 +29,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -41,25 +49,46 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.widget.Toast;
+
 import androidx.core.app.ActivityCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;
 public class RideSelectActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
-    TextView tvprise, tvdepot;
+    TextView tvprise, tvdepot, tvdistance;
     TextView tvadress1,tvadress2;
     private static final int PICKUP_REQUEST = 1001;
     private static final int DROPOFF_REQUEST = 1002;
     LatLng pickupLatLng, dropoffLatLng = null;
+    String selectedVehicle = "";
+    Button btnCommande;
+    String userId, tel;
 
+    int finalPrixParticulier = 0;
+    int finalPrixTaxi = 0;
+    int finalPrixConfort = 0;
+    double distanceKm = 0;
+    int durationMin = 0;
+    double distanceValue = 0;
+    int durationValue = 0;
+
+
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_ride_select);
+
+        // Récupérer user_id depuis SharedPreferences
+        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
+        userId = sp.getString("user_id", "0");
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -72,9 +101,11 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
         }
         tvprise = findViewById(R.id.prise);
         tvadress1 = findViewById(R.id.tvadress);
+        tvdistance = findViewById(R.id.distance);
 
         tvdepot = findViewById(R.id.depot);
         tvadress2 = findViewById(R.id.tvadress2);
+        btnCommande = findViewById(R.id.commande);
 
         tvprise.setOnClickListener(v -> openAutocomplete(PICKUP_REQUEST));
         tvadress1.setOnClickListener(v -> openAutocomplete(PICKUP_REQUEST));
@@ -84,6 +115,61 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 
         checkGPS();
 
+        LinearLayout btnParticulier = findViewById(R.id.layoutParticulier);
+        LinearLayout btnTaxi = findViewById(R.id.layoutTaxi);
+        LinearLayout btnConfort = findViewById(R.id.layoutConfort);
+
+        btnParticulier.setOnClickListener(v -> selectVehicle("PARTICULIER"));
+        btnTaxi.setOnClickListener(v -> selectVehicle("TAXI"));
+        btnConfort.setOnClickListener(v -> selectVehicle("CONFORT"));
+
+        selectVehicle("PARTICULIER");
+
+        btnCommande.setOnClickListener(v -> {
+
+            if (selectedVehicle.isEmpty()) {
+                Toast.makeText(this, "Choisissez un véhicule", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (pickupLatLng == null || dropoffLatLng == null) {
+                Toast.makeText(this, "Choisissez les adresses", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // 🔥 DONNÉES DE COMMANDE
+            Log.d("COMMANDE", "Type: " + selectedVehicle);
+            Log.d("COMMANDE", "Pickup: " + pickupLatLng);
+            Log.d("COMMANDE", "Drop: " + dropoffLatLng);
+
+            Toast.makeText(this, "Commande envoyée (" + selectedVehicle + ")", Toast.LENGTH_SHORT).show();
+
+            // 👉 ici tu enverras au serveur plus tard
+            sendRide();
+        });
+    }
+
+    private void selectVehicle(String type) {
+
+        selectedVehicle = type;
+
+        LinearLayout p = findViewById(R.id.layoutParticulier);
+        LinearLayout t = findViewById(R.id.layoutTaxi);
+        LinearLayout c = findViewById(R.id.layoutConfort);
+
+        // reset
+        p.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        t.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        c.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+
+        // highlight sélection
+        if (type.equals("PARTICULIER")) {
+            p.setBackgroundResource(R.drawable.selected_bg);
+        } else if (type.equals("TAXI")) {
+            t.setBackgroundResource(R.drawable.selected_bg);
+        } else if (type.equals("CONFORT")) {
+            c.setBackgroundResource(R.drawable.selected_bg);
+        }
     }
 
     @Override
@@ -162,7 +248,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         fusedLocationClient.getCurrentLocation(
-                com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                Priority.PRIORITY_HIGH_ACCURACY,
                 null
         ).addOnSuccessListener(location -> {
 
@@ -177,7 +263,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 16));
 
                 // cercle bleu
-                mMap.addCircle(new com.google.android.gms.maps.model.CircleOptions()
+                mMap.addCircle(new CircleOptions()
                         .center(userLocation)
                         .radius(100)
                         .strokeColor(Color.BLUE)
@@ -195,10 +281,10 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 
         new Thread(() -> {
             try {
-                android.location.Geocoder geocoder =
-                        new android.location.Geocoder(this, java.util.Locale.getDefault());
+                Geocoder geocoder =
+                        new Geocoder(this, Locale.getDefault());
 
-                java.util.List<android.location.Address> addresses =
+                List<Address> addresses =
                         geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
 
                 if (addresses != null && !addresses.isEmpty()) {
@@ -242,6 +328,40 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 
             drawOSRMRoute(pickupLatLng, dropoffLatLng);
 
+            double distanceKm = calculateDistance(
+                    pickupLatLng.latitude, pickupLatLng.longitude,
+                    dropoffLatLng.latitude, dropoffLatLng.longitude
+            );
+
+//            double distanceMeters = json.getJSONArray("routes")
+//                    .getJSONObject(0)
+//                    .getDouble("distance");
+//
+//            double durationSec = json.getJSONArray("routes")
+//                    .getJSONObject(0)
+//                    .getDouble("duration");
+
+
+
+// 🔥 sauvegarder
+            distanceValue = distanceKm;
+
+// 🔥 mettre à jour prix avec vraie distance
+            updatePrice(distanceKm);
+
+// 🔥 afficher distance
+
+            if (tvdistance != null) {
+                tvdistance.setText(String.format("Distance : %.2f km", distanceKm));
+            }
+
+
+// 🔥 appel calcul prix
+            updatePrice(distanceKm);
+            distanceValue = distanceKm;
+            Log.d("OSRM", "Distance: " + distanceKm);
+            Log.d("OSRM", "Durée: " + durationMin);
+
             LatLngBounds bounds = new LatLngBounds.Builder()
                     .include(pickupLatLng)
                     .include(dropoffLatLng)
@@ -249,47 +369,193 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150));
         }
+
+
     }
 
-//    private void updateMap() {
-//        if (mMap == null) return;
+    private String getSelectedPrice() {
+
+        int price = 0;
+
+        if (selectedVehicle.equals("PARTICULIER")) {
+            price = finalPrixParticulier;
+        } else if (selectedVehicle.equals("TAXI")) {
+            price = finalPrixTaxi;
+        } else if (selectedVehicle.equals("CONFORT")) {
+            price = finalPrixConfort;
+        }
+
+        return String.valueOf(price);
+    }
+
 //
-//        mMap.clear();
-//
-//        if (pickupLatLng != null) {
-//            mMap.addMarker(new MarkerOptions().position(pickupLatLng).title("Pickup")
-//                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-//        }
-//
-//        if (dropoffLatLng != null) {
-//            mMap.addMarker(new MarkerOptions().position(dropoffLatLng).title("Dropoff"));
-//        }
-//
-//        if (pickupLatLng != null && dropoffLatLng != null) {
-//
-//            double distanceKm = calculateDistance(
-//                    pickupLatLng.latitude, pickupLatLng.longitude,
-//                    dropoffLatLng.latitude, dropoffLatLng.longitude
-//            );
-//
-//           // if (tvDistance != null) tvDistance.setText(String.format(Locale.US, "Distance : %.2f km", distanceKm));
-//
-//            drawOSRMRoute(pickupLatLng, dropoffLatLng);
-//            //updatePrice();
-//
-//            LatLngBounds bounds = new LatLngBounds.Builder()
-//                    .include(pickupLatLng)
-//                    .include(dropoffLatLng)
-//                    .build();
-//
-//            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150));
-//        }
-//    }
+private void sendRide() {
+
+    String url = "https://pisco.alwaysdata.net/create_ride.php"; // 🔥 remplace
+
+    com.android.volley.RequestQueue queue =
+            com.android.volley.toolbox.Volley.newRequestQueue(this);
+
+    com.android.volley.toolbox.StringRequest request =
+            new com.android.volley.toolbox.StringRequest(
+                    com.android.volley.Request.Method.POST,
+                    url,
+
+                    response -> {
+                        try {
+                            org.json.JSONObject json = new org.json.JSONObject(response);
+
+                            if (json.getBoolean("success")) {
+
+                                String rideId = json.getString("ride_id");
+
+                                android.widget.Toast.makeText(this,
+                                        "Commande envoyée 🚀 ID: " + rideId,
+                                        android.widget.Toast.LENGTH_LONG).show();
+
+                                // 👉 ici tu peux passer à écran suivant
+                                // startActivity(new Intent(this, WaitingDriverActivity.class));
+                                Intent i = new Intent(this, WaitingDriverActivity.class);
+                                i.putExtra("ride_id", rideId);
+                                startActivity(i);
+
+                            } else {
+                                android.widget.Toast.makeText(this,
+                                        "Erreur serveur",
+                                        android.widget.Toast.LENGTH_SHORT).show();
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    },
+
+                    error -> {
+                        android.widget.Toast.makeText(this,
+                                "Erreur réseau ❌",
+                                android.widget.Toast.LENGTH_SHORT).show();
+
+                        android.util.Log.e("API_ERROR", error.toString());
+                    }
+            ) {
+
+                @Override
+                protected java.util.Map<String, String> getParams() {
+
+                    java.util.Map<String, String> params = new java.util.HashMap<>();
+
+                    params.put("client_id", String.valueOf(userId)); // 🔥 adapte
+                    params.put("trip_type", "taxi"); // ou livraison
+
+                    params.put("pickup_address", tvadress1.getText().toString());
+                    params.put("pickup_lat", String.valueOf(pickupLatLng.latitude));
+                    params.put("pickup_lng", String.valueOf(pickupLatLng.longitude));
+
+                    params.put("dropoff_address", tvadress2.getText().toString());
+                    params.put("dropoff_lat", String.valueOf(dropoffLatLng.latitude));
+                    params.put("dropoff_lng", String.valueOf(dropoffLatLng.longitude));
+
+                    params.put("price", getSelectedPrice());
+                    params.put("distance_km", String.valueOf(distanceValue));
+                    params.put("vehicle_type", selectedVehicle.toLowerCase());
+
+                    return params;
+                }
+            };
+
+    queue.add(request);
+}
+
+    private String detectCity(LatLng latLng) {
+        try {
+            Geocoder geocoder =
+                    new Geocoder(this, Locale.getDefault());
+
+            List<Address> addresses =
+                    geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+
+            if (addresses != null && !addresses.isEmpty()) {
+
+                String city = addresses.get(0).getLocality(); // ville
+
+                if (city != null) {
+                    if (city.toLowerCase().contains("dakar")) return "DAKAR";
+                    if (city.toLowerCase().contains("thies") || city.toLowerCase().contains("thiès")) return "THIES";
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "OTHER";
+    }
+
+    private void updatePrice(double distanceKm) {
+
+        // 🔥 détecter ville (on prend le pickup)
+        String city = detectCity(pickupLatLng);
+
+        double baseParticulier = 0, perKmParticulier = 0;
+        double baseTaxi = 0, perKmTaxi = 0;
+        double baseConfort = 0, perKmConfort = 0;
+
+        // 🔥 TARIFS PAR VILLE
+        if (city.equals("DAKAR")) {
+
+             baseParticulier = 700;
+             perKmParticulier = 300;
+
+             baseTaxi = 1000;
+             perKmTaxi = 350;
+
+             baseConfort = 900;
+             perKmConfort = 350;
+
+        } else if (city.equals("THIES")) {
+
+            baseParticulier = 500;
+            perKmParticulier = 150;
+
+            baseTaxi = 800;
+            perKmTaxi = 200;
+
+            baseConfort = 700;
+            perKmConfort = 200;
+
+        } 
+
+
+        // 🔥 CALCUL
+        int prixParticulier = (int) Math.round(baseParticulier + (distanceKm * perKmParticulier));
+        int prixTaxi = (int) Math.round(baseTaxi + (distanceKm * perKmTaxi));
+        int prixConfort = (int) Math.round(baseConfort + (distanceKm * perKmConfort));
+
+        // 🔥 MINIMUM (important)
+        //if (prixParticulier < 600) prixParticulier = 600;
+        //if (prixTaxi < 1000) prixTaxi = 1000;
+        //if (prixConfort < 900) prixConfort = 900;
+
+         finalPrixParticulier = prixParticulier;
+         finalPrixTaxi = prixTaxi;
+         finalPrixConfort = prixConfort;
+        runOnUiThread(() -> {
+
+            TextView p1 = findViewById(R.id.priceParticulier);
+            TextView p2 = findViewById(R.id.priceTaxi);
+            TextView p3 = findViewById(R.id.priceConfort);
+
+            if (p1 != null) p1.setText(finalPrixParticulier + " FCFA");
+            if (p2 != null) p2.setText(finalPrixTaxi + " FCFA");
+            if (p3 != null) p3.setText(finalPrixConfort + " FCFA");
+        });
+    }
+
 private void drawOSRMRoute(LatLng origin, LatLng destination) {
     new Thread(() -> {
         try {
 
-            String url = "https://router.project-osrm.org/route/v1/driving/"
+            String url = "http://router.project-osrm.org/route/v1/driving/"
                     + origin.longitude + "," + origin.latitude + ";"
                     + destination.longitude + "," + destination.latitude
                     + "?overview=full&geometries=geojson";
@@ -331,10 +597,26 @@ private void drawOSRMRoute(LatLng origin, LatLng destination) {
                 polylineOptions.add(new LatLng(lat, lng));
             }
 
+            JSONObject route = json.getJSONArray("routes").getJSONObject(0);
+
+            double distanceMeters = route.getDouble("distance");
+            double durationSec = route.getDouble("duration");
+
+// 🔥 conversion
+            double distanceKm = distanceMeters / 1000.0;
+            int durationMin = (int) (durationSec / 60);
+
+            distanceValue = distanceKm;
+            durationValue = durationMin;
+
             runOnUiThread(() -> {
                 if (mMap != null) {
                     mMap.addPolyline(polylineOptions);
                 }
+                tvdistance.setText(
+                        String.format("%.2f km • %d min", distanceKm, durationMin)
+                );
+                Log.e("distance",  String.format(Locale.getDefault(), "%.2f km • %d min", distanceKm, durationMin));
             });
 
         } catch (Exception e) {
@@ -342,50 +624,7 @@ private void drawOSRMRoute(LatLng origin, LatLng destination) {
         }
     }).start();
 }
-//    private void drawOSRMRoute(LatLng origin, LatLng destination) {
-//        new Thread(() -> {
-//            try {
-//                String url = "http://router.project-osrm.org/route/v1/driving/"
-//                        + origin.longitude + "," + origin.latitude + ";"
-//                        + destination.longitude + "," + destination.latitude
-//                        + "?overview=full&geometries=geojson";
-//
-//                URL obj = new URL(url);
-//                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-//                con.setRequestMethod("GET");
-//
-//                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//                StringBuilder response = new StringBuilder();
-//                String line;
-//                while ((line = in.readLine()) != null) response.append(line);
-//                in.close();
-//
-//                JSONObject json = new JSONObject(response.toString());
-//                JSONArray coords = json.getJSONArray("routes")
-//                        .getJSONObject(0)
-//                        .getJSONObject("geometry")
-//                        .getJSONArray("coordinates");
-//
-//                PolylineOptions polylineOptions = new PolylineOptions();
-//                polylineOptions.width(12f);
-//                polylineOptions.color(Color.BLUE);
-//
-//                for (int i = 0; i < coords.length(); i++) {
-//                    JSONArray c = coords.getJSONArray(i);
-//                    double lng = c.getDouble(0);
-//                    double lat = c.getDouble(1);
-//                    polylineOptions.add(new LatLng(lat, lng));
-//                }
-//
-//                runOnUiThread(() -> {
-//                    if (mMap != null) mMap.addPolyline(polylineOptions);
-//                });
-//
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }).start();
-//    }
+
 
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         double R = 6371;
@@ -453,7 +692,7 @@ private void drawOSRMRoute(LatLng origin, LatLng destination) {
                         // déplacer caméra
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 16));
 
-                        mMap.addCircle(new com.google.android.gms.maps.model.CircleOptions()
+                        mMap.addCircle(new CircleOptions()
                                 .center(userLocation)
                                 .radius(100) // mètres
                                 .strokeColor(Color.BLUE)
