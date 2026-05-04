@@ -13,16 +13,19 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -77,6 +80,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
     RelativeLayout container;
     FrameLayout slider;
     TextView textStatus;
+    String userId, tel;
+
 
     boolean isOnline = false;
     boolean assignmentRequested = false;
@@ -229,14 +234,16 @@ public class MapDeliveriesActivity extends FragmentActivity {
 //            badgeNotif.setVisibility(View.GONE);
 //        }
 
-        int driverId = getSharedPreferences("user", MODE_PRIVATE)
-                .getInt("driver_id", 0);
+//        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+//                .getInt("driver_id", 0);
+        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
+        userId = sp.getString("user_id", "0");
 
-        if (driverId == 0) {
-            // pas connecté
-            startActivity(new Intent(MapDeliveriesActivity.this, LoginActivity.class));
-            finish();
-        }
+//        if (userId == 0) {
+//            // pas connecté
+//            startActivity(new Intent(MapDeliveriesActivity.this, LoginActivity.class));
+//            finish();
+//        }
 
         txtSolde = findViewById(R.id.txtSolde);
 
@@ -245,6 +252,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
         newOrderSound.setVolume(1.0f, 1.0f);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        //checkGPS();
         // Vérifier les permissions et lancer la localisation
         checkLocationPermission();
 
@@ -253,7 +261,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
         mapFragment.getMapAsync(map -> {
             mMap = map;
-            setupMap(driverId);
+            setupMap(Integer.parseInt(userId));
             loadDeliveries();
             startAutoRefresh();
         });
@@ -303,8 +311,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
         assignmentRequested = true;
 
-        int driverId = getSharedPreferences("user", MODE_PRIVATE)
-                .getInt("driver_id", 0);
+        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
+        userId = sp.getString("user_id", "0");
 
         String url = Constants.BASE_URL + "auto_assign_driver.php";
 
@@ -352,7 +360,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
             @Override
             protected Map<String,String> getParams(){
                 Map<String,String> params = new HashMap<>();
-                params.put("driver_id", String.valueOf(driverId));
+                params.put("driver_id", String.valueOf(userId));
                 return params;
             }
         };
@@ -369,6 +377,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
 
     private void checkLocationPermission() {
+
+        checkGPS(); // 🔥 important
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -382,8 +393,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     private void updateOnlineStatusAPI(boolean online){
 
-        int driverId = getSharedPreferences("user", MODE_PRIVATE)
-                .getInt("driver_id", 0);
+
 
         String url = Constants.BASE_URL + "update_online_status.php";
 
@@ -394,7 +404,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
             @Override
             protected Map<String,String> getParams(){
                 Map<String,String> params = new HashMap<>();
-                params.put("driver_id", String.valueOf(driverId));
+                params.put("driver_id", String.valueOf(userId));
                 params.put("is_online", online ? "1" : "0");
                 return params;
             }
@@ -403,7 +413,30 @@ public class MapDeliveriesActivity extends FragmentActivity {
         Volley.newRequestQueue(this).add(req);
     }
 
-   
+    private void checkGPS() {
+
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (!isGPSEnabled) {
+
+            new AlertDialog.Builder(this)
+                    .setTitle("GPS désactivé")
+                    .setMessage("Veuillez activer le GPS pour utiliser l'application")
+                    .setCancelable(false)
+                    .setPositiveButton("Activer", (dialog, which) -> {
+
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+
+                    })
+                    .setNegativeButton("Quitter", (dialog, which) -> {
+                        finish();
+                    })
+                    .show();
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -424,10 +457,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
 
     private void refreshSolde() {
-        int driverId = getSharedPreferences("user", MODE_PRIVATE)
-                .getInt("driver_id", 0);
 
-        String url = BASE_URL + "get_driver_balance.php?driver_id=" + driverId;
+
+        String url = BASE_URL + "get_driver_balance.php?driver_id=" + userId;
 
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
@@ -476,7 +508,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ==========================
 
     @SuppressLint("PotentialBehaviorOverride")
-    private void setupMap(int driverId) {
+    private void setupMap(int userId) {
 
         mMap.setOnMarkerClickListener(marker -> {
 
@@ -498,7 +530,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
             MapDelivery d = markerDeliveries.get(marker);
 
             if (d != null) {
-                showAcceptDialog(d, String.valueOf(driverId));
+                showAcceptDialog(d, String.valueOf(userId));
                 return true;
             }
 
@@ -599,8 +631,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
         double lat = driverMarker.getPosition().latitude;
         double lng = driverMarker.getPosition().longitude;
 
-        int driverId = getSharedPreferences("user", MODE_PRIVATE)
-                .getInt("driver_id", 0);
+
 
         String url = Constants.BASE_URL + "update_driver_location.php";
 
@@ -611,7 +642,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
             @Override
             protected Map<String,String> getParams(){
                 Map<String,String> params = new HashMap<>();
-                params.put("driver_id", String.valueOf(driverId));
+                params.put("driver_id", String.valueOf(userId));
                 params.put("lat", String.valueOf(lat));
                 params.put("lng", String.valueOf(lng));
                 return params;
@@ -791,10 +822,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 newOrderSound = MediaPlayer.create(MapDeliveriesActivity.this, R.raw.new_order);
             }
 
-            int driverId = getSharedPreferences("user",MODE_PRIVATE)
-                    .getInt("driver_id",0);
 
-            acceptDelivery(String.valueOf(driverId));
+
+            acceptDelivery(String.valueOf(userId));
         });
 
 
@@ -802,10 +832,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     private void getDriverVehicleType() {
 
-        int driverId = getSharedPreferences("user", MODE_PRIVATE)
-                .getInt("driver_id", 0);
 
-        String url = BASE_URL + "get_driver_vehicle.php?driver_id=" + driverId;
+
+        String url = BASE_URL + "get_driver_vehicle.php?driver_id=" + userId;
 
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
@@ -834,7 +863,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ACCEPT DIALOG
     // ==========================
 
-    private void showAcceptDialog(MapDelivery d, String driverId) {
+    private void showAcceptDialog(MapDelivery d, String userId) {
         new AlertDialog.Builder(this)
                 .setTitle("📦 Nouvelle course")
                 .setMessage(
@@ -845,7 +874,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
                 .setCancelable(false)
                 .setPositiveButton("✅ ACCEPTER", (dialog, which) -> {
                     selectedDelivery = d;
-                    acceptDelivery(driverId);
+                    acceptDelivery(userId);
                 })
                 .setNegativeButton("❌ ANNULER", (dialog, which) -> dialog.dismiss())
                 .show();
@@ -855,7 +884,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     // ACCEPT DELIVERY
     // ==========================
 
-    private void acceptDelivery(String driverId) {
+    private void acceptDelivery(String userId) {
         StringRequest req = new StringRequest(Request.Method.POST, URL_ACCEPT,
                 response -> {
                     Toast.makeText(this, "Livraison acceptée", Toast.LENGTH_SHORT).show();
@@ -878,7 +907,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> p = new HashMap<>();
                 p.put("delivery_id", selectedDelivery.id);
-                p.put("driver_id", driverId);
+                p.put("driver_id", userId);
                 return p;
             }
         };
@@ -920,6 +949,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        checkGPS();
         refreshSolde();
         hasActiveTrip = false;
     }

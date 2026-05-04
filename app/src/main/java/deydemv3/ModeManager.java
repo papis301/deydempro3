@@ -6,12 +6,25 @@ import android.content.SharedPreferences;
 public class ModeManager {
 
     private static final String PREF_NAME = "user_mode_pref";
-    private static final String KEY_MODE = "current_mode";
+    //private static final String KEY_MODE = "current_mode";
 
     public static final String MODE_CLIENT = "client";
     public static final String MODE_DRIVER = "driver";
 
     private SharedPreferences prefs;
+
+    private static final String PREF = "APP_MODE";
+    private static final String KEY_MODE = "mode";
+
+    public static void setMode(Context context, String mode) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF, Context.MODE_PRIVATE);
+        prefs.edit().putString(KEY_MODE, mode).apply();
+    }
+
+    public static String getMode(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_MODE, "client");
+    }
 
     public ModeManager(Context context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);

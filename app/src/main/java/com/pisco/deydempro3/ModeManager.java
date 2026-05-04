@@ -11,29 +11,25 @@ public class ModeManager {
     public static final String MODE_CLIENT = "client";
     public static final String MODE_DRIVER = "driver";
 
-    private SharedPreferences prefs;
-
-    public ModeManager(Context context) {
-        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-    }
-
-    // Sauvegarder mode
-    public void setMode(String mode) {
+    // 🔥 Sauvegarder mode
+    public static void setMode(Context context, String mode) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         prefs.edit().putString(KEY_MODE, mode).apply();
     }
 
-    // Récupérer mode
-    public String getMode() {
+    // 🔥 Récupérer mode
+    public static String getMode(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         return prefs.getString(KEY_MODE, MODE_CLIENT);
     }
 
-    // Vérifier mode chauffeur
-    public boolean isDriverMode() {
-        return getMode().equals(MODE_DRIVER);
+    // 🔥 Vérifier chauffeur
+    public static boolean isDriverMode(Context context) {
+        return getMode(context).equals(MODE_DRIVER);
     }
 
-    // Vérifier mode client
-    public boolean isClientMode() {
-        return getMode().equals(MODE_CLIENT);
+    // 🔥 Vérifier client
+    public static boolean isClientMode(Context context) {
+        return getMode(context).equals(MODE_CLIENT);
     }
 }
