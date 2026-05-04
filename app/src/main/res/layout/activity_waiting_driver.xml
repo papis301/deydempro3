@@ -1,64 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- MAP -->
+    <!-- 🗺️ MAP -->
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
-    <!-- 🔵 ZONE PULSE -->
+    <!-- 🔵 PULSE CENTER -->
     <FrameLayout
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_centerInParent="true">
 
-        <!-- cercle extérieur -->
+        <!-- cercle 1 -->
         <View
             android:id="@+id/pulse1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/circle_pulse"/>
+            android:background="@drawable/circle_pulse" />
 
-        <!-- cercle milieu -->
+        <!-- cercle 2 -->
         <View
             android:id="@+id/pulse2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/circle_pulse"/>
+            android:background="@drawable/circle_pulse" />
 
-        <!-- centre -->
+        <!-- cercle centre -->
         <View
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
-            android:background="@drawable/circle_center"/>
+            android:background="@drawable/circle_center" />
+
+        <!-- icone localisation -->
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_location"
+            android:tint="@android:color/white" />
 
     </FrameLayout>
 
-    <!-- TEXTE -->
+    <!-- 📋 bouton liste -->
+    <ImageButton
+        android:id="@+id/btnOrders"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="26dp"
+        android:background="@drawable/circle_white"
+        android:src="@android:drawable/ic_menu_agenda" />
+
+    <!-- 🔽 PANEL BAS -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:background="#FFFFFF"
+        android:padding="20dp"
+        android:elevation="10dp"
+        android:layout_marginBottom="30dp">
 
-        <TextView
-            android:text="Recherche en cours..."
-            android:textSize="18sp"
-            android:textStyle="bold"
+        <!-- 🔵 ETAT RECHERCHE -->
+        <LinearLayout
+            android:id="@+id/layoutSearching"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"/>
+            android:orientation="vertical">
 
-        <TextView
-            android:text="Recherche d’un chauffeur..."
-            android:textSize="14sp"
+            <TextView
+                android:text="Recherche en cours..."
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Recherche d’un chauffeur..."
+                android:textSize="14sp"
+                android:textColor="#555555"
+                android:layout_marginTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- 🟢 ETAT CHAUFFEUR -->
+        <LinearLayout
+            android:id="@+id/layoutDriver"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvDriverName"
+                android:text="Nom chauffeur"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tvCar"
+                android:text="Voiture"
+                android:textSize="14sp"
+                android:textColor="#555555"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- ❌ ANNULER -->
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ANNULER LA COURSE"
+            android:backgroundTint="#E53935"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp"/>
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -409,9 +409,9 @@ private void sendRide() {
 
                                 String rideId = json.getString("ride_id");
 
-                                android.widget.Toast.makeText(this,
-                                        "Commande envoyée 🚀 ID: " + rideId,
-                                        android.widget.Toast.LENGTH_LONG).show();
+//                                android.widget.Toast.makeText(this,
+//                                        "Commande envoyée 🚀 ID: " + rideId,
+//                                        android.widget.Toast.LENGTH_LONG).show();
 
                                 // 👉 ici tu peux passer à écran suivant
                                 // startActivity(new Intent(this, WaitingDriverActivity.class));
