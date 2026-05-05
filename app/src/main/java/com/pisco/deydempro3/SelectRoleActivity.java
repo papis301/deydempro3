@@ -39,7 +39,7 @@ public class SelectRoleActivity extends AppCompatActivity {
         // 🚗 DRIVER
         btnDriver.setOnClickListener(v -> {
             //startActivity(new Intent(this, StartActivitypro.class));
-            startActivity(new Intent(this, MapDeliveriesActivity.class));
+            startActivity(new Intent(this, DriverHomeActivity.class));
 
             //switchModeAPI("driver");
         });

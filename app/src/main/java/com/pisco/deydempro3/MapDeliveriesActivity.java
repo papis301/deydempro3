@@ -252,9 +252,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
         newOrderSound.setVolume(1.0f, 1.0f);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        //checkGPS();
+        checkGPS();
         // Vérifier les permissions et lancer la localisation
-        checkLocationPermission();
+        //checkLocationPermission();
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
@@ -283,9 +283,9 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
             textStatus.setText("En ligne");
             textStatus.setTextColor(getResources().getColor(R.color.online_green));
-            
+
                // autoAssignDriver();
-            
+
 
         } else {
 
