@@ -51,7 +51,7 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     String userId;
     ImageView imgStatus;
     TextView txtTitle, txtSubtitle;
-    private TextView txtSolde;
+    private TextView txtSolde, txName;
     LinearLayout banner;
 
     private FusedLocationProviderClient fusedLocationClient;
@@ -74,6 +74,7 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         banner = findViewById(R.id.bannerOffline);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         txtSolde = findViewById(R.id.txtSolde);
+        txName = findViewById(R.id.txtName);
 
         SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
         userId = sp.getString("user_id", "0");
@@ -170,6 +171,7 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
 
+
         LocationRequest request = LocationRequest.create();
         request.setInterval(3000);
         request.setPriority(Priority.PRIORITY_HIGH_ACCURACY);
@@ -185,6 +187,9 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
                 LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
 
+                if(isOnline){
+                    assignNearestRide(pos.latitude, pos.longitude);
+                }
                 // 🔥 créer ou déplacer le marker
                 if (driverMarker == null) {
 
@@ -206,6 +211,49 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                 }
             }
         }, getMainLooper());
+    }
+
+    private void assignNearestRide(double lat, double lng){
+
+        String url = BASE_URL + "assign_nearest_ride.php";
+
+        StringRequest request = new StringRequest(Request.Method.POST, url,
+                response -> {
+                    try {
+                        JSONObject json = new JSONObject(response);
+
+                        if(json.getBoolean("success")){
+
+                            JSONObject ride = json.getJSONObject("ride");
+
+                            Intent i = new Intent(this, DeliveryNavigationActivity.class);
+
+                            i.putExtra("ride_id", ride.getString("id"));
+                            i.putExtra("pickup_lat", ride.getDouble("pickup_lat"));
+                            i.putExtra("pickup_lng", ride.getDouble("pickup_lng"));
+                            i.putExtra("drop_lat", ride.getDouble("dropoff_lat"));
+                            i.putExtra("drop_lng", ride.getDouble("dropoff_lng"));
+
+                            startActivity(i);
+
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {}
+        ){
+            protected Map<String,String> getParams(){
+                Map<String,String> p = new HashMap<>();
+                p.put("driver_id", userId);
+                p.put("lat", String.valueOf(lat));
+                p.put("lng", String.valueOf(lng));
+                return p;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(request);
     }
 
     private void checkGPS() {
