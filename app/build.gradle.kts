@@ -59,5 +59,6 @@ dependencies {
     implementation ("com.github.bumptech.glide:okhttp3-integration:4.16.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("com.google.android.libraries.places:places:3.4.0")
+    implementation("com.google.firebase:firebase-auth:22.3.0")
 
 }

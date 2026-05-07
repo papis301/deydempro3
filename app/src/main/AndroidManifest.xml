@@ -30,6 +30,12 @@
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".VerifyOtpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PhoneOtpActivity"
+            android:exported="false" />
+        <activity
             android:name=".DriverHomeActivity"
             android:exported="false" />
         <activity

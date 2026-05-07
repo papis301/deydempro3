@@ -708,14 +708,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
                                     continue;
                                 }
                             }
-//                            if(!driverVehicleType.isEmpty()){
-//
-//                                String deliveryVehicle = d.type_vehicule.toLowerCase();
-//
-//                                if(!deliveryVehicle.contains(driverVehicleType)){
-//                                    continue; // ignore livraison incompatible
-//                                }
-//                            }
 
                             boolean exists = false;
                             for (Marker m : markerDeliveries.keySet()) {
@@ -762,7 +754,6 @@ public class MapDeliveriesActivity extends FragmentActivity {
         );
 
         Volley.newRequestQueue(this).add(req);
-
 
     }
 

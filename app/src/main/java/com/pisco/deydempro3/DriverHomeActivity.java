@@ -4,22 +4,17 @@ import static com.pisco.deydempro3.Constants.BASE_URL;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Bundle;
+import android.media.MediaPlayer;
+import android.os.*;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.*;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
@@ -28,221 +23,192 @@ import androidx.fragment.app.FragmentActivity;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
-import com.google.android.gms.location.*;
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    // 🔥 MAP + GPS
     private GoogleMap mMap;
-    private Switch switchOnline;
-    private TextView txtStatus;
-
-
-    String userId;
-    ImageView imgStatus;
-    TextView txtTitle, txtSubtitle;
-    private TextView txtSolde, txName;
-    LinearLayout banner;
-
     private FusedLocationProviderClient fusedLocationClient;
     private Marker driverMarker;
     private boolean firstLocation = true;
-    boolean isOnline = false;
 
-    @SuppressLint("MissingInflatedId")
+    // 🔥 UI
+    private Switch switchOnline;
+    private TextView txtStatus, txtTitle, txtSubtitle;
+    private ImageView imgStatus;
+    private LinearLayout banner;
+
+    // 🔥 STATE
+    private boolean isOnline = false;
+    private boolean hasActiveTrip = false;
+    private boolean popupVisible = false;
+    private boolean assignmentRequested = false;
+
+    private long lastProposalTime = 0;
+    private final long COOLDOWN = 15000;
+
+    private String userId;
+
+    private Handler handler = new Handler();
+
+    private MediaPlayer sound;
+    private boolean dispatchRunning = false;
+
+    // ================================
+    // 🚀 ON CREATE
+    // ================================
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_home);
 
+        // UI
         switchOnline = findViewById(R.id.switchOnline);
         txtStatus = findViewById(R.id.txtStatus);
-        checkGPS();
-        imgStatus = findViewById(R.id.imgStatus);
         txtTitle = findViewById(R.id.txtTitle);
         txtSubtitle = findViewById(R.id.txtSubtitle);
+        imgStatus = findViewById(R.id.imgStatus);
         banner = findViewById(R.id.bannerOffline);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        txtSolde = findViewById(R.id.txtSolde);
-        txName = findViewById(R.id.txtName);
 
+        // USER
         SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
         userId = sp.getString("user_id", "0");
 
+        // MAP
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.map);
-
         mapFragment.getMapAsync(this);
 
-        checkPermission();
-        refreshSolde();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        switchOnline.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        sound = MediaPlayer.create(this, R.raw.new_order);
+
+        checkGPS();
+
+        // 🔥 SWITCH ONLINE / OFFLINE
+        switchOnline.setOnCheckedChangeListener((btn, isChecked) -> {
 
             isOnline = isChecked;
 
             if(isOnline){
-                txtStatus.setText("Online");
                 setOnlineUI();
+                startDispatchLoop(); // démarre UNE seule fois
             } else {
-                txtStatus.setText("Offline");
                 setOfflineUI();
             }
 
-            // 🔥 ici appel API
             updateStatus(isOnline);
         });
     }
 
-    private void setOfflineUI(){
+    // ================================
+    // 🔥 GPS CHECK + ACTIVATION
+    // ================================
+    private void checkGPS(){
 
-        banner.setBackgroundColor(getResources().getColor(android.R.color.holo_orange_dark));
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        imgStatus.setImageResource(R.drawable.ic_moon);
+        boolean enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-        txtTitle.setText("You are offline !");
-        txtSubtitle.setText("Go online to start accepting jobs.");
+        if(!enabled){
 
+            new AlertDialog.Builder(this)
+                    .setTitle("GPS désactivé")
+                    .setMessage("Activez le GPS pour continuer")
+                    .setCancelable(false)
+                    .setPositiveButton("Activer", (d,w)->{
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    })
+                    .show();
+        }
     }
 
-    private void setOnlineUI(){
-
-        banner.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
-
-        imgStatus.setImageResource(R.drawable.ic_online); // 🚗 ou ✔️
-
-        txtTitle.setText("You are online");
-        txtSubtitle.setText("You can now receive rides");
-
-    }
-
+    // ================================
+    // 🔥 MAP READY
+    // ================================
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        LatLng dakar = new LatLng(14.7167, -17.4677);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(dakar, 14));
+        checkPermission();
     }
 
-    private void updateStatus(boolean online){
-        // TODO: appel API update_online_status.php
-        String url = Constants.BASE_URL + "update_online_status.php";
+    // ================================
+    // 🔥 PERMISSION GPS
+    // ================================
+    private void checkPermission(){
 
-        StringRequest req = new StringRequest(Request.Method.POST, url,
-                response -> Log.d("ONLINE_STATUS", response),
-                error -> Toast.makeText(this,"Erreur réseau",Toast.LENGTH_SHORT).show()
-        ){
-            @Override
-            protected Map<String,String> getParams(){
-                Map<String,String> params = new HashMap<>();
-                params.put("driver_id", String.valueOf(userId));
-                params.put("is_online", online ? "1" : "0");
-                return params;
-            }
-        };
-
-        Volley.newRequestQueue(this).add(req);
-    }
-
-    private void checkPermission() {
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
 
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},100);
 
         } else {
             startLocationUpdates();
         }
     }
 
+    // ================================
+    // 📍 POSITION CHAUFFEUR (TEMPS RÉEL)
+    // ================================
     @SuppressLint("MissingPermission")
-    private void startLocationUpdates() {
-
+    private void startLocationUpdates(){
 
         LocationRequest request = LocationRequest.create();
         request.setInterval(3000);
         request.setPriority(Priority.PRIORITY_HIGH_ACCURACY);
 
-        fusedLocationClient.requestLocationUpdates(request, new LocationCallback() {
+        fusedLocationClient.requestLocationUpdates(request, new LocationCallback(){
             @Override
-            public void onLocationResult(LocationResult result) {
+            public void onLocationResult(LocationResult result){
 
-                if (result == null) return;
+                if(result == null) return;
 
-                Location location = result.getLastLocation();
-                if (location == null) return;
+                Location loc = result.getLastLocation();
+                if(loc == null) return;
 
-                LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
+                LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
 
-                if(isOnline){
-                    assignNearestRide(pos.latitude, pos.longitude);
-                }
-                // 🔥 créer ou déplacer le marker
-                if (driverMarker == null) {
-
+                // 🔥 afficher / déplacer marker
+                if(driverMarker == null){
                     driverMarker = mMap.addMarker(new MarkerOptions()
                             .position(pos)
                             .title("Moi"));
-//                    driverMarker = mMap.addMarker(new MarkerOptions()
-//                            .position(pos)
-//                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_car)));
-
                 } else {
                     driverMarker.setPosition(pos);
                 }
 
-                // 🔥 centrer une seule fois
-                if (firstLocation) {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 16));
+                // 🔥 centrer une fois
+                if(firstLocation){
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos,16));
                     firstLocation = false;
                 }
+
+                // 🔥 envoyer position au serveur
+                sendLocation(pos.latitude, pos.longitude);
             }
         }, getMainLooper());
     }
 
-    private void assignNearestRide(double lat, double lng){
+    // ================================
+    // 📡 ENVOI POSITION
+    // ================================
+    private void sendLocation(double lat, double lng){
 
-        String url = BASE_URL + "assign_nearest_ride.php";
+        String url = BASE_URL + "update_driver_location.php";
 
-        StringRequest request = new StringRequest(Request.Method.POST, url,
-                response -> {
-                    try {
-                        JSONObject json = new JSONObject(response);
-
-                        if(json.getBoolean("success")){
-
-                            JSONObject ride = json.getJSONObject("ride");
-
-                            Intent i = new Intent(this, DeliveryNavigationActivity.class);
-
-                            i.putExtra("ride_id", ride.getString("id"));
-                            i.putExtra("pickup_lat", ride.getDouble("pickup_lat"));
-                            i.putExtra("pickup_lng", ride.getDouble("pickup_lng"));
-                            i.putExtra("drop_lat", ride.getDouble("dropoff_lat"));
-                            i.putExtra("drop_lng", ride.getDouble("dropoff_lng"));
-
-                            startActivity(i);
-
-                        }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                },
-                error -> {}
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                res -> Log.d("LOC", res),
+                err -> Log.e("LOC_ERR", err.toString())
         ){
             protected Map<String,String> getParams(){
                 Map<String,String> p = new HashMap<>();
@@ -253,124 +219,186 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
             }
         };
 
-        Volley.newRequestQueue(this).add(request);
+        Volley.newRequestQueue(this).add(req);
     }
 
-    private void checkGPS() {
+    // ================================
+    // 🔄 BOUCLE ASSIGNATION
+    // ================================
+    private void startDispatchLoop(){
 
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        if(dispatchRunning) return; // 🔥 évite double boucle
+        dispatchRunning = true;
 
-        LocationSettingsRequest.Builder builder =
-                new LocationSettingsRequest.Builder()
-                        .addLocationRequest(locationRequest);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
 
-        SettingsClient client = LocationServices.getSettingsClient(this);
+                if(isOnline && !hasActiveTrip && !popupVisible){
+                    autoAssignDriver();
+                    Log.d("DISPATCH", "loop active");
+                }
 
-        client.checkLocationSettings(builder.build())
-                .addOnSuccessListener(this, locationSettingsResponse -> {
-                    // ✅ GPS activé
-                    Log.d("GPS", "GPS activé");
-                    getUserLocation();
-                })
-                .addOnFailureListener(this, e -> {
-
-                    if (e instanceof ResolvableApiException) {
-                        try {
-                            // 🔥 demande activation GPS
-                            ResolvableApiException resolvable = (ResolvableApiException) e;
-                            resolvable.startResolutionForResult(this, 1001);
-                        } catch (IntentSender.SendIntentException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                });
-    }
-
-    private void getUserLocation() {
-
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                null
-        ).addOnSuccessListener(location -> {
-
-            if (location != null && mMap != null) {
-
-                LatLng userLocation = new LatLng(
-                        location.getLatitude(),
-                        location.getLongitude()
-                );
-
-                // déplacer caméra
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 16));
-
-                // cercle bleu
-                mMap.addCircle(new CircleOptions()
-                        .center(userLocation)
-                        .radius(100)
-                        .strokeColor(Color.BLUE)
-                        .fillColor(0x220000FF)
-                        .strokeWidth(2));
-
+                handler.postDelayed(this, 7000);
             }
-        });
+        },7000);
     }
 
-    private void refreshSolde() {
+    // ================================
+    // 🚗 AUTO ASSIGNATION
+    // ================================
+    private void autoAssignDriver(){
+        Log.d("AUTO_ASSIGN", "appel méthode");
+        if(assignmentRequested) return;
 
+        long now = System.currentTimeMillis();
+        if(now - lastProposalTime < COOLDOWN) return;
 
-        String url = BASE_URL + "get_driver_balance.php?driver_id=" + userId;
+        assignmentRequested = true;
 
-        StringRequest req = new StringRequest(Request.Method.GET, url,
+        String url = BASE_URL + "auto_assign_driver.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
                 response -> {
-                    try {
+
+                    assignmentRequested = false;
+
+                    try{
                         JSONObject obj = new JSONObject(response);
 
-                        if (obj.getBoolean("success")) {
-                            int solde = obj.getInt("solde");
-                            txtSolde.setText("Solde : " + solde + " FCFA");
+                        if(obj.getBoolean("success")){
 
-                            if (solde <= 0) {
-                                showBlockedDialog(solde);
-                            }
+                            lastProposalTime = System.currentTimeMillis();
 
-                            getSharedPreferences("user", MODE_PRIVATE)
-                                    .edit()
-                                    .putInt("solde", solde)
-                                    .apply();
+                            showIncomingTrip(obj);
+                            Log.d("ASSIGN_RESPONSE", response);
+
+                        } else {
+
+                            Log.d("ASSIGN_RESPONSE", "Aucune course");
+                            lastProposalTime = 0; // 🔥 relance rapide
                         }
 
-                    } catch (Exception e) {
+                    }catch(Exception e){
                         e.printStackTrace();
                     }
                 },
-                error -> Log.e("SOLDE_ERR", error.toString())
-        );
+                error -> {
+                    assignmentRequested = false;
+                    Log.e("ASSIGN_ERROR", error.toString());
+
+                }
+        ){
+            protected Map<String,String> getParams(){
+                Map<String,String> p = new HashMap<>();
+                p.put("driver_id", userId);
+                Log.d("DRIVER_ID", userId);
+                return p;
+            }
+        };
 
         Volley.newRequestQueue(this).add(req);
     }
 
-    private void showBlockedDialog(int solde) {
-        new AlertDialog.Builder(this)
-                .setTitle("Compte bloqué")
-                .setMessage(
-                        "Votre compte est bloqué.\n\n" +
-                                "Solde actuel : " + solde + " FCFA\n\n" +
-                                "Veuillez recharger votre compte."
-                )
-                .setCancelable(false)
-                .setPositiveButton("OK", (d, w) -> finish())
-                .show();
+    // ================================
+    // 🔔 POPUP COURSE
+    // ================================
+    private void showIncomingTrip(JSONObject trip){
+
+        popupVisible = true;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Nouvelle course");
+
+        builder.setMessage("Pickup: " + trip.optString("pickup_address")
+                + "\nPrix: " + trip.optString("price"));
+
+        builder.setCancelable(false);
+
+        builder.setPositiveButton("ACCEPTER", (d,w)->{
+
+            popupVisible = false;
+            hasActiveTrip = true;
+
+            acceptTrip(trip.optString("delivery_id"));
+        });
+
+        builder.setNegativeButton("REFUSER", (d,w)->{
+            popupVisible = false;
+            lastProposalTime = 0; // 🔥 important sinon bloqué
+        });
+
+        builder.show();
+
+        // 🔥 son
+        if(sound != null) sound.start();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        checkGPS();
+    // ================================
+    // ✅ ACCEPTER COURSE
+    // ================================
+    private void acceptTrip(String rideId){
+
+        hasActiveTrip = true;
+
+        String url = BASE_URL + "accept_delivery.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                res -> {
+                    Toast.makeText(this,"Course acceptée",Toast.LENGTH_SHORT).show();
+                },
+                err -> {
+                    hasActiveTrip = false;
+                    Log.e("ACCEPT_ERR", err.toString());
+                }
+        ){
+            protected Map<String,String> getParams(){
+                Map<String,String> p = new HashMap<>();
+                p.put("delivery_id", rideId);
+                p.put("driver_id", userId);
+                return p;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(req);
+    }
+
+    // ================================
+    // 🔄 UI ONLINE / OFFLINE
+    // ================================
+    private void setOnlineUI(){
+        txtStatus.setText("Online");
+        banner.setBackgroundColor(Color.GREEN);
+        imgStatus.setImageResource(R.drawable.ic_online);
+        txtTitle.setText("You are online");
+    }
+
+    private void setOfflineUI(){
+        txtStatus.setText("Offline");
+       // banner.setBackgroundColor(Color.ORANGE);
+        imgStatus.setImageResource(R.drawable.ic_moon);
+        txtTitle.setText("You are offline");
+    }
+
+    // ================================
+    // 📡 UPDATE STATUS SERVEUR
+    // ================================
+    private void updateStatus(boolean online){
+
+        String url = BASE_URL + "update_online_status.php";
+
+        StringRequest req = new StringRequest(Request.Method.POST, url,
+                res -> {},
+                err -> {}
+        ){
+            protected Map<String,String> getParams(){
+                Map<String,String> p = new HashMap<>();
+                p.put("driver_id", userId);
+                p.put("is_online", online ? "1":"0");
+                return p;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(req);
     }
 }

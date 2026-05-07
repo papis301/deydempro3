@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:text="Phone Verification"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="#000"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:text="Enter your OTP code here"
+        android:textSize="14sp"
+        android:textColor="#777"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/edtOtp"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:hint="1234"
+        android:inputType="number"
+        android:letterSpacing="0.5"
+        android:maxLength="4"
+        android:textSize="34sp"/>
+
+    <Button
+        android:id="@+id/btnVerify"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:text="VERIFY NOW"
+        android:textStyle="bold"
+        android:textColor="#000"
+        android:backgroundTint="#FFD400"
+        android:layout_marginTop="40dp"/>
+
+</LinearLayout>
