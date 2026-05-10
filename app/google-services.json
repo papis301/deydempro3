@@ -1,0 +1,214 @@
+{
+  "project_info": {
+    "project_number": "471440425690",
+    "project_id": "its2025",
+    "storage_bucket": "its2025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471440425690:android:50b9accbc4b76b74e5dbe3",
+        "android_client_info": {
+          "package_name": "com.pisco.agrofood"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1cgM1F4iT9lb1muMuccD9Uouwccad_fc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "471440425690-kgrgrodvnn3e55rc2o4394d1rlmtfmjq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pisco.toutitew"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471440425690:android:ab2b6052e2a5f603e5dbe3",
+        "android_client_info": {
+          "package_name": "com.pisco.deydempro3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "471440425690-9n104pf2eo954hgufl75e5sgsvcr1j82.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pisco.deydempro3",
+            "certificate_hash": "e96ec36a4a5fa0f586f422454c25d41ee045fd2e"
+          }
+        },
+        {
+          "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1cgM1F4iT9lb1muMuccD9Uouwccad_fc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "471440425690-kgrgrodvnn3e55rc2o4394d1rlmtfmjq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pisco.toutitew"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471440425690:android:00883342948f6c33e5dbe3",
+        "android_client_info": {
+          "package_name": "com.pisco.loamdem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1cgM1F4iT9lb1muMuccD9Uouwccad_fc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "471440425690-kgrgrodvnn3e55rc2o4394d1rlmtfmjq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pisco.toutitew"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471440425690:android:5c3b1d768a2acfb1e5dbe3",
+        "android_client_info": {
+          "package_name": "com.pisco.samacaisseandroid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "471440425690-lctbpcjg5rigm6hmun2j15b578niahgq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pisco.samacaisseandroid",
+            "certificate_hash": "c6e5c6e15e128e0a419639ab3ec80cc8bbb83a4e"
+          }
+        },
+        {
+          "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1cgM1F4iT9lb1muMuccD9Uouwccad_fc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "471440425690-kgrgrodvnn3e55rc2o4394d1rlmtfmjq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pisco.toutitew"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471440425690:android:9d970253ee41eeaee5dbe3",
+        "android_client_info": {
+          "package_name": "com.pisco.toutitew"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "471440425690-1l4t5a1b2r6l0fug7r526cl7kfuipas1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pisco.toutitew",
+            "certificate_hash": "c6e5c6e15e128e0a419639ab3ec80cc8bbb83a4e"
+          }
+        },
+        {
+          "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1cgM1F4iT9lb1muMuccD9Uouwccad_fc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "471440425690-sda9eudc01t54d00rtbear596297o7sf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "471440425690-kgrgrodvnn3e55rc2o4394d1rlmtfmjq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pisco.toutitew"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

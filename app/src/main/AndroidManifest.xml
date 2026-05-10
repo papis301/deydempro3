@@ -8,6 +8,8 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Android 10+ -->
     <uses-permission
         android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
@@ -17,6 +19,8 @@
         tools:ignore="ForegroundServicesPolicy" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name="deydemv3.MyApp"
@@ -34,7 +38,9 @@
             android:exported="false" />
         <activity
             android:name=".PhoneOtpActivity"
-            android:exported="false" />
+            android:exported="false" >
+
+        </activity>
         <activity
             android:name=".DriverHomeActivity"
             android:exported="false" />
@@ -61,12 +67,8 @@
         </activity>
         <activity
             android:name="deydemv3.HomeActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:exported="false">
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".SelectPartnerActivity"
@@ -94,7 +96,7 @@
             android:exported="false" />
         <activity
             android:name=".StartActivitypro"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".DeliveryNavigationActivity"
             android:exported="false" />
@@ -105,13 +107,13 @@
 
         <activity
             android:name=".MapDeliveriesActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".AvailableDeliveriesActivity"
             android:exported="false" />
         <activity
-            android:name=".RegisterActivity"
-            android:exported="true" />
+            android:name=".RegisterActivitydriver"
+            android:exported="false" />
         <activity
             android:name=".ListeDescourses"
             android:exported="false" />
@@ -126,7 +128,12 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
-        <activity android:name="deydemv3.StartActivity" />
+
+        <activity android:name="deydemv3.StartActivity"
+            android:exported="false">
+
+        </activity>
+
         <activity
             android:name="deydemv3.DriverProfileActivity"
             android:exported="false" />
@@ -153,7 +160,7 @@
             android:exported="false" />
         <activity
             android:name="deydemv3.PickupDeliveryActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name="deydemv3.SearchLocationActivity"
             android:exported="false" />
@@ -162,7 +169,7 @@
             android:exported="false" />
         <activity
             android:name="deydemv3.RegisterActivity"
-            android:exported="true" />
+            android:exported="false" />
     </application>
 
 </manifest>

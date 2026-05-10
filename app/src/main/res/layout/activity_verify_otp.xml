@@ -4,23 +4,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:gravity="center">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Phone Verification"
-        android:textSize="32sp"
         android:textStyle="bold"
-        android:textColor="#000"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:textSize="30sp"
+        android:textColor="#000"/>
 
     <TextView
-        android:text="Enter your OTP code here"
-        android:textSize="14sp"
-        android:textColor="#777"
-        android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="Enter your OTP code"
+        android:textColor="#777"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"/>
 
     <EditText
         android:id="@+id/edtOtp"
@@ -30,9 +31,8 @@
         android:gravity="center"
         android:hint="1234"
         android:inputType="number"
-        android:letterSpacing="0.5"
         android:maxLength="4"
-        android:textSize="34sp"/>
+        android:textSize="32sp"/>
 
     <Button
         android:id="@+id/btnVerify"
@@ -43,5 +43,14 @@
         android:textColor="#000"
         android:backgroundTint="#FFD400"
         android:layout_marginTop="40dp"/>
+
+    <TextView
+        android:id="@+id/txtResend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Renvoyer le code"
+        android:textColor="#000"
+        android:textStyle="bold"
+        android:layout_marginTop="30dp"/>
 
 </LinearLayout>

@@ -86,9 +86,41 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_ride_select);
 
+
+
         // Récupérer user_id depuis SharedPreferences
-        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
-        userId = sp.getString("user_id", "0");
+        //
+// 🔥 VÉRIFIER SESSION
+//
+        SharedPreferences session =
+                getSharedPreferences("DeydemUser", MODE_PRIVATE);
+
+        boolean isLogged =
+                session.getBoolean("is_logged", false);
+
+        userId =
+                session.getString("user_id", "0");
+
+        if (!isLogged || userId.equals("0")) {
+
+            Toast.makeText(this,
+                    "Veuillez vous connecter",
+                    Toast.LENGTH_LONG).show();
+
+            Intent intent =
+                    new Intent(
+                            RideSelectActivity.this,
+                            LoginActivityc.class
+                    );
+
+            startActivity(intent);
+
+            finish();
+
+            return;
+        }
+        //Toast.makeText(this, "Choisissez "+ userId, Toast.LENGTH_SHORT).show();
+
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -208,6 +240,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
             e.printStackTrace();
         }
     }
+
 
     private void checkGPS() {
 

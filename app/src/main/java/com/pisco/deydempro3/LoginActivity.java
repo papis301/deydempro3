@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void RegisterDriver() {
-        startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        startActivity(new Intent(LoginActivity.this, RegisterActivitydriver.class));
         finish();
     }
 

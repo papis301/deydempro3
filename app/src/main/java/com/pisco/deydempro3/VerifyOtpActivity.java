@@ -1,6 +1,3 @@
-// 🔥 VerifyOtpActivity.java
-// Vérification code OTP Twilio
-
 package com.pisco.deydempro3;
 
 import android.content.Intent;
@@ -11,54 +8,62 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
 
 public class VerifyOtpActivity extends AppCompatActivity {
 
     EditText edtOtp;
     Button btnVerify;
 
-    String phone;
+    FirebaseAuth auth;
+
+    String verificationId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify_otp);
 
-        phone = getIntent().getStringExtra("phone");
+        auth = FirebaseAuth.getInstance();
 
         edtOtp = findViewById(R.id.edtOtp);
         btnVerify = findViewById(R.id.btnVerify);
 
+        verificationId =
+                getIntent().getStringExtra("verificationId");
+
         btnVerify.setOnClickListener(v -> {
 
-            String otp = edtOtp.getText().toString().trim();
+            String otp =
+                    edtOtp.getText().toString().trim();
 
-            verifyOtp(phone, otp);
+            verifyCode(otp);
         });
     }
 
-    private void verifyOtp(String phone, String otp){
+    private void verifyCode(String code){
 
-        String url = Constants.BASE_URL + "verify_otp.php";
+        PhoneAuthCredential credential =
+                PhoneAuthProvider.getCredential(
+                        verificationId,
+                        code
+                );
 
-        StringRequest request = new StringRequest(Request.Method.POST, url,
+        auth.signInWithCredential(credential)
+                .addOnCompleteListener(task -> {
 
-                response -> {
-
-                    if(response.contains("success")){
+                    if(task.isSuccessful()){
 
                         Toast.makeText(this,
                                 "Connexion réussie",
                                 Toast.LENGTH_SHORT).show();
 
-                        startActivity(new Intent(this,
-                                SelectRoleActivity.class));
+                        startActivity(new Intent(
+                                this,
+                                SelectRoleActivity.class
+                        ));
 
                         finish();
 
@@ -66,29 +71,8 @@ public class VerifyOtpActivity extends AppCompatActivity {
 
                         Toast.makeText(this,
                                 "Code incorrect",
-                                Toast.LENGTH_SHORT).show();
+                                Toast.LENGTH_LONG).show();
                     }
-
-                },
-
-                error -> Toast.makeText(this,
-                        "Erreur réseau",
-                        Toast.LENGTH_SHORT).show()
-
-        ){
-
-            @Override
-            protected Map<String, String> getParams(){
-
-                Map<String, String> params = new HashMap<>();
-
-                params.put("phone", phone);
-                params.put("otp", otp);
-
-                return params;
-            }
-        };
-
-        Volley.newRequestQueue(this).add(request);
+                });
     }
 }

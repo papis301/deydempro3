@@ -1,10 +1,15 @@
 package com.pisco.deydempro3;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
@@ -29,6 +34,19 @@ public class SelectRoleActivity extends AppCompatActivity {
 
         btnClient = findViewById(R.id.btnClient);
         btnDriver = findViewById(R.id.btnDriver);
+
+        if (!isConnected()) {
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Pas de connexion")
+                    .setMessage("Veuillez activer Internet")
+                    .setPositiveButton("Réessayer",
+                            (dialog, which) -> recreate())
+                    .setCancelable(false)
+                    .show();
+
+            return;
+        }
 
         // 🔵 CLIENT
         btnClient.setOnClickListener(v -> {
@@ -65,11 +83,11 @@ public class SelectRoleActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
 
                             // 🔥 redirection unique
-                            if(newMode.equals("driver")){
-                                startActivity(new Intent(this, StartActivitypro.class));
-                            } else {
-                                startActivity(new Intent(this, RideSelectActivity.class));
-                            }
+//                            if(newMode.equals("driver")){
+//                                startActivity(new Intent(this, StartActivitypro.class));
+//                            } else {
+//                                startActivity(new Intent(this, RideSelectActivity.class));
+//                            }
 
                             finish();
                         }
@@ -93,6 +111,35 @@ public class SelectRoleActivity extends AppCompatActivity {
         };
 
         Volley.newRequestQueue(this).add(request);
+    }
+
+    private boolean isConnected() {
+
+        ConnectivityManager cm =
+                (ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (cm == null) {
+            return false;
+        }
+
+        Network network = cm.getActiveNetwork();
+
+        if (network == null) {
+            return false;
+        }
+
+        NetworkCapabilities capabilities =
+                cm.getNetworkCapabilities(network);
+
+        return capabilities != null &&
+                (
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                                ||
+                                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                                ||
+                                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                );
     }
 
     // 🔥 récupère ton user id (à adapter)

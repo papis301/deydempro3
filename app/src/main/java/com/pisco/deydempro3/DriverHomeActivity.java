@@ -4,6 +4,7 @@ import static com.pisco.deydempro3.Constants.BASE_URL;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -13,7 +14,9 @@ import android.media.MediaPlayer;
 import android.os.*;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.widget.*;
 
 import androidx.appcompat.app.AlertDialog;
@@ -21,16 +24,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import deydemv3.LoginActivityc;
 
 public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -58,9 +65,17 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     private String userId;
 
     private Handler handler = new Handler();
+    private Handler dispatchHandler = new Handler();
+
+    private Runnable dispatchRunnable;
 
     private MediaPlayer sound;
     private boolean dispatchRunning = false;
+    private Polyline currentPolyline;
+    private Marker pickupMarker;
+    private Marker dropoffMarker;
+
+
 
     // ================================
     // 🚀 ON CREATE
@@ -69,7 +84,10 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_home);
-
+//
+// 🔥 MODE DRIVER
+//
+        updateDriverMode();
         // UI
         switchOnline = findViewById(R.id.switchOnline);
         txtStatus = findViewById(R.id.txtStatus);
@@ -79,8 +97,34 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         banner = findViewById(R.id.bannerOffline);
 
         // USER
-        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
-        userId = sp.getString("user_id", "0");
+        SharedPreferences sp =
+                getSharedPreferences("DeydemUser", MODE_PRIVATE);
+
+        userId =
+                sp.getString("user_id", "0");
+
+//
+// 🔥 VÉRIFIER SESSION
+//
+        if (userId == null || userId.isEmpty() || userId.equals("0")) {
+
+            Toast.makeText(this,
+                    "Veuillez vous connecter",
+                    Toast.LENGTH_LONG).show();
+
+            Intent intent =
+                    new Intent(
+                            DriverHomeActivity.this,
+                            LoginActivityc.class
+                    );
+
+            startActivity(intent);
+
+            finish();
+
+            return;
+        } Toast.makeText(this,"id"+ userId,Toast.LENGTH_SHORT).show();
+
 
         // MAP
         SupportMapFragment mapFragment =
@@ -104,6 +148,7 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                 startDispatchLoop(); // démarre UNE seule fois
             } else {
                 setOfflineUI();
+                stopDispatchLoop();
             }
 
             updateStatus(isOnline);
@@ -141,6 +186,35 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         checkPermission();
     }
 
+    private void updateDriverMode() {
+
+        String url = BASE_URL + "update_mode_driver.php";
+
+        StringRequest request = new StringRequest(
+                Request.Method.POST,
+                url,
+
+                response -> Log.d("MODE_UPDATE", response),
+
+                error -> Log.e("MODE_ERROR", error.toString())
+
+        ) {
+
+            @Override
+            protected Map<String, String> getParams() {
+
+                Map<String, String> params =
+                        new HashMap<>();
+
+                params.put("user_id", userId);
+
+                return params;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(request);
+    }
+
     // ================================
     // 🔥 PERMISSION GPS
     // ================================
@@ -155,6 +229,203 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         } else {
             startLocationUpdates();
         }
+    }
+
+    private void drawRoute(
+            LatLng origin,
+            LatLng destination,
+            TextView tvDistance,
+            TextView tvDuration
+    ){
+
+        String url =
+                "https://router.project-osrm.org/route/v1/driving/"
+                        + origin.longitude + "," + origin.latitude
+                        + ";"
+                        + destination.longitude + "," + destination.latitude
+                        + "?overview=full&geometries=geojson";
+
+        JsonObjectRequest request =
+                new JsonObjectRequest(
+                        Request.Method.GET,
+                        url,
+                        null,
+
+                        response -> {
+
+                            try {
+
+                                Log.d(
+                                        "ROUTE_RESPONSE",
+                                        response.toString()
+                                );
+
+                                JSONArray routes =
+                                        response.getJSONArray("routes");
+
+                                if(routes.length() == 0) return;
+
+                                JSONObject route =
+                                        routes.getJSONObject(0);
+
+                                //
+                                // 🔥 DISTANCE
+                                //
+                                double distanceMeters =
+                                        route.getDouble("distance");
+
+                                double distanceKm =
+                                        distanceMeters / 1000;
+
+                                //
+                                // 🔥 DURATION
+                                //
+                                double durationSec =
+                                        route.getDouble("duration");
+
+                                double durationMin =
+                                        durationSec / 60;
+
+                                tvDistance.setText(
+                                        String.format(
+                                                "%.2f km",
+                                                distanceKm
+                                        )
+                                );
+
+                                tvDuration.setText(
+                                        ((int)durationMin) + " min"
+                                );
+
+                                Log.d(
+                                        "ROUTE_DISTANCE",
+                                        distanceKm + " km"
+                                );
+
+                                Log.d(
+                                        "ROUTE_DURATION",
+                                        durationMin + " min"
+                                );
+
+                                JSONObject geometry =
+                                        route.getJSONObject("geometry");
+
+                                JSONArray coordinates =
+                                        geometry.getJSONArray("coordinates");
+
+                                PolylineOptions polylineOptions =
+                                        new PolylineOptions()
+                                                .width(14f)
+                                                .color(Color.BLUE)
+                                                .geodesic(true);
+
+                                for(int i=0; i<coordinates.length(); i++){
+
+                                    JSONArray point =
+                                            coordinates.getJSONArray(i);
+
+                                    double lng =
+                                            point.getDouble(0);
+
+                                    double lat =
+                                            point.getDouble(1);
+
+                                    polylineOptions.add(
+                                            new LatLng(lat,lng)
+                                    );
+                                }
+
+                                //
+                                // 🔥 REMOVE OLD
+                                //
+                                if(currentPolyline != null){
+                                    currentPolyline.remove();
+                                }
+
+                                //
+                                // 🔥 DRAW
+                                //
+                                currentPolyline =
+                                        mMap.addPolyline(polylineOptions);
+
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
+
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "ROUTE_ERROR",
+                                    error.toString()
+                            );
+
+                            if(error.networkResponse != null){
+
+                                Log.e(
+                                        "ROUTE_CODE",
+                                        String.valueOf(
+                                                error.networkResponse.statusCode
+                                        )
+                                );
+                            }
+                        }
+
+                ){
+
+                    @Override
+                    public Map<String, String> getHeaders(){
+
+                        Map<String,String> headers =
+                                new HashMap<>();
+
+                        headers.put(
+                                "User-Agent",
+                                "Mozilla/5.0"
+                        );
+
+                        headers.put(
+                                "Accept",
+                                "application/json"
+                        );
+
+                        return headers;
+                    }
+                };
+
+
+        Volley.newRequestQueue(this).add(request);
+    }
+
+    private float getBearing(
+            LatLng start,
+            LatLng end
+    ){
+
+        double lat =
+                Math.abs(start.latitude - end.latitude);
+
+        double lng =
+                Math.abs(start.longitude - end.longitude);
+
+        if(start.latitude < end.latitude
+                && start.longitude < end.longitude)
+            return (float)(Math.toDegrees(Math.atan(lng / lat)));
+
+        else if(start.latitude >= end.latitude
+                && start.longitude < end.longitude)
+            return (float)((90 - Math.toDegrees(Math.atan(lng / lat))) + 90);
+
+        else if(start.latitude >= end.latitude
+                && start.longitude >= end.longitude)
+            return (float)(Math.toDegrees(Math.atan(lng / lat)) + 180);
+
+        else if(start.latitude < end.latitude
+                && start.longitude >= end.longitude)
+            return (float)((90 - Math.toDegrees(Math.atan(lng / lat))) + 270);
+
+        return -1;
     }
 
     // ================================
@@ -244,6 +515,17 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         },7000);
     }
 
+    private void stopDispatchLoop() {
+
+        if (dispatchHandler != null
+                && dispatchRunnable != null) {
+
+            dispatchHandler.removeCallbacks(dispatchRunnable);
+        }
+
+        Log.d("DISPATCH", "loop stopped");
+    }
+
     // ================================
     // 🚗 AUTO ASSIGNATION
     // ================================
@@ -305,33 +587,291 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     // ================================
     private void showIncomingTrip(JSONObject trip){
 
+
+
         popupVisible = true;
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Nouvelle course");
+        if(sound != null){
+            sound.start();
+        }
 
-        builder.setMessage("Pickup: " + trip.optString("pickup_address")
-                + "\nPrix: " + trip.optString("price"));
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_incoming_trip);
+        Window window = dialog.getWindow();
 
-        builder.setCancelable(false);
+        if(window != null){
 
-        builder.setPositiveButton("ACCEPTER", (d,w)->{
+            window.setGravity(Gravity.BOTTOM);
+
+            window.setLayout(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+
+            window.setBackgroundDrawableResource(
+                    android.R.color.transparent
+            );
+
+            window.getAttributes().windowAnimations =
+                    android.R.style.Animation_Dialog;
+        }
+
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.getWindow().setLayout(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+
+        dialog.setCancelable(false);
+
+        TextView tvPickup =
+                dialog.findViewById(R.id.tvPickup);
+
+        TextView tvDropoff =
+                dialog.findViewById(R.id.tvDropoff);
+
+        TextView tvPrice =
+                dialog.findViewById(R.id.tvPrice);
+
+        TextView tvDistance =
+                dialog.findViewById(R.id.tvDistance);
+
+        TextView tvDuration =
+                dialog.findViewById(R.id.tvDuration);
+
+        Button btnAccept =
+                dialog.findViewById(R.id.btnAccept);
+
+        Button btnIgnore =
+                dialog.findViewById(R.id.btnIgnore);
+
+        //
+        // 🔥 DATA
+        //
+        tvPickup.setText(
+                trip.optString("pickup_address")
+        );
+
+        tvDropoff.setText(
+                trip.optString("dropoff_address")
+        );
+
+        tvPrice.setText(
+                trip.optString("price") + " FCFA"
+        );
+
+        tvDistance.setText(
+                trip.optString("distance_km") + " km"
+        );
+
+        Vibrator vibrator =
+                (Vibrator) getSystemService(VIBRATOR_SERVICE);
+
+        if(vibrator != null){
+            vibrator.vibrate(1000);
+        }
+
+        //
+        // 🔥 ACCEPTER
+        //
+        btnAccept.setOnClickListener(v -> {
 
             popupVisible = false;
             hasActiveTrip = true;
 
-            acceptTrip(trip.optString("delivery_id"));
+            dialog.dismiss();
+
+            acceptTrip(
+                    trip.optString("delivery_id")
+            );
         });
 
-        builder.setNegativeButton("REFUSER", (d,w)->{
+        //
+        // 🔥 REFUSER
+        //
+        btnIgnore.setOnClickListener(v -> {
+
             popupVisible = false;
-            lastProposalTime = 0; // 🔥 important sinon bloqué
+
+            lastProposalTime = 0;
+
+            refuseTrip(
+                    trip.optString("delivery_id")
+            );
+
+            dialog.dismiss();
         });
 
-        builder.show();
+        //
+// 🔥 PICKUP
+//
+        double pickupLat =
+                trip.optDouble("pickup_lat");
 
-        // 🔥 son
-        if(sound != null) sound.start();
+        double pickupLng =
+                trip.optDouble("pickup_lng");
+
+//
+// 🔥 DROPOFF
+//
+        double dropLat =
+                trip.optDouble("dropoff_lat");
+
+        double dropLng =
+                trip.optDouble("dropoff_lng");
+
+        LatLng pickup =
+                new LatLng(pickupLat, pickupLng);
+
+        LatLng dropoff =
+                new LatLng(dropLat, dropLng);
+
+//
+// 🔥 CLEAR OLD MARKERS
+//
+        // mMap.clear();
+        //
+// 🔥 REMOVE OLD MARKERS
+//
+        if(pickupMarker != null){
+            pickupMarker.remove();
+        }
+
+        if(dropoffMarker != null){
+            dropoffMarker.remove();
+        }
+
+        if(currentPolyline != null){
+            currentPolyline.remove();
+        }
+
+        if(driverMarker != null){
+            driverMarker.remove();
+        }
+
+//
+// 🔥 PICKUP MARKER
+//
+        pickupMarker = mMap.addMarker(
+                new MarkerOptions()
+                        .position(pickup)
+                        .title("Pickup")
+                        .icon(
+                                BitmapDescriptorFactory.defaultMarker(
+                                        BitmapDescriptorFactory.HUE_GREEN
+                                )
+                        )
+        );
+
+//
+// 🔥 DROPOFF MARKER
+//
+        dropoffMarker = mMap.addMarker(
+                new MarkerOptions()
+                        .position(dropoff)
+                        .title("Destination")
+                        .icon(
+                                BitmapDescriptorFactory.defaultMarker(
+                                        BitmapDescriptorFactory.HUE_RED
+                                )
+                        )
+        );
+
+//
+// 🔥 DRIVER MARKER
+//
+        if(driverMarker != null){
+
+            driverMarker = mMap.addMarker(
+                    new MarkerOptions()
+                            .position(driverMarker.getPosition())
+                            .title("Moi")
+            );
+        }
+
+//
+// 🔥 PICKUP MARKER
+//
+        mMap.addMarker(
+                new MarkerOptions()
+                        .position(pickup)
+                        .title("Pickup")
+                        .icon(BitmapDescriptorFactory.defaultMarker(
+                                BitmapDescriptorFactory.HUE_GREEN
+                        ))
+        );
+
+//
+// 🔥 DROPOFF MARKER
+//
+        mMap.addMarker(
+                new MarkerOptions()
+                        .position(dropoff)
+                        .title("Destination")
+                        .icon(BitmapDescriptorFactory.defaultMarker(
+                                BitmapDescriptorFactory.HUE_RED
+                        ))
+        );
+
+        //
+// 🔥 DRAW ROUTE
+//
+        drawRoute(
+                pickup,
+                dropoff,
+                tvDistance,
+                tvDuration
+        );
+//
+// 🔥 CAMERA BOUNDS
+//
+        //
+// 🔥 BOUNDS
+//
+        LatLngBounds.Builder builder =
+                new LatLngBounds.Builder();
+
+        builder.include(pickup);
+        builder.include(dropoff);
+
+        LatLngBounds bounds =
+                builder.build();
+
+//
+// 🔥 CAMERA POSITION
+//
+        CameraUpdate update =
+                CameraUpdateFactory.newLatLngBounds(
+                        bounds,
+                        250 // padding
+                );
+
+        mMap.animateCamera(update);
+
+//
+// 🔥 BEARING
+//
+        float bearing =
+                getBearing(pickup, dropoff);
+
+//
+// 🔥 CAMERA STYLE UBER
+//
+        CameraPosition cameraPosition =
+                new CameraPosition.Builder()
+                        .target(bounds.getCenter())
+                        .zoom(14.5f)
+                        .bearing(bearing)
+                        .tilt(45f)
+                        .build();
+
+        mMap.animateCamera(
+                CameraUpdateFactory.newCameraPosition(
+                        cameraPosition
+                )
+        );
+
+        dialog.show();
     }
 
     // ================================
@@ -361,6 +901,58 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         };
 
         Volley.newRequestQueue(this).add(req);
+    }
+
+    private void refuseTrip(String rideId){
+
+        String url =
+                BASE_URL + "refuse_trip.php";
+
+        StringRequest request =
+                new StringRequest(
+                        Request.Method.POST,
+                        url,
+
+                        response -> {
+
+                            Log.d(
+                                    "REFUSE_RESPONSE",
+                                    response
+                            );
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "REFUSE_ERROR",
+                                    error.toString()
+                            );
+                        }
+
+                ){
+
+                    @Override
+                    protected Map<String, String> getParams(){
+
+                        Map<String,String> params =
+                                new HashMap<>();
+
+                        params.put(
+                                "ride_id",
+                                rideId
+                        );
+
+                        params.put(
+                                "driver_id",
+                                userId
+                        );
+
+                        return params;
+                    }
+                };
+
+        Volley.newRequestQueue(this)
+                .add(request);
     }
 
     // ================================
