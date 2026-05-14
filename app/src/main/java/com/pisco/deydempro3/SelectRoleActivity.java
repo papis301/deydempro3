@@ -2,10 +2,12 @@ package com.pisco.deydempro3;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -31,6 +33,7 @@ public class SelectRoleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_role);
+        checkGPS();
 
         btnClient = findViewById(R.id.btnClient);
         btnDriver = findViewById(R.id.btnDriver);
@@ -50,19 +53,55 @@ public class SelectRoleActivity extends AppCompatActivity {
 
         // 🔵 CLIENT
         btnClient.setOnClickListener(v -> {
-            startActivity(new Intent(this, RideSelectActivity.class));
-            //switchModeAPI("client");
+
+            if(!isGpsEnabled()){
+
+                checkGPS();
+                return;
+            }
+
+            startActivity(
+                    new Intent(
+                            this,
+                            RideSelectActivity.class
+                    )
+            );
         });
 
         // 🚗 DRIVER
         btnDriver.setOnClickListener(v -> {
-            //startActivity(new Intent(this, StartActivitypro.class));
-            startActivity(new Intent(this, DriverHomeActivity.class));
 
-            //switchModeAPI("driver");
+            if(!isGpsEnabled()){
+
+                checkGPS();
+                return;
+            }
+
+            startActivity(
+                    new Intent(
+                            this,
+                            DriverHomeActivity.class
+                    )
+            );
         });
     }
 
+    private boolean isGpsEnabled(){
+
+        LocationManager lm =
+                (LocationManager)
+                        getSystemService(
+                                Context.LOCATION_SERVICE
+                        );
+
+        if(lm == null){
+            return false;
+        }
+
+        return lm.isProviderEnabled(
+                LocationManager.GPS_PROVIDER
+        );
+    }
     private void switchModeAPI(String newMode) {
 
         String url = "https://pisco.alwaysdata.net/switch_mode.php";
@@ -140,6 +179,28 @@ public class SelectRoleActivity extends AppCompatActivity {
                                 ||
                                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
                 );
+    }
+
+    private void checkGPS(){
+
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        boolean enabled =
+                lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                        ||
+                        lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        if(!enabled){
+
+            new AlertDialog.Builder(this)
+                    .setTitle("GPS désactivé")
+                    .setMessage("Activez le GPS pour continuer")
+                    .setCancelable(false)
+                    .setPositiveButton("Activer", (d,w)->{
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    })
+                    .show();
+        }
     }
 
     // 🔥 récupère ton user id (à adapter)

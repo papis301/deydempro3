@@ -7,6 +7,8 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.*;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
@@ -74,20 +76,33 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     private Polyline currentPolyline;
     private Marker pickupMarker;
     private Marker dropoffMarker;
+    private double currentLat = 0;
+    private double currentLng = 0;
 
+    private double pickupLat = 0;
+    private double pickupLng = 0;
 
+    private String pickupAddress = "";
+    private String customerName = "";
+    private String customerPhone = "";
+    private String customerPhoto = "";
+    private String client_id = "";
+    ImageView btnMenu;
+    LinearLayout menuLayout;
+    boolean menuVisible = false;
+    TextView txtDriverName;
+    TextView txtPhone;
+    ImageView imgProfile;
 
     // ================================
     // 🚀 ON CREATE
     // ================================
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_home);
-//
-// 🔥 MODE DRIVER
-//
-        updateDriverMode();
+
         // UI
         switchOnline = findViewById(R.id.switchOnline);
         txtStatus = findViewById(R.id.txtStatus);
@@ -95,6 +110,13 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         txtSubtitle = findViewById(R.id.txtSubtitle);
         imgStatus = findViewById(R.id.imgStatus);
         banner = findViewById(R.id.bannerOffline);
+        btnMenu = findViewById(R.id.btnMenu);
+        menuLayout = findViewById(R.id.menuLayout);
+        txtDriverName = findViewById(R.id.txtDriverName);
+
+        txtPhone = findViewById(R.id.txtPhone);
+
+        imgProfile = findViewById(R.id.imgProfile);
 
         // USER
         SharedPreferences sp =
@@ -102,6 +124,31 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
         userId =
                 sp.getString("user_id", "0");
+        boolean savedOnline =
+                sp.getBoolean(
+                        "driver_online",
+                        false
+                );
+
+        switchOnline.setChecked(savedOnline);
+
+        isOnline = savedOnline;
+
+        if(isOnline){
+
+            setOnlineUI();
+
+            Toast.makeText(
+                    this,
+                    "Connexion chauffeur...",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+        //
+// 🔥 MODE DRIVER
+//
+        updateDriverMode();
+
 
 //
 // 🔥 VÉRIFIER SESSION
@@ -143,9 +190,27 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
             isOnline = isChecked;
 
+            sp.edit()
+                    .putBoolean(
+                            "driver_online",
+                            isOnline
+                    )
+                    .apply();
+
             if(isOnline){
                 setOnlineUI();
                 startDispatchLoop(); // démarre UNE seule fois
+                checkActiveTrip();
+                Log.d(
+                        "DRIVER_ID",
+                        getSharedPreferences(
+                                "DeydemUser",
+                                MODE_PRIVATE
+                        ).getString(
+                                "user_id",
+                                "0"
+                        )
+                );
             } else {
                 setOfflineUI();
                 stopDispatchLoop();
@@ -153,6 +218,283 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
             updateStatus(isOnline);
         });
+
+        btnMenu.setOnClickListener(v -> {
+
+            if(menuVisible){
+
+                menuLayout.animate()
+                        .translationX(-menuLayout.getWidth())
+                        .setDuration(250);
+
+                menuLayout.setVisibility(View.GONE);
+
+                menuVisible = false;
+
+            } else {
+
+                menuLayout.setVisibility(View.VISIBLE);
+
+                menuLayout.setTranslationX(
+                        -menuLayout.getWidth()
+                );
+
+                menuLayout.animate()
+                        .translationX(0)
+                        .setDuration(250);
+
+                menuVisible = true;
+            }
+        });
+
+        findViewById(R.id.btnLogout)
+                .setOnClickListener(v -> {
+
+                    startActivity(
+                            new Intent(
+                                    this,
+                                    LoginActivityc.class
+                            )
+                    );
+
+                    finish();
+                });
+        loadDriverProfile();
+    }
+
+    private void loadDriverProfile(){
+
+        String url =
+                BASE_URL
+                        + "get_driver_profile.php?driver_id="
+                        + userId;
+
+        JsonObjectRequest request =
+                new JsonObjectRequest(
+
+                        Request.Method.GET,
+                        url,
+                        null,
+
+                        response -> {
+
+                            try {
+
+                                Log.d(
+                                        "PROFILE_RESPONSE",
+                                        response.toString()
+                                );
+
+                                if(response.getBoolean("success")){
+
+                                    JSONObject driver =
+                                            response.getJSONObject("driver");
+
+                                    String name =
+                                            driver.optString("name");
+
+                                    String phone =
+                                            driver.optString("phone");
+
+                                    String photo =
+                                            driver.optString("photo");
+
+                                    //
+                                    // 🔥 UI
+                                    //
+                                    txtDriverName.setText(name);
+
+                                    txtPhone.setText(phone);
+
+                                }
+
+                            } catch(Exception e){
+                                e.printStackTrace();
+                            }
+
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "PROFILE_ERROR",
+                                    error.toString()
+                            );
+                        }
+
+                );
+
+        Volley.newRequestQueue(this)
+                .add(request);
+    }
+
+    private void checkActiveTrip(){
+
+        String url =
+                BASE_URL
+                        + "get_active_trip.php?driver_id="
+                        + userId;
+
+        StringRequest request =
+                new StringRequest(
+                        Request.Method.GET,
+                        url,
+
+                        response -> {
+
+                            try {
+
+                                Log.d(
+                                        "ACTIVE_TRIP",
+                                        response
+                                );
+
+                                JSONObject obj =
+                                        new JSONObject(response);
+
+                                if(obj.getBoolean("success")){
+
+                                    hasActiveTrip = true;
+
+                                    JSONObject trip =
+                                            obj.getJSONObject("trip");
+
+                                    String rideId =
+                                            trip.optString("id");
+
+
+                                    double pickupLat =
+                                            trip.optDouble("pickup_lat");
+
+                                    double pickupLng =
+                                            trip.optDouble("pickup_lng");
+
+                                    double dropoffLat =
+                                            trip.optDouble("dropoff_lat");
+
+                                    double dropoffLng =
+                                            trip.optDouble("dropoff_lng");
+
+                                    String pickupAddress =
+                                            trip.optString("pickup_address");
+
+                                    String dropoffAddress =
+                                            trip.optString("dropoff_address");
+
+                                    String status =
+                                            trip.optString("status");
+
+                                     customerName =
+                                            trip.optString("customer_profil");
+
+                                     customerPhone =
+                                            trip.optString("customer_phone");
+
+                                     customerPhoto =
+                                            trip.optString("customer_photo");
+                                     client_id =
+                                            trip.optString("client_id");
+
+                                    //
+                                    // 🔥 REDIRECTION
+                                    //
+                                    Intent intent =
+                                            new Intent(
+                                                    DriverHomeActivity.this,
+                                                    DriverPickupActivity.class
+                                            );
+
+                                    intent.putExtra(
+                                            "ride_id",
+                                            rideId
+                                    );
+                                    intent.putExtra(
+                                            "client_id",
+                                            trip.optString("client_id")
+                                    );
+
+                                    intent.putExtra(
+                                            "pickup_lat",
+                                            pickupLat
+                                    );
+
+                                    intent.putExtra(
+                                            "pickup_lng",
+                                            pickupLng
+                                    );
+
+                                    intent.putExtra(
+                                            "dropoff_lat",
+                                            dropoffLat
+                                    );
+
+                                    intent.putExtra(
+                                            "dropoff_lng",
+                                            dropoffLng
+                                    );
+
+                                    intent.putExtra(
+                                            "pickup_address",
+                                            pickupAddress
+                                    );
+
+                                    intent.putExtra(
+                                            "dropoff_address",
+                                            dropoffAddress
+                                    );
+
+                                    intent.putExtra(
+                                            "driver_lat",
+                                            currentLat
+                                    );
+
+                                    intent.putExtra(
+                                            "driver_lng",
+                                            currentLng
+                                    );
+
+                                    intent.putExtra(
+                                            "trip_status",
+                                            status
+                                    );
+                                    intent.putExtra(
+                                            "customer_profil",
+                                            customerName
+                                    );
+
+                                    intent.putExtra(
+                                            "customer_phone",
+                                            customerPhone
+                                    );
+
+                                    intent.putExtra(
+                                            "customer_photo",
+                                            customerPhoto
+                                    );
+
+                                    startActivity(intent);
+
+                                    //finish();
+                                }
+
+                            } catch(Exception e){
+                                e.printStackTrace();
+                            }
+
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "ACTIVE_TRIP_ERROR",
+                                    error.toString()
+                            );
+                        }
+
+                );
+
+        Volley.newRequestQueue(this)
+                .add(request);
     }
 
     // ================================
@@ -448,14 +790,37 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                 if(loc == null) return;
 
                 LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
+                currentLat = loc.getLatitude();
+                currentLng = loc.getLongitude();
 
                 // 🔥 afficher / déplacer marker
                 if(driverMarker == null){
-                    driverMarker = mMap.addMarker(new MarkerOptions()
-                            .position(pos)
-                            .title("Moi"));
+
+                    driverMarker =
+                            mMap.addMarker(
+
+                                    new MarkerOptions()
+                                            .position(pos)
+                                            .title("Vous")
+                                            .flat(true)
+                                            .anchor(0.5f,0.5f)
+                                            .rotation(0f)
+                                            .icon(
+                                                    resizeMapIcon(
+                                                            R.drawable.car_top,
+                                                            128,
+                                                            128
+                                                    )
+                                            )
+                            );
+
                 } else {
+
                     driverMarker.setPosition(pos);
+
+                    driverMarker.setRotation(
+                            loc.getBearing()
+                    );
                 }
 
                 // 🔥 centrer une fois
@@ -466,8 +831,39 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
                 // 🔥 envoyer position au serveur
                 sendLocation(pos.latitude, pos.longitude);
+                if(isOnline && !dispatchRunning){
+
+                    startDispatchLoop();
+
+                    checkActiveTrip();
+                }
             }
         }, getMainLooper());
+    }
+
+    private BitmapDescriptor resizeMapIcon(
+            int iconResId,
+            int width,
+            int height
+    ){
+
+        Bitmap imageBitmap =
+                BitmapFactory.decodeResource(
+                        getResources(),
+                        iconResId
+                );
+
+        Bitmap resizedBitmap =
+                Bitmap.createScaledBitmap(
+                        imageBitmap,
+                        width,
+                        height,
+                        false
+                );
+
+        return BitmapDescriptorFactory.fromBitmap(
+                resizedBitmap
+        );
     }
 
     // ================================
@@ -510,20 +906,23 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                     Log.d("DISPATCH", "loop active");
                 }
 
-                handler.postDelayed(this, 7000);
+                if(dispatchRunning){
+                    handler.postDelayed(this, 7000);
+                }
             }
         },7000);
     }
 
-    private void stopDispatchLoop() {
+    private void stopDispatchLoop(){
 
-        if (dispatchHandler != null
-                && dispatchRunnable != null) {
+        dispatchRunning = false;
 
-            dispatchHandler.removeCallbacks(dispatchRunnable);
-        }
+        handler.removeCallbacksAndMessages(null);
 
-        Log.d("DISPATCH", "loop stopped");
+        Log.d(
+                "DISPATCH",
+                "loop stopped"
+        );
     }
 
     // ================================
@@ -586,12 +985,13 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     // 🔔 POPUP COURSE
     // ================================
     private void showIncomingTrip(JSONObject trip){
-
-
+        if(isFinishing() || isDestroyed()){
+            return;
+        }
 
         popupVisible = true;
 
-        if(sound != null){
+        if(sound != null && !sound.isPlaying()){
             sound.start();
         }
 
@@ -626,6 +1026,8 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
         TextView tvPickup =
                 dialog.findViewById(R.id.tvPickup);
+        TextView tvTimer =
+                dialog.findViewById(R.id.tvTimer);
 
         TextView tvDropoff =
                 dialog.findViewById(R.id.tvDropoff);
@@ -670,12 +1072,66 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         if(vibrator != null){
             vibrator.vibrate(1000);
         }
+        pickupLat =
+                trip.optDouble("pickup_lat");
+
+        pickupLng =
+                trip.optDouble("pickup_lng");
+
+        pickupAddress =
+                trip.optString("pickup_address");
+        client_id =
+                trip.optString("client_id");
+
+        CountDownTimer timer =
+                new CountDownTimer(15000,1000) {
+
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+
+                        tvTimer.setText(
+                                String.valueOf(
+                                        millisUntilFinished / 1000
+                                )
+                        );
+                    }
+
+                    @Override
+                    public void onFinish() {
+
+
+                        if(dialog.isShowing()){
+
+                            popupVisible = false;
+
+                            hasActiveTrip = false;
+
+                            lastProposalTime = 0;
+
+                            timeoutTrip(
+                                    trip.optString("delivery_id")
+                            );
+
+                            dialog.dismiss();
+
+                            Toast.makeText(
+                                    DriverHomeActivity.this,
+                                    "Temps écoulé",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                            autoAssignDriver();
+                        }
+                    }
+                };
+
+        timer.start();
 
         //
         // 🔥 ACCEPTER
         //
         btnAccept.setOnClickListener(v -> {
-
+            timer.cancel();
             popupVisible = false;
             hasActiveTrip = true;
 
@@ -690,16 +1146,66 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         // 🔥 REFUSER
         //
         btnIgnore.setOnClickListener(v -> {
-
+            timer.cancel();
             popupVisible = false;
+
+            hasActiveTrip = false;
 
             lastProposalTime = 0;
 
+            //
+            // 🔥 API REFUS
+            //
             refuseTrip(
                     trip.optString("delivery_id")
             );
 
+            //
+            // 🔥 REMOVE POLYLINE
+            //
+            if(currentPolyline != null){
+                currentPolyline.remove();
+                currentPolyline = null;
+            }
+
+            //
+            // 🔥 REMOVE PICKUP MARKER
+            //
+            if(pickupMarker != null){
+                pickupMarker.remove();
+                pickupMarker = null;
+            }
+
+            //
+            // 🔥 REMOVE DROPOFF MARKER
+            //
+            if(dropoffMarker != null){
+                dropoffMarker.remove();
+                dropoffMarker = null;
+            }
+
+            //
+            // 🔥 RESTORE DRIVER MARKER
+            //
+            if(driverMarker != null){
+
+                LatLng driverPos =
+                        driverMarker.getPosition();
+
+                mMap.animateCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                                driverPos,
+                                16f
+                        )
+                );
+            }
+
             dialog.dismiss();
+
+            //
+            // 🔥 RELANCE RAPIDE DISPATCH
+            //
+            autoAssignDriver();
         });
 
         //
@@ -780,39 +1286,15 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 //
 // 🔥 DRIVER MARKER
 //
-        if(driverMarker != null){
+        LatLng driverPos =
+                new LatLng(currentLat, currentLng);
 
-            driverMarker = mMap.addMarker(
-                    new MarkerOptions()
-                            .position(driverMarker.getPosition())
-                            .title("Moi")
-            );
-        }
-
-//
-// 🔥 PICKUP MARKER
-//
-        mMap.addMarker(
-                new MarkerOptions()
-                        .position(pickup)
-                        .title("Pickup")
-                        .icon(BitmapDescriptorFactory.defaultMarker(
-                                BitmapDescriptorFactory.HUE_GREEN
-                        ))
-        );
-
-//
-// 🔥 DROPOFF MARKER
-//
-        mMap.addMarker(
-                new MarkerOptions()
-                        .position(dropoff)
-                        .title("Destination")
-                        .icon(BitmapDescriptorFactory.defaultMarker(
-                                BitmapDescriptorFactory.HUE_RED
-                        ))
-        );
-
+        driverMarker =
+                mMap.addMarker(
+                        new MarkerOptions()
+                                .position(driverPos)
+                                .title("Moi")
+                );
         //
 // 🔥 DRAW ROUTE
 //
@@ -846,7 +1328,11 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                         250 // padding
                 );
 
-        mMap.animateCamera(update);
+        try{
+            mMap.animateCamera(update);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
 
 //
 // 🔥 BEARING
@@ -874,6 +1360,59 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         dialog.show();
     }
 
+    private void timeoutTrip(String rideId){
+
+        String url =
+                BASE_URL + "trip_timeout.php";
+
+        StringRequest request =
+                new StringRequest(
+
+                        Request.Method.POST,
+                        url,
+
+                        response -> {
+
+                            Log.d(
+                                    "TIMEOUT_RESPONSE",
+                                    response
+                            );
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "TIMEOUT_ERROR",
+                                    error.toString()
+                            );
+                        }
+
+                ){
+
+                    @Override
+                    protected Map<String,String> getParams(){
+
+                        Map<String,String> params =
+                                new HashMap<>();
+
+                        params.put(
+                                "ride_id",
+                                rideId
+                        );
+
+                        params.put(
+                                "driver_id",
+                                userId
+                        );
+
+                        return params;
+                    }
+                };
+
+        Volley.newRequestQueue(this)
+                .add(request);
+    }
+
     // ================================
     // ✅ ACCEPTER COURSE
     // ================================
@@ -886,7 +1425,25 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         StringRequest req = new StringRequest(Request.Method.POST, url,
                 res -> {
                     Toast.makeText(this,"Course acceptée",Toast.LENGTH_SHORT).show();
-                },
+                    Intent intent = new Intent(
+                            DriverHomeActivity.this,
+                            DriverPickupActivity.class
+                    );
+
+                    intent.putExtra("ride_id", rideId);
+                    intent.putExtra(
+                            "client_id", client_id);
+
+                    intent.putExtra("pickup_lat", pickupLat);
+                    intent.putExtra("pickup_lng", pickupLng);
+
+                    intent.putExtra("driver_lat", currentLat);
+                    intent.putExtra("driver_lng", currentLng);
+
+                    intent.putExtra("pickup_address", pickupAddress);
+
+                    startActivity(intent);
+                    },
                 err -> {
                     hasActiveTrip = false;
                     Log.e("ACCEPT_ERR", err.toString());
@@ -962,14 +1519,16 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         txtStatus.setText("Online");
         banner.setBackgroundColor(Color.GREEN);
         imgStatus.setImageResource(R.drawable.ic_online);
-        txtTitle.setText("You are online");
+        txtTitle.setText("Vous etes en ligne");
+        txtSubtitle.setText("Vous recevrez des courses");
     }
 
     private void setOfflineUI(){
         txtStatus.setText("Offline");
-       // banner.setBackgroundColor(Color.ORANGE);
+        banner.setBackgroundColor(Color.parseColor("#FF9800"));
         imgStatus.setImageResource(R.drawable.ic_moon);
-        txtTitle.setText("You are offline");
+        txtTitle.setText("Vous etes hors ligne");
+        txtSubtitle.setText("Passer en ligne pour recevoir des courses");
     }
 
     // ================================
@@ -992,5 +1551,44 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         };
 
         Volley.newRequestQueue(this).add(req);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        //
+        // 🔥 STOP DISPATCH
+        //
+        stopDispatchLoop();
+
+        //
+        // 🔥 STOP GPS
+        //
+        if(fusedLocationClient != null){
+
+            fusedLocationClient.removeLocationUpdates(
+                    new LocationCallback(){}
+            );
+        }
+
+        //
+        // 🔥 RELEASE SOUND
+        //
+        if(sound != null){
+
+            sound.release();
+            sound = null;
+        }
+
+        //
+        // 🔥 CLEAR HANDLER
+        //
+        handler.removeCallbacksAndMessages(null);
+
+        Log.d(
+                "DRIVER_HOME",
+                "onDestroy"
+        );
     }
 }

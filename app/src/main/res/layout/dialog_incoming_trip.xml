@@ -14,6 +14,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="18dp">
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 secondes"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/holo_red_dark"
+            android:layout_gravity="center"
+            android:padding="8dp"/>
 
         <!-- PRIX -->
         <TextView

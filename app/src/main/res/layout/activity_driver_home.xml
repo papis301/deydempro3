@@ -29,10 +29,14 @@
             android:gravity="center_vertical"
             android:elevation="10dp">
 
-<!--            <ImageView-->
-<!--                android:src="@drawable/ic_menu"-->
-<!--                android:layout_width="24dp"-->
-<!--                android:layout_height="24dp"/>-->
+            <ImageView
+                android:id="@+id/btnMenu"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="16dp"
+                android:padding="10dp"
+                android:src="@drawable/ic_menu"
+                android:elevation="8dp"/>
 
             <TextView
                 android:id="@+id/txtStatus"
@@ -74,7 +78,7 @@
 
                 <TextView
                     android:id="@+id/txtTitle"
-                    android:text="You are offline !"
+                    android:text="Vous etes hors ligne!"
                     android:textStyle="bold"
                     android:textColor="#000"
                     android:textSize="16sp"
@@ -83,11 +87,85 @@
 
                 <TextView
                     android:id="@+id/txtSubtitle"
-                    android:text="Go online to start accepting jobs."
+                    android:text="Passer en ligne pour recevoir des courses"
                     android:textColor="#000"
                     android:textSize="13sp"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"/>
+            </LinearLayout>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/menuLayout"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@android:color/white"
+            android:padding="20dp"
+            android:visibility="gone"
+            android:elevation="12dp">
+
+            <!-- PROFIL -->
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:src="@drawable/ic_profile"/>
+
+            <TextView
+                android:id="@+id/txtDriverName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chauffeur"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:layout_marginTop="12dp"/>
+
+            <TextView
+                android:id="@+id/txtPhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+221770000000"
+                android:textColor="#888"/>
+
+            <!-- MENU -->
+
+            <LinearLayout
+                android:id="@+id/btnTrips"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:gravity="center_vertical"
+                android:layout_marginTop="30dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_trip"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mes courses"
+                    android:textSize="16sp"
+                    android:layout_marginStart="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btnLogout"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_logout"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Déconnexion"
+                    android:textSize="16sp"
+                    android:layout_marginStart="16dp"/>
             </LinearLayout>
 
         </LinearLayout>
