@@ -15,6 +15,10 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -101,6 +105,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
         userId =
                 session.getString("user_id", "0");
 
+
         if (!isLogged || userId.equals("0")) {
 
             Toast.makeText(this,
@@ -119,6 +124,8 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 
             return;
         }
+
+        checkActiveRide();
         //Toast.makeText(this, "Choisissez "+ userId, Toast.LENGTH_SHORT).show();
 
 
@@ -179,6 +186,75 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
             // 👉 ici tu enverras au serveur plus tard
             sendRide();
         });
+    }
+
+    private void checkActiveRide(){
+
+//        String clientId =
+//                getSharedPreferences(
+//                        "user",
+//                        MODE_PRIVATE
+//                ).getString(
+//                        "user_id",
+//                        "0"
+//                );
+
+        String url =
+                "https://pisco.alwaysdata.net/get_client_active_trip.php?client_id="
+                        + userId;
+
+        StringRequest request =
+                new StringRequest(
+
+                        Request.Method.GET,
+                        url,
+
+                        response -> {
+
+                            try {
+
+                                JSONObject json =
+                                        new JSONObject(response);
+
+                                if(json.getBoolean("success")){
+
+                                    String rideId =
+                                            json.getString("ride_id");
+
+                                    Intent intent =
+                                            new Intent(
+                                                    RideSelectActivity.this,
+                                                    WaitingDriverActivity.class
+                                            );
+
+                                    intent.putExtra(
+                                            "ride_id",
+                                            rideId
+                                    );
+
+                                    startActivity(intent);
+
+                                    finish();
+                                }
+
+                            } catch(Exception e){
+                                e.printStackTrace();
+                            }
+
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "ACTIVE_RIDE",
+                                    error.toString()
+                            );
+                        }
+
+                );
+
+        Volley.newRequestQueue(this)
+                .add(request);
     }
 
     private void selectVehicle(String type) {

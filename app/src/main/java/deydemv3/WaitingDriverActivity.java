@@ -39,6 +39,14 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     private Handler handler = new Handler();
 
     private boolean driverFound = false;
+    private boolean driverUIShown = false;
+    private Marker driverMarker;
+    private double driverLat = 0;
+    private double driverLng = 0;
+    private String driverPhone = "";
+    private String driverPhoto = "";
+    private String driverId = "";
+    private TextView tvArrival;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +62,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
         layoutDriver = findViewById(R.id.layoutDriver);
         tvDriverName = findViewById(R.id.tvDriverName);
         tvCar = findViewById(R.id.tvCar);
+        tvArrival = findViewById(R.id.tvArrival);
 
         // MAP
         SupportMapFragment mapFragment =
@@ -66,6 +75,169 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
         showSearching();
 
         startDriverSearch();
+
+
+    }
+
+    private void loadDriverProfile(){
+
+        String url =
+                "https://pisco.alwaysdata.net/get_driver_profile.php?driver_id="
+                        + driverId;
+
+        StringRequest request =
+                new StringRequest(
+
+                        Request.Method.GET,
+                        url,
+
+                        response -> {
+
+                            try {
+
+                                JSONObject json =
+                                        new JSONObject(response);
+
+                                if(json.getBoolean("success")){
+
+                                    JSONObject driver =
+                                            json.getJSONObject("driver");
+
+                                    String name =
+                                            driver.getString("name");
+
+                                    String vehicle =
+                                            driver.getString("vehicle_type");
+
+                                    double lat =
+                                            driver.getDouble("last_lat");
+
+                                    double lng =
+                                            driver.getDouble("last_lng");
+                                    driverLat = lat;
+                                    driverLng = lng;
+                                    tvDriverName.setText(
+                                            "🚗 " + name
+                                    );
+                                   // driverPhone = driver.getString("phone");
+
+                                    tvCar.setText(vehicle);
+
+                                    tvArrival.setText("Arrive dans 2 min");
+
+                                    //
+                                    // 🔥 UI
+                                    //
+                                    showDriver(
+                                            name,
+                                            vehicle
+                                    );
+
+                                    //
+                                    // 🔥 POSITION LIVE
+                                    //
+                                    updateDriverMarker(
+                                            lat,
+                                            lng
+                                    );
+                                    LatLng driverPos =
+                                            new LatLng(
+                                                    driverLat,
+                                                    driverLng
+                                            );
+
+                                    if(!driverUIShown){
+
+                                        mMap.animateCamera(
+                                                CameraUpdateFactory.newLatLngZoom(
+                                                        driverPos,
+                                                        15f
+                                                )
+                                        );
+                                    }
+                                }
+
+                            } catch(Exception e){
+                                e.printStackTrace();
+                            }
+
+                        },
+
+                        error -> {
+
+                            Toast.makeText(
+                                    this,
+                                    "Erreur profil chauffeur",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+
+                );
+
+        Volley.newRequestQueue(this)
+                .add(request);
+    }
+
+    private void updateDriverMarker(
+            double lat,
+            double lng
+    ){
+
+        if(mMap == null){
+            return;
+        }
+
+        LatLng driverPos =
+                new LatLng(lat,lng);
+
+        if(driverMarker == null){
+
+            driverMarker =
+                    mMap.addMarker(
+
+                            new MarkerOptions()
+                                    .position(driverPos)
+                                    .title("Chauffeur")
+                                    .flat(true)
+                                    .anchor(0.5f,0.5f)
+                                    .icon(
+                                            resizeMapIcon(
+                                                    R.drawable.car_top,
+                                                    90,
+                                                    90
+                                            )
+                                    )
+                    );
+
+        } else {
+
+            driverMarker.setPosition(driverPos);
+        }
+    }
+
+    private BitmapDescriptor resizeMapIcon(
+            int iconResId,
+            int width,
+            int height
+    ){
+
+        android.graphics.Bitmap imageBitmap =
+                android.graphics.BitmapFactory.decodeResource(
+                        getResources(),
+                        iconResId
+                );
+
+        android.graphics.Bitmap resizedBitmap =
+                android.graphics.Bitmap.createScaledBitmap(
+                        imageBitmap,
+                        width,
+                        height,
+                        false
+                );
+
+        return BitmapDescriptorFactory.fromBitmap(
+                resizedBitmap
+        );
     }
 
     // ================= MAP =================
@@ -117,7 +289,9 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
         layoutDriver.setVisibility(View.VISIBLE);
 
         tvDriverName.setText(name);
-        tvCar.setText(car);
+        tvCar.setText(
+                car + " • " + driverPhone
+        );
     }
 
     // ================= DRIVER SEARCH =================
@@ -128,10 +302,9 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
             @Override
             public void run() {
 
-                if (!driverFound) {
-                    checkDriverStatus();
-                    handler.postDelayed(this, 5000);
-                }
+                checkDriverStatus();
+
+                handler.postDelayed(this, 5000);
             }
         }, 3000);
     }
@@ -152,12 +325,25 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
 
                             driverFound = true;
 
-                            String name = json.getString("driver_name");
-                            String car = json.getString("vehicle");
+                            driverId = json.getString("driver_id");
+                            driverPhone = json.getString("phone");
 
-                            showDriver(name, car);
+                            loadDriverProfile();
 
-                            Toast.makeText(this, "Chauffeur trouvé 🚗", Toast.LENGTH_SHORT).show();
+                            if(!driverUIShown){
+
+                                driverUIShown = true;
+
+                                Toast.makeText(
+                                        this,
+                                        "Chauffeur trouvé 🚗",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                layoutSearching.setVisibility(View.GONE);
+
+                                layoutDriver.setVisibility(View.VISIBLE);
+                            }
                         }
 
                     } catch (Exception e) {
@@ -176,6 +362,18 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     private void initButtons() {
 
         // ❌ Annuler
+        findViewById(R.id.btnCancelSearching)
+                .setOnClickListener(v -> {
+
+                    new AlertDialog.Builder(this)
+                            .setTitle("Annuler")
+                            .setMessage("Voulez-vous annuler la recherche ?")
+                            .setPositiveButton("Oui", (d, i) -> cancelRide())
+                            .setNegativeButton("Non", null)
+                            .show();
+                });
+
+        // ❌ Annuler
         findViewById(R.id.btnCancel).setOnClickListener(v -> {
 
             new AlertDialog.Builder(this)
@@ -190,6 +388,33 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
 //        findViewById(R.id.btnOrders).setOnClickListener(v -> {
 //            startActivity(new Intent(this, OrdersActivity.class));
 //        });
+        findViewById(R.id.btnCallDriver)
+                .setOnClickListener(v -> {
+
+                    if(driverPhone.isEmpty()){
+
+                        Toast.makeText(
+                                this,
+                                "Numéro indisponible",
+                                Toast.LENGTH_SHORT
+                        ).show();
+
+                        return;
+                    }
+
+                    Intent intent =
+                            new Intent(
+                                    Intent.ACTION_DIAL
+                            );
+
+                    intent.setData(
+                            android.net.Uri.parse(
+                                    "tel:" + driverPhone
+                            )
+                    );
+
+                    startActivity(intent);
+                });
     }
 
     private void cancelRide() {
@@ -206,6 +431,18 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
 
                         if (json.getBoolean("success")) {
                             Toast.makeText(this, "Course annulée ✅", Toast.LENGTH_SHORT).show();
+                            Intent intent =
+                                    new Intent(
+                                            WaitingDriverActivity.this,
+                                            RideSelectActivity.class
+                                    );
+
+                            intent.addFlags(
+                                    Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            );
+
+                            startActivity(intent);
+
                             finish();
                         } else {
                             Toast.makeText(this, json.getString("message"), Toast.LENGTH_LONG).show();
@@ -241,5 +478,16 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
         };
 
         Volley.newRequestQueue(this).add(request);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        handler.removeCallbacksAndMessages(null);
+
+        if(driverMarker != null){
+            driverMarker.remove();
+        }
     }
 }

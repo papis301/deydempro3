@@ -94,6 +94,14 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     TextView txtPhone;
     ImageView imgProfile;
 
+    TextView txtSolde;
+
+    TextView txtJobs;
+
+    TextView txtDistance;
+
+    TextView txtHours;
+
     // ================================
     // 🚀 ON CREATE
     // ================================
@@ -117,6 +125,13 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         txtPhone = findViewById(R.id.txtPhone);
 
         imgProfile = findViewById(R.id.imgProfile);
+        txtSolde = findViewById(R.id.txtSolde);
+
+        txtJobs = findViewById(R.id.txtJobs);
+
+        txtDistance = findViewById(R.id.txtDistance);
+
+        txtHours = findViewById(R.id.txtHours);
 
         // USER
         SharedPreferences sp =
@@ -299,12 +314,31 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                                     String photo =
                                             driver.optString("photo");
 
+                                    String solde =
+                                            driver.optString("solde");
+
+                                    String totalCourses =
+                                            driver.optString("total_courses");
+
+                                    String completed =
+                                            driver.optString("completed");
+
+                                    String rating =
+                                            driver.optString("rating");
+
                                     //
                                     // 🔥 UI
                                     //
                                     txtDriverName.setText(name);
 
                                     txtPhone.setText(phone);
+                                    txtSolde.setText(solde + " CFA");
+
+                                    txtJobs.setText(totalCourses);
+
+                                    txtDistance.setText(completed);
+
+                                    txtHours.setText(rating);
 
                                 }
 

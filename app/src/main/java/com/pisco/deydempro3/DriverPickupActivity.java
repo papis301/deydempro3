@@ -5,6 +5,7 @@ import static com.pisco.deydempro3.Constants.BASE_URL;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,6 +14,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
@@ -98,6 +100,8 @@ public class DriverPickupActivity extends AppCompatActivity
     String customerPhoto;
     Button btnStartTrip;
     Button btnCompleteTrip;
+    private Handler tripHandler =
+            new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +153,7 @@ public class DriverPickupActivity extends AppCompatActivity
                 Toast.LENGTH_LONG
         ).show();
         getClientInfo();
+        startTripStatusChecker();
 
         pickupLat = getIntent().getDoubleExtra("pickup_lat",0);
         pickupLng = getIntent().getDoubleExtra("pickup_lng",0);
@@ -254,6 +259,104 @@ public class DriverPickupActivity extends AppCompatActivity
             completeTrip();
 
         });
+    }
+
+    private void startTripStatusChecker(){
+
+        tripHandler.postDelayed(
+                new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        checkTripStatus();
+
+                        tripHandler.postDelayed(
+                                this,
+                                5000
+                        );
+                    }
+                },
+                5000
+        );
+    }
+
+    private void checkTripStatus(){
+
+        String url =
+                "https://pisco.alwaysdata.net/check_trip_status.php?ride_id="
+                        + rideId;
+
+        StringRequest request =
+                new StringRequest(
+
+                        Request.Method.GET,
+                        url,
+
+                        response -> {
+
+                            try {
+
+                                JSONObject json =
+                                        new JSONObject(response);
+
+                                if(json.getBoolean("success")){
+
+                                    String status =
+                                            json.getString("status");
+
+                                    //
+                                    // 🔥 CLIENT A ANNULÉ
+                                    //
+                                    if(status.equals("cancelled")){
+
+                                        tripHandler.removeCallbacksAndMessages(null);
+
+                                        new AlertDialog.Builder(this)
+                                                .setTitle("Course annulée")
+                                                .setMessage("Le client a annulé la course.")
+                                                .setCancelable(false)
+                                                .setPositiveButton(
+                                                        "OK",
+                                                        (d,i)->{
+
+                                                            Intent intent =
+                                                                    new Intent(
+                                                                            DriverPickupActivity.this,
+                                                                            DriverHomeActivity.class
+                                                                    );
+
+                                                            intent.addFlags(
+                                                                    Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                                            );
+
+                                                            startActivity(intent);
+
+                                                            finish();
+                                                        }
+                                                )
+                                                .show();
+                                    }
+                                }
+
+                            } catch(Exception e){
+                                e.printStackTrace();
+                            }
+
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "CHECK_STATUS",
+                                    error.toString()
+                            );
+                        }
+
+                );
+
+        Volley.newRequestQueue(this)
+                .add(request);
     }
 
     private void completeTrip(){
@@ -1197,5 +1300,12 @@ private void updateTripStatus(){
         );
 
         return results[0];
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        tripHandler.removeCallbacksAndMessages(null);
     }
 }
