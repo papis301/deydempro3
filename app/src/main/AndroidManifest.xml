@@ -32,6 +32,9 @@
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
         <activity
+            android:name="deydemv3.DriverTripsActivity"
+            android:exported="false" />
+        <activity
             android:name=".DriverPickupActivity"
             android:exported="false" />
         <activity
@@ -39,7 +42,7 @@
             android:exported="false" />
         <activity
             android:name=".PhoneOtpActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".DriverHomeActivity"
             android:exported="false" />
@@ -66,7 +69,7 @@
         </activity>
         <activity
             android:name="deydemv3.HomeActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".SelectPartnerActivity"
             android:exported="false" />
@@ -127,7 +130,7 @@
             android:exported="false" />
         <activity
             android:name="deydemv3.StartActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name="deydemv3.DriverProfileActivity"
             android:exported="false" />

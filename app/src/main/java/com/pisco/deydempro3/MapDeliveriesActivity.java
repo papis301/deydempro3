@@ -137,7 +137,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
         textStatus = findViewById(R.id.textStatus);
 
         // Charger état sauvegardé
-        isOnline = getSharedPreferences("user", MODE_PRIVATE)
+        isOnline = getSharedPreferences("DeydemUser", MODE_PRIVATE)
                 .getBoolean("is_online", false);
 
         updateUI(isOnline);
@@ -170,7 +170,7 @@ public class MapDeliveriesActivity extends FragmentActivity {
             isOnline = !isOnline;
 
             // Sauvegarder
-            getSharedPreferences("user", MODE_PRIVATE)
+            getSharedPreferences("DeydemUser", MODE_PRIVATE)
                     .edit()
                     .putBoolean("is_online", isOnline)
                     .apply();

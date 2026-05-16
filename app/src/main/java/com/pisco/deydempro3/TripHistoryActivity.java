@@ -43,7 +43,7 @@ public class TripHistoryActivity extends AppCompatActivity {
 
     private void loadTrips(){
 
-        int driverId = getSharedPreferences("user", MODE_PRIVATE)
+        int driverId = getSharedPreferences("DeydemUser", MODE_PRIVATE)
                 .getInt("driver_id", 0);
 
         String url = Constants.BASE_URL + "get_driver_trips.php?driver_id=" + driverId;

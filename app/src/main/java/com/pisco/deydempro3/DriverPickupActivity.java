@@ -219,7 +219,7 @@ public class DriverPickupActivity extends AppCompatActivity
             btnStartTrip.setVisibility(View.VISIBLE);
             btnArrived.setVisibility(View.GONE);
 
-            updateTripStatus();
+            updateTripStatus("onplace");
         });
 
         btnRecenter.setOnClickListener(v -> {
@@ -250,13 +250,16 @@ public class DriverPickupActivity extends AppCompatActivity
 
         btnStartTrip.setOnClickListener(v -> {
 
-            startTrip();
+            //startTrip();
+            updateTripStatus("ongoing");
 
         });
 
         btnCompleteTrip.setOnClickListener(v -> {
 
-            completeTrip();
+           // completeTrip();
+            updateTripStatus("completed");
+            finish();
 
         });
     }
@@ -304,6 +307,7 @@ public class DriverPickupActivity extends AppCompatActivity
 
                                     String status =
                                             json.getString("status");
+                                    updateButtonsByStatus(status);
 
                                     //
                                     // 🔥 CLIENT A ANNULÉ
@@ -357,6 +361,63 @@ public class DriverPickupActivity extends AppCompatActivity
 
         Volley.newRequestQueue(this)
                 .add(request);
+    }
+
+    private void updateButtonsByStatus(String status){
+
+        //
+        // 🔥 cacher tout
+        //
+        btnArrived.setVisibility(View.GONE);
+
+        btnStartTrip.setVisibility(View.GONE);
+
+        btnCompleteTrip.setVisibility(View.GONE);
+
+        switch (status){
+
+            //
+            // 🔥 COURSE ACCEPTÉE
+            //
+            case "accepted":
+
+                btnArrived.setVisibility(View.VISIBLE);
+
+                break;
+
+            //
+            // 🔥 CHAUFFEUR SUR PLACE
+            //
+            case "onplace":
+
+                btnStartTrip.setVisibility(View.VISIBLE);
+
+                break;
+
+            //
+            // 🔥 COURSE EN COURS
+            //
+            case "ongoing":
+
+                btnCompleteTrip.setVisibility(View.VISIBLE);
+
+                break;
+
+            //
+            // 🔥 COURSE TERMINÉE
+            //
+            case "completed":
+
+                Toast.makeText(
+                        this,
+                        "Course terminée",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+
+                break;
+        }
     }
 
     private void completeTrip(){
@@ -1239,38 +1300,78 @@ public class DriverPickupActivity extends AppCompatActivity
 
 
 
-private void updateTripStatus(){
+    private void updateTripStatus(String status){
 
-    String url =
-            "https://pisco.alwaysdata.net/update_trip_status.php";
+        String url =
+                "https://pisco.alwaysdata.net/update_trip_status.php";
 
-    StringRequest request = new StringRequest(
-            Request.Method.POST,
-            url,
-            response -> {
+        Log.d(
+                "STATUS_DEBUG",
+                "rideId=" + rideId
+                        + " driverId=" + userId
+                        + " status=" + status
+        );
 
-            },
-            error -> {
+        StringRequest request =
+                new StringRequest(
 
-            }
-    ){
+                        Request.Method.POST,
+                        url,
 
-        @Override
-        protected java.util.Map<String, String> getParams(){
+                        response -> {
 
-            java.util.Map<String,String> params =
-                    new java.util.HashMap<>();
+                            Log.d(
+                                    "reponse status",
+                                    response
+                            );
 
-            params.put("ride_id", rideId);
-            params.put("status", "onplace");
+                            Toast.makeText(
+                                    this,
+                                    "Status : " + status,
+                                    Toast.LENGTH_SHORT
+                            ).show();
 
-            return params;
-        }
-    };
+                            updateButtonsByStatus(status);
+                        },
 
-    Volley.newRequestQueue(this)
-            .add(request);
-}
+                        error -> {
+
+                            Log.e(
+                                    "STATUS_ERROR",
+                                    error.toString()
+                            );
+                        }
+
+                ){
+
+                    @Override
+                    protected Map<String, String> getParams(){
+
+                        Map<String,String> params =
+                                new HashMap<>();
+
+                        params.put(
+                                "ride_id",
+                                rideId
+                        );
+
+                        params.put(
+                                "driver_id",
+                                userId
+                        );
+
+                        params.put(
+                                "status",
+                                status
+                        );
+
+                        return params;
+                    }
+                };
+
+        Volley.newRequestQueue(this)
+                .add(request);
+    }
 
     private boolean isMarkerVisible(LatLng latLng){
 

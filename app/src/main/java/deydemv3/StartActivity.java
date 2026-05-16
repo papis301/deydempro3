@@ -20,6 +20,7 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.pisco.deydempro3.R;
+import com.pisco.deydempro3.SelectRoleActivity;
 
 import org.json.JSONObject;
 
@@ -123,7 +124,7 @@ public class StartActivity extends AppCompatActivity {
                         boolean success = json.optBoolean("success", false);
 
                         if (success) {
-                            startActivity(new Intent(this, PickupDeliveryActivity.class));
+                            startActivity(new Intent(this, SelectRoleActivity.class));
                         } else {
                             clearSession();
                             startActivity(new Intent(this, LoginActivityc.class));

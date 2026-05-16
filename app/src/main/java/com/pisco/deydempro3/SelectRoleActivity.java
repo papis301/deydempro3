@@ -102,55 +102,55 @@ public class SelectRoleActivity extends AppCompatActivity {
                 LocationManager.GPS_PROVIDER
         );
     }
-    private void switchModeAPI(String newMode) {
-
-        String url = "https://pisco.alwaysdata.net/switch_mode.php";
-
-        StringRequest request = new StringRequest(Request.Method.POST, url,
-
-                response -> {
-                    try {
-                        JSONObject json = new JSONObject(response);
-
-                        if(json.getBoolean("success")){
-
-                            // 🔥 sauvegarder local
-                            ModeManager.setMode(this, newMode);
-
-                            Toast.makeText(this,
-                                    "Mode : " + newMode,
-                                    Toast.LENGTH_SHORT).show();
-
-                            // 🔥 redirection unique
-//                            if(newMode.equals("driver")){
-//                                startActivity(new Intent(this, StartActivitypro.class));
-//                            } else {
-//                                startActivity(new Intent(this, RideSelectActivity.class));
-//                            }
-
-                            finish();
-                        }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                },
-
-                error -> Toast.makeText(this, "Erreur réseau ❌", Toast.LENGTH_SHORT).show()
-        ) {
-            @Override
-            protected Map<String, String> getParams() {
-
-                Map<String, String> params = new HashMap<>();
-                params.put("user_id", String.valueOf(getUserId())); // 🔥 à implémenter
-                params.put("mode", newMode);
-
-                return params;
-            }
-        };
-
-        Volley.newRequestQueue(this).add(request);
-    }
+//    private void switchModeAPI(String newMode) {
+//
+//        String url = "https://pisco.alwaysdata.net/switch_mode.php";
+//
+//        StringRequest request = new StringRequest(Request.Method.POST, url,
+//
+//                response -> {
+//                    try {
+//                        JSONObject json = new JSONObject(response);
+//
+//                        if(json.getBoolean("success")){
+//
+//                            // 🔥 sauvegarder local
+//                            ModeManager.setMode(this, newMode);
+//
+//                            Toast.makeText(this,
+//                                    "Mode : " + newMode,
+//                                    Toast.LENGTH_SHORT).show();
+//
+//                            // 🔥 redirection unique
+////                            if(newMode.equals("driver")){
+////                                startActivity(new Intent(this, StartActivitypro.class));
+////                            } else {
+////                                startActivity(new Intent(this, RideSelectActivity.class));
+////                            }
+//
+//                            finish();
+//                        }
+//
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                },
+//
+//                error -> Toast.makeText(this, "Erreur réseau ❌", Toast.LENGTH_SHORT).show()
+//        ) {
+//            @Override
+//            protected Map<String, String> getParams() {
+//
+//                Map<String, String> params = new HashMap<>();
+//                params.put("user_id", String.valueOf(getUserId())); // 🔥 à implémenter
+//                params.put("mode", newMode);
+//
+//                return params;
+//            }
+//        };
+//
+//        Volley.newRequestQueue(this).add(request);
+//    }
 
     private boolean isConnected() {
 
@@ -205,7 +205,7 @@ public class SelectRoleActivity extends AppCompatActivity {
 
     // 🔥 récupère ton user id (à adapter)
     private int getUserId() {
-        return getSharedPreferences("USER", MODE_PRIVATE)
+        return getSharedPreferences("DeydemUser", MODE_PRIVATE)
                 .getInt("user_id", 0);
     }
 }

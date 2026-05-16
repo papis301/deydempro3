@@ -77,6 +77,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
     int finalPrixParticulier = 0;
     int finalPrixTaxi = 0;
     int finalPrixConfort = 0;
+    int finalPrixMoto = 0;
     double distanceKm = 0;
     int durationMin = 0;
     double distanceValue = 0;
@@ -157,10 +158,12 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
         LinearLayout btnParticulier = findViewById(R.id.layoutParticulier);
         LinearLayout btnTaxi = findViewById(R.id.layoutTaxi);
         LinearLayout btnConfort = findViewById(R.id.layoutConfort);
+        LinearLayout btnMoto = findViewById(R.id.layoutMoto);
 
         btnParticulier.setOnClickListener(v -> selectVehicle("PARTICULIER"));
         btnTaxi.setOnClickListener(v -> selectVehicle("TAXI"));
         btnConfort.setOnClickListener(v -> selectVehicle("CONFORT"));
+        btnMoto.setOnClickListener(v -> selectVehicle("MOTO"));
 
         selectVehicle("PARTICULIER");
 
@@ -264,11 +267,14 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
         LinearLayout p = findViewById(R.id.layoutParticulier);
         LinearLayout t = findViewById(R.id.layoutTaxi);
         LinearLayout c = findViewById(R.id.layoutConfort);
+        LinearLayout m = findViewById(R.id.layoutMoto);
 
         // reset
         p.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         t.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         c.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        m.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+
 
         // highlight sélection
         if (type.equals("PARTICULIER")) {
@@ -277,6 +283,8 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
             t.setBackgroundResource(R.drawable.selected_bg);
         } else if (type.equals("CONFORT")) {
             c.setBackgroundResource(R.drawable.selected_bg);
+        } else if (type.equals("MOTO")) {
+            m.setBackgroundResource(R.drawable.selected_bg);
         }
     }
 
@@ -492,6 +500,8 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
             price = finalPrixTaxi;
         } else if (selectedVehicle.equals("CONFORT")) {
             price = finalPrixConfort;
+        } else if (selectedVehicle.equals("MOTO")) {
+            price = finalPrixMoto;
         }
 
         return String.valueOf(price);
@@ -608,6 +618,7 @@ private void sendRide() {
         double baseParticulier = 0, perKmParticulier = 0;
         double baseTaxi = 0, perKmTaxi = 0;
         double baseConfort = 0, perKmConfort = 0;
+        double baseMoto = 0, perKmMoto = 0;
 
         // 🔥 TARIFS PAR VILLE
         if (city.equals("DAKAR")) {
@@ -621,25 +632,46 @@ private void sendRide() {
              baseConfort = 900;
              perKmConfort = 350;
 
+            baseMoto = 500;
+            perKmMoto = 105;
+
         } else if (city.equals("THIES")) {
 
             baseParticulier = 500;
-            perKmParticulier = 150;
+            perKmParticulier = 100;
 
-            baseTaxi = 800;
-            perKmTaxi = 200;
+            baseTaxi = 600;
+            perKmTaxi = 150;
 
-            baseConfort = 700;
-            perKmConfort = 200;
+            baseConfort = 600;
+            perKmConfort = 150;
+
+            baseMoto = 300;
+            perKmMoto = 50;
 
         } 
 
 
         // 🔥 CALCUL
-        int prixParticulier = (int) Math.round(baseParticulier + (distanceKm * perKmParticulier));
-        int prixTaxi = (int) Math.round(baseTaxi + (distanceKm * perKmTaxi));
-        int prixConfort = (int) Math.round(baseConfort + (distanceKm * perKmConfort));
+        int prixParticulier =
+                roundPrice(
+                        (int)(baseParticulier + (distanceKm * perKmParticulier))
+                );
 
+        int prixTaxi =
+                roundPrice(
+                        (int)(baseTaxi + (distanceKm * perKmTaxi))
+                );
+
+        int prixConfort =
+                roundPrice(
+                        (int)(baseConfort + (distanceKm * perKmConfort))
+                );
+
+        int prixMoto =
+                roundPrice(
+                        (int)(baseMoto + (distanceKm * perKmMoto))
+                );
         // 🔥 MINIMUM (important)
         //if (prixParticulier < 600) prixParticulier = 600;
         //if (prixTaxi < 1000) prixTaxi = 1000;
@@ -648,16 +680,26 @@ private void sendRide() {
          finalPrixParticulier = prixParticulier;
          finalPrixTaxi = prixTaxi;
          finalPrixConfort = prixConfort;
+         finalPrixMoto = prixMoto;
         runOnUiThread(() -> {
 
             TextView p1 = findViewById(R.id.priceParticulier);
             TextView p2 = findViewById(R.id.priceTaxi);
             TextView p3 = findViewById(R.id.priceConfort);
+            TextView p4 = findViewById(R.id.priceMoto);
 
             if (p1 != null) p1.setText(finalPrixParticulier + " FCFA");
             if (p2 != null) p2.setText(finalPrixTaxi + " FCFA");
             if (p3 != null) p3.setText(finalPrixConfort + " FCFA");
+            if (p4 != null) p4.setText(finalPrixMoto + " FCFA");
         });
+    }
+
+    private int roundPrice(int price){
+
+        return (int) (
+                Math.round(price / 50.0) * 50
+        );
     }
 
 private void drawOSRMRoute(LatLng origin, LatLng destination) {

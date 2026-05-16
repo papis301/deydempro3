@@ -49,7 +49,7 @@ public class DriverDocumentsActivity extends AppCompatActivity {
         recycler = findViewById(R.id.recycler);
         btnRefresh = findViewById(R.id.btnRefresh);
 
-        SharedPreferences userSp = getSharedPreferences("user", MODE_PRIVATE);
+        SharedPreferences userSp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
          driverId = userSp.getInt("driver_id", 0);
 
         recycler.setLayoutManager(new GridLayoutManager(this, 3));
@@ -59,7 +59,7 @@ public class DriverDocumentsActivity extends AppCompatActivity {
         // =====================
         // 📞 Numéro chauffeur
         // =====================
-        SharedPreferences sp = getSharedPreferences("user", MODE_PRIVATE);
+        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
         driverPhone = sp.getString("phone", "Inconnu");
 
         // =====================

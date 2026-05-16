@@ -86,7 +86,7 @@ public class StartActivitypro extends AppCompatActivity {
         }
 
         // 🔐 CONNEXION CHAUFFEUR
-        SharedPreferences userSp = getSharedPreferences("user", MODE_PRIVATE);
+        SharedPreferences userSp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
         int driverId = userSp.getInt("driver_id", 0);
 
         if (driverId == 0) {
@@ -267,7 +267,7 @@ public class StartActivitypro extends AppCompatActivity {
 
     // 📄 CGU
     private boolean isCguAccepted() {
-        SharedPreferences sp = getSharedPreferences("DeydemPro", MODE_PRIVATE);
+        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
         return sp.getBoolean("cgu_accepted", false);
     }
 

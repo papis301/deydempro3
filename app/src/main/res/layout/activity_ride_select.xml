@@ -8,7 +8,7 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="300dp"
         android:layout_above="@id/bottomPanel"/>
 
     <!-- TOP SEARCH PANEL -->
@@ -177,6 +177,32 @@
 
             <!-- BIKE -->
             <LinearLayout
+                android:id="@+id/layoutMoto"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:src="@drawable/ic_bike"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
+
+                <TextView
+                    android:text="Moto"
+                    android:textSize="12sp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/priceMoto"
+                    android:text="0 FCFA"
+                    android:textColor="#00C853"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout
                 android:id="@+id/layoutParticulier"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -185,7 +211,7 @@
                 android:layout_height="wrap_content">
 
                 <ImageView
-                    android:src="@drawable/ic_driver"
+                    android:src="@drawable/ic_car"
                     android:layout_width="40dp"
                     android:layout_height="40dp"/>
 
@@ -213,7 +239,7 @@
                 android:layout_height="wrap_content">
 
                 <ImageView
-                    android:src="@drawable/ic_driver"
+                    android:src="@drawable/ic_taxi"
                     android:layout_width="40dp"
                     android:layout_height="40dp"/>
 
@@ -241,7 +267,7 @@
                 android:layout_height="wrap_content">
 
                 <ImageView
-                    android:src="@drawable/ic_driver"
+                    android:src="@drawable/suv"
                     android:layout_width="40dp"
                     android:layout_height="40dp"/>
 

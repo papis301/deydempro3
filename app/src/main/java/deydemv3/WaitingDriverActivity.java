@@ -47,6 +47,8 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     private String driverPhoto = "";
     private String driverId = "";
     private TextView tvArrival;
+    private Handler tripStatusHandler = new Handler();
+    private boolean tripCancelledDialogShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +77,141 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
         showSearching();
 
         startDriverSearch();
+        startTripStatusChecker();
 
 
+    }
+
+    private void startTripStatusChecker(){
+
+        tripStatusHandler.postDelayed(
+                new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        checkTripStatus();
+
+                        tripStatusHandler.postDelayed(
+                                this,
+                                5000
+                        );
+                    }
+                },
+                5000
+        );
+    }
+
+    private void checkTripStatus(){
+
+        String url =
+                "https://pisco.alwaysdata.net/check_trip_status.php?ride_id="
+                        + rideId;
+
+        StringRequest request =
+                new StringRequest(
+
+                        Request.Method.GET,
+                        url,
+
+                        response -> {
+
+                            try {
+
+                                JSONObject json =
+                                        new JSONObject(response);
+
+                                if(json.getBoolean("success")){
+
+                                    String status =
+                                            json.getString("status");
+
+                                    //
+                                    // 🔥 CHAUFFEUR A ANNULÉ
+                                    //
+                                    if(status.equals("pending")
+                                            && driverFound
+                                            && !tripCancelledDialogShown){
+
+                                        tripCancelledDialogShown = true;
+
+                                        //
+                                        // 🔥 reset état chauffeur
+                                        //
+                                        driverFound = false;
+                                        driverUIShown = false;
+                                        driverId = "";
+
+                                        //
+                                        // 🔥 enlever marker voiture
+                                        //
+                                        if(driverMarker != null){
+
+                                            driverMarker.remove();
+                                            driverMarker = null;
+                                        }
+
+                                        //
+                                        // 🔥 retour écran recherche
+                                        //
+                                        showSearching();
+
+                                        //
+                                        // 🔥 popup UNE SEULE FOIS
+                                        //
+                                        new AlertDialog.Builder(this)
+                                                .setTitle("Course annulée")
+                                                .setMessage("Le chauffeur a annulé la course.")
+                                                .setCancelable(false)
+                                                .setPositiveButton(
+                                                        "OK",
+                                                        (d,i)->{
+
+                                                            //
+                                                            // 🔥 réautoriser futur dialog
+                                                            //
+                                                            tripCancelledDialogShown = false;
+                                                        }
+                                                )
+                                                .show();
+                                    }
+
+                                    //
+                                    // 🔥 COURSE TERMINÉE
+                                    //
+                                    if(status.equals("completed")){
+
+                                        tripStatusHandler.removeCallbacksAndMessages(null);
+                                        tripCancelledDialogShown = true;
+
+                                        Toast.makeText(
+                                                WaitingDriverActivity.this,
+                                                "Course terminée",
+                                                Toast.LENGTH_LONG
+                                        ).show();
+
+                                        finish();
+                                    }
+                                }
+
+                            } catch(Exception e){
+                                e.printStackTrace();
+                            }
+
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "TRIP_STATUS",
+                                    error.toString()
+                            );
+                        }
+
+                );
+
+        Volley.newRequestQueue(this)
+                .add(request);
     }
 
     private void loadDriverProfile(){
@@ -483,7 +618,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        tripStatusHandler.removeCallbacksAndMessages(null);
         handler.removeCallbacksAndMessages(null);
 
         if(driverMarker != null){

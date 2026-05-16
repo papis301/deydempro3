@@ -39,6 +39,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import deydemv3.DriverTripsActivity;
 import deydemv3.LoginActivityc;
 
 public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -101,6 +102,7 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     TextView txtDistance;
 
     TextView txtHours;
+    private boolean hasPartner = false;
 
     // ================================
     // 🚀 ON CREATE
@@ -132,6 +134,8 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         txtDistance = findViewById(R.id.txtDistance);
 
         txtHours = findViewById(R.id.txtHours);
+        LinearLayout btnLogout =
+                findViewById(R.id.btnLogout);
 
         // USER
         SharedPreferences sp =
@@ -187,7 +191,14 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
             return;
         } Toast.makeText(this,"id"+ userId,Toast.LENGTH_SHORT).show();
 
+        loadDriverProfile();
 
+
+        btnLogout.setOnClickListener(v -> {
+
+            logout();
+
+        });
         // MAP
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager()
@@ -213,6 +224,7 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                     .apply();
 
             if(isOnline){
+
                 setOnlineUI();
                 startDispatchLoop(); // démarre UNE seule fois
                 checkActiveTrip();
@@ -233,6 +245,19 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
             updateStatus(isOnline);
         });
+
+        //ouvrir l'activite des courses
+        findViewById(R.id.btnTrips)
+                .setOnClickListener(v -> {
+
+                    Intent intent =
+                            new Intent(
+                                    DriverHomeActivity.this,
+                                    DriverTripsActivity.class
+                            );
+
+                    startActivity(intent);
+                });
 
         btnMenu.setOnClickListener(v -> {
 
@@ -264,17 +289,122 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
         findViewById(R.id.btnLogout)
                 .setOnClickListener(v -> {
-
-                    startActivity(
-                            new Intent(
-                                    this,
-                                    LoginActivityc.class
-                            )
-                    );
-
-                    finish();
+                    logout();
                 });
-        loadDriverProfile();
+
+
+    }
+
+    private void showPartnerDialog(){
+
+        AlertDialog dialog =
+                new AlertDialog.Builder(this)
+
+                        .setTitle("Partenaire requis")
+
+                        .setMessage(
+                                "Vous devez trouver un partenaire avant de recevoir des courses."
+                        )
+
+                        .setCancelable(false)
+
+//                        .setPositiveButton(
+//                                "Trouver un partenaire",
+//                                (d, which) -> {
+//
+//                                    //
+//                                    // 🔥 OUVRIR ACTIVITÉ PARTENAIRE
+//                                    //
+//
+//                                    // startActivity(
+//                                    //         new Intent(
+//                                    //                 this,
+//                                    //                 PartnersActivity.class
+//                                    //         )
+//                                    // );
+//                                }
+//                        )
+
+                        .create();
+
+        dialog.setCanceledOnTouchOutside(false);
+
+        dialog.show();
+    }
+//    private void showPartnerDialog(){
+//
+//        new AlertDialog.Builder(this)
+//
+//                .setTitle("Partenaire requis")
+//
+//                .setMessage(
+//                        "Vous devez être lié à un partenaire avant de recevoir des courses."
+//                )
+
+//                .setPositiveButton(
+//                        "Trouver un partenaire",
+//                        (dialog, which) -> {
+//
+//                            //
+//                            // 🔥 OUVRIR ACTIVITÉ PARTENAIRES
+//                            //
+//
+//                            // startActivity(
+//                            //      new Intent(
+//                            //              this,
+//                            //              PartnersActivity.class
+//                            //      )
+//                            // );
+//
+//                        }
+//                )
+//
+//                .setNegativeButton(
+//                        "Fermer",
+//                        null
+//                )
+//
+//                .show();
+//    }
+
+    private void logout(){
+
+        //
+        // 🔥 CLEAR SESSION
+        //
+        getSharedPreferences(
+                "DeydemUser",
+                MODE_PRIVATE
+        ).edit().clear().apply();
+
+        getSharedPreferences(
+                "user",
+                MODE_PRIVATE
+        ).edit().clear().apply();
+
+        //
+        // 🔥 LOGIN
+        //
+        Intent intent =
+                new Intent(
+                        DriverHomeActivity.this,
+                        LoginActivityc.class
+                );
+
+        intent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
+        );
+
+        startActivity(intent);
+
+        finishAffinity();
+
+        Toast.makeText(
+                this,
+                "Déconnecté",
+                Toast.LENGTH_SHORT
+        ).show();
     }
 
     private void loadDriverProfile(){
@@ -306,7 +436,31 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                                             response.getJSONObject("driver");
 
                                     String name =
-                                            driver.optString("name");
+                                            driver.optString("nom_profil");
+                                    String partnerId =
+                                            driver.optString(
+                                                    "partner_id",
+                                                    ""
+                                            );
+                                    hasPartner =
+                                            partnerId != null
+                                                    && !partnerId.isEmpty()
+                                                    && !partnerId.equals("0")
+                                                    && !partnerId.equals("null");
+                                    if(!hasPartner){
+
+                                        switchOnline.setChecked(false);
+
+                                        Toast.makeText(
+                                                this,
+                                                "Trouvez un partenaire avant de recevoir des courses",
+                                                Toast.LENGTH_LONG
+                                        ).show();
+
+                                        showPartnerDialog();
+
+                                        return;
+                                    }
 
                                     String phone =
                                             driver.optString("phone");
