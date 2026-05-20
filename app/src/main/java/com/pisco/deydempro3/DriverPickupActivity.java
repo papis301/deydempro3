@@ -842,12 +842,8 @@ public class DriverPickupActivity extends AppCompatActivity
                                 driverLat,
                                 driverLng
                         );
-                        //
-                        // 🔥 DRIVER MARKER
-                        //
-//
-// 🔥 DRIVER MARKER
-//
+
+
                         //
 // 🔥 DRIVER MARKER
 //

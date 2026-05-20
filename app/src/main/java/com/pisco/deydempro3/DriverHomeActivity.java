@@ -63,7 +63,7 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
     private boolean assignmentRequested = false;
 
     private long lastProposalTime = 0;
-    private final long COOLDOWN = 15000;
+    private final long COOLDOWN = 3000;
 
     private String userId;
 
@@ -470,6 +470,22 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
                                     String solde =
                                             driver.optString("solde");
+                                    //
+                                    // 🔥 SOLDE INSUFFISANT
+                                    //
+                                    int solderecup = Integer.parseInt(solde);
+                                    if(solderecup <= 0){
+
+                                        switchOnline.setChecked(false);
+
+                                        switchOnline.setEnabled(false);
+
+                                        showLowBalanceDialog(solderecup);
+
+                                    }else{
+
+                                        switchOnline.setEnabled(true);
+                                    }
 
                                     String totalCourses =
                                             driver.optString("total_courses");
@@ -1054,6 +1070,45 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         );
     }
 
+    private void showLowBalanceDialog(int solde){
+
+        AlertDialog dialog =
+                new AlertDialog.Builder(this)
+
+                        .setTitle("Solde insuffisant")
+
+                        .setMessage(
+
+                                "Votre solde est de "
+                                        + solde
+                                        + " CFA.\n\n"
+
+                                        + "Rechargez votre compte "
+                                        + "pour continuer à recevoir "
+                                        + "des courses."
+
+                        )
+
+                        .setCancelable(false)
+
+                        .setPositiveButton(
+
+                                "OK",
+
+                                (d, which) -> {
+
+                                    d.dismiss();
+                                }
+
+                        )
+
+                        .create();
+
+        dialog.setCanceledOnTouchOutside(false);
+
+        dialog.show();
+    }
+
     // ================================
     // 📡 ENVOI POSITION
     // ================================
@@ -1090,15 +1145,16 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
             public void run() {
 
                 if(isOnline && !hasActiveTrip && !popupVisible){
+                    checkActiveTrip();
                     autoAssignDriver();
                     Log.d("DISPATCH", "loop active");
                 }
 
                 if(dispatchRunning){
-                    handler.postDelayed(this, 7000);
+                    handler.postDelayed(this, 2500);
                 }
             }
-        },7000);
+        },2500);
     }
 
     private void stopDispatchLoop(){

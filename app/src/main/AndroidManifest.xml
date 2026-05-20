@@ -54,7 +54,8 @@
             android:exported="false" />
         <activity
             android:name=".ModeManager"
-            android:exported="false" />
+            android:exported="false"
+            tools:ignore="Instantiatable" />
         <activity
             android:name=".SelectRoleActivity"
             android:exported="false" />

@@ -55,6 +55,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
+
         <!-- BANNER -->
         <LinearLayout
             android:id="@+id/bannerOffline"
