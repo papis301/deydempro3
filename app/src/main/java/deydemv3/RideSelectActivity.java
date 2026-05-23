@@ -193,14 +193,6 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 
     private void checkActiveRide(){
 
-//        String clientId =
-//                getSharedPreferences(
-//                        "user",
-//                        MODE_PRIVATE
-//                ).getString(
-//                        "user_id",
-//                        "0"
-//                );
 
         String url =
                 "https://pisco.alwaysdata.net/get_client_active_trip.php?client_id="
@@ -450,13 +442,6 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
                     dropoffLatLng.latitude, dropoffLatLng.longitude
             );
 
-//            double distanceMeters = json.getJSONArray("routes")
-//                    .getJSONObject(0)
-//                    .getDouble("distance");
-//
-//            double durationSec = json.getJSONArray("routes")
-//                    .getJSONObject(0)
-//                    .getDouble("duration");
 
 
 
@@ -650,7 +635,6 @@ private void sendRide() {
             perKmMoto = 50;
 
         } 
-
 
         // 🔥 CALCUL
         int prixParticulier =

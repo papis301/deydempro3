@@ -49,6 +49,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     private TextView tvArrival;
     private Handler tripStatusHandler = new Handler();
     private boolean tripCancelledDialogShown = false;
+    private boolean isActivityDestroyed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -254,7 +255,11 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
                                     tvDriverName.setText(
                                             "🚗 " + name
                                     );
-                                   // driverPhone = driver.getString("phone");
+                                    driverPhone =
+                                            driver.optString(
+                                                    "phone",
+                                                    ""
+                                            );
 
                                     tvCar.setText(vehicle);
 

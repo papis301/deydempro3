@@ -308,22 +308,22 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
 
                         .setCancelable(false)
 
-//                        .setPositiveButton(
-//                                "Trouver un partenaire",
-//                                (d, which) -> {
-//
-//                                    //
-//                                    // 🔥 OUVRIR ACTIVITÉ PARTENAIRE
-//                                    //
-//
-//                                    // startActivity(
-//                                    //         new Intent(
-//                                    //                 this,
-//                                    //                 PartnersActivity.class
-//                                    //         )
-//                                    // );
-//                                }
-//                        )
+                        .setPositiveButton(
+                                "Trouver un partenaire",
+                                (d, which) -> {
+
+                                    //
+                                    // 🔥 OUVRIR ACTIVITÉ PARTENAIRE
+                                    //
+
+                                     startActivity(
+                                             new Intent(
+                                                     this,
+                                                     PartnersActivity.class
+                                             )
+                                     );
+                                }
+                        )
 
                         .create();
 

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:orientation="vertical">
+
+    <TextView
+
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+
+        android:text="Liste des partenaires"
+
+        android:textSize="24sp"
+
+        android:textStyle="bold"
+
+        android:padding="15dp"/>
+
+    <ListView
+
+        android:id="@+id/listPartners"
+
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent"/>
+    <TextView
+
+        android:id="@+id/txtEmpty"
+
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+
+        android:text="Aucun partenaire disponible"
+
+        android:textSize="18sp"
+
+        android:visibility="gone"
+
+        android:layout_gravity="center"
+
+        android:padding="20dp"/>
+
+</LinearLayout>
