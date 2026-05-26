@@ -1,125 +1,440 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+
+    android:fillViewport="true"
+
+    android:background="#F4F8E7">
 
     <LinearLayout
+
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="20dp">
 
-        <!-- LOGO -->
+        android:gravity="center_horizontal"
+
+        android:padding="24dp">
+
+        <!-- 🔥 TOP SPACE -->
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"/>
+
+        <!-- 🔥 LOGO -->
+
         <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+
+            android:layout_width="130dp"
+
+            android:layout_height="130dp"
+
             android:src="@drawable/logodeydempro"
-            android:layout_marginTop="30dp"/>
 
-        <!-- TITRE -->
+            android:scaleType="fitCenter"/>
+
+        <!-- 🔥 TITLE -->
+
         <TextView
-            android:text="Choisissez votre profil"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#333"
-            android:layout_marginTop="20dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
 
-        <!-- DESCRIPTION -->
-        <TextView
-            android:text="Veuillez sélectionner une option pour continuer"
-            android:textSize="14sp"
-            android:textColor="#777"
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
 
-        <!-- CONTAINER -->
-        <LinearLayout
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="30dp">
 
-            <!-- CLIENT -->
+            android:text="Choisissez votre profil"
+
+            android:textColor="#111111"
+
+            android:textStyle="bold"
+
+            android:textSize="30sp"
+
+            android:layout_marginTop="20dp"/>
+
+        <!-- 🔥 SUBTITLE -->
+
+        <TextView
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:text="Veuillez sélectionner une option pour continuer"
+
+            android:textColor="#777777"
+
+            android:textSize="15sp"
+
+            android:gravity="center"
+
+            android:layout_marginTop="10dp"/>
+
+        <!-- 🔥 INDICATOR -->
+
+        <LinearLayout
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:orientation="horizontal"
+
+            android:layout_marginTop="20dp"
+
+            android:gravity="center">
+
+            <View
+
+                android:layout_width="50dp"
+
+                android:layout_height="6dp"
+
+                android:background="#00C853"/>
+
+            <View
+
+                android:layout_width="8dp"
+
+                android:layout_height="8dp"
+
+                android:layout_marginStart="10dp"
+
+                android:background="#6EE7B7"/>
+
+        </LinearLayout>
+
+        <!-- 🔥 CARDS -->
+
+        <LinearLayout
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:orientation="horizontal"
+
+            android:layout_marginTop="35dp">
+
+            <!-- 🔥 CLIENT CARD -->
+
             <LinearLayout
+
                 android:id="@+id/btnClient"
+
                 android:layout_width="0dp"
+
                 android:layout_height="wrap_content"
+
                 android:layout_weight="1"
-                android:background="@drawable/card_bg"
+
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:layout_marginEnd="10dp">
+
+                android:background="@drawable/card_bg"
+
+                android:padding="18dp"
+
+                android:layout_marginEnd="10dp"
+
+                android:elevation="5dp"
+
+                android:gravity="center">
+
+                <!-- IMAGE -->
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+
+                    android:layout_width="120dp"
+
+                    android:layout_height="120dp"
+
                     android:src="@drawable/client"
-                    android:layout_gravity="center"/>
+
+                    android:scaleType="fitCenter"/>
+
+                <!-- ICON -->
+
+                <ImageView
+
+                    android:layout_width="45dp"
+
+                    android:layout_height="45dp"
+
+                    android:src="@drawable/ic_user"
+
+                    android:padding="10dp"
+
+                    android:background="@drawable/circle_white"
+
+                    android:layout_marginTop="-20dp"/>
+
+                <!-- TITLE -->
 
                 <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
                     android:text="Client"
+
                     android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:textColor="#00C853"
-                    android:layout_marginTop="10dp"
-                    android:layout_gravity="center"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"/>
+
+                    android:textColor="#00B248"
+
+                    android:textSize="22sp"
+
+                    android:layout_marginTop="15dp"/>
+
+                <!-- DESCRIPTION -->
 
                 <TextView
-                    android:text="Réservez un trajet facilement"
-                    android:textSize="12sp"
-                    android:textColor="#555"
-                    android:gravity="center"
-                    android:layout_marginTop="5dp"
+
+                    android:layout_width="wrap_content"
+
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"/>
+
+                    android:text="Réservez un trajet facilement"
+
+                    android:textColor="#666666"
+
+                    android:textSize="14sp"
+
+                    android:gravity="center"
+
+                    android:layout_marginTop="8dp"/>
+
+                <!-- BUTTON -->
+
+                <LinearLayout
+
+                    android:layout_width="match_parent"
+
+                    android:layout_height="50dp"
+
+                    android:background="@drawable/button_green"
+
+                    android:layout_marginTop="25dp"
+
+                    android:gravity="center">
+
+                    <ImageView
+
+                        android:layout_width="24dp"
+
+                        android:layout_height="24dp"
+
+                        android:src="@drawable/ic_arrow"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <!-- CHAUFFEUR -->
+            <!-- 🔥 DRIVER CARD -->
+
             <LinearLayout
+
                 android:id="@+id/btnDriver"
+
                 android:layout_width="0dp"
+
                 android:layout_height="wrap_content"
+
                 android:layout_weight="1"
-                android:background="@drawable/card_bg"
+
                 android:orientation="vertical"
-                android:padding="16dp">
+
+                android:background="@drawable/card_bg"
+
+                android:padding="18dp"
+
+                android:elevation="5dp"
+
+                android:gravity="center">
+
+                <!-- IMAGE -->
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+
+                    android:layout_width="120dp"
+
+                    android:layout_height="120dp"
+
                     android:src="@drawable/chauffeur"
-                    android:layout_gravity="center"/>
+
+                    android:scaleType="fitCenter"/>
+
+                <!-- ICON -->
+
+                <ImageView
+
+                    android:layout_width="45dp"
+
+                    android:layout_height="45dp"
+
+                    android:src="@drawable/ic_steering"
+
+                    android:padding="10dp"
+
+                    android:background="@drawable/circle_white"
+
+                    android:layout_marginTop="-20dp"/>
+
+                <!-- TITLE -->
 
                 <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
                     android:text="Chauffeur"
+
                     android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:textColor="#00695C"
-                    android:layout_marginTop="10dp"
-                    android:layout_gravity="center"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"/>
+
+                    android:textColor="#009688"
+
+                    android:textSize="22sp"
+
+                    android:layout_marginTop="15dp"/>
+
+                <!-- DESCRIPTION -->
 
                 <TextView
-                    android:text="Gagnez de l'argent en conduisant"
-                    android:textSize="12sp"
-                    android:textColor="#555"
-                    android:gravity="center"
-                    android:layout_marginTop="5dp"
+
+                    android:layout_width="wrap_content"
+
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"/>
+
+                    android:text="Gagnez de l'argent en conduisant"
+
+                    android:textColor="#666666"
+
+                    android:textSize="14sp"
+
+                    android:gravity="center"
+
+                    android:layout_marginTop="8dp"/>
+
+                <!-- BUTTON -->
+
+                <LinearLayout
+
+                    android:layout_width="match_parent"
+
+                    android:layout_height="50dp"
+
+                    android:background="@drawable/button_green"
+
+                    android:layout_marginTop="25dp"
+
+                    android:gravity="center">
+
+                    <ImageView
+
+                        android:layout_width="24dp"
+
+                        android:layout_height="24dp"
+
+                        android:src="@drawable/ic_arrow"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
 
+        <!-- 🔥 SECURITY CARD -->
+
+        <LinearLayout
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:orientation="horizontal"
+
+            android:background="@drawable/card_bg"
+
+            android:padding="18dp"
+
+            android:elevation="4dp"
+
+            android:layout_marginTop="35dp"
+
+            android:gravity="center_vertical">
+
+            <ImageView
+
+                android:layout_width="40dp"
+
+                android:layout_height="40dp"
+
+                android:src="@drawable/ic_security"/>
+
+            <LinearLayout
+
+                android:layout_width="0dp"
+
+                android:layout_height="wrap_content"
+
+                android:layout_weight="1"
+
+                android:orientation="vertical"
+
+                android:layout_marginStart="15dp">
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    android:text="Sécurisé  Fiable"
+
+                    android:textStyle="bold"
+
+                    android:textColor="#111111"
+
+                    android:textSize="18sp"/>
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    android:text="Vos données sont protégées et sécurisées"
+
+                    android:textColor="#666666"
+
+                    android:textSize="13sp"
+
+                    android:layout_marginTop="4dp"/>
+
+            </LinearLayout>
+
+            <ImageView
+
+                android:layout_width="35dp"
+
+                android:layout_height="35dp"
+
+                android:src="@drawable/ic_check_green"/>
+
+        </LinearLayout>
+
+        <!-- 🔥 BOTTOM SPACE -->
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"/>
+
     </LinearLayout>
+
 </ScrollView>
