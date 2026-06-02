@@ -259,6 +259,18 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                     startActivity(intent);
                 });
 
+        findViewById(R.id.btnDocs)
+                .setOnClickListener(v -> {
+
+                    Intent intent =
+                            new Intent(
+                                    DriverHomeActivity.this,
+                                    DriverDocumentsActivityV3.class
+                            );
+
+                    startActivity(intent);
+                });
+
         btnMenu.setOnClickListener(v -> {
 
             if(menuVisible){

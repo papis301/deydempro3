@@ -32,6 +32,9 @@
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".DriverDocumentsActivityV3"
+            android:exported="false" />
+        <activity
             android:name=".PartnersActivity"
             android:exported="false" />
         <activity

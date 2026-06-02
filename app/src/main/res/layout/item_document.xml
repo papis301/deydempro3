@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- TYPE DOCUMENT -->
+
+        <TextView
+            android:id="@+id/txtType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#212121"/>
+
+        <!-- RECTO -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recto"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"/>
+
+        <ImageView
+            android:id="@+id/imgRecto"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="4dp"
+            android:background="#EEEEEE"
+            android:scaleType="centerCrop"/>
+
+        <Button
+            android:id="@+id/btnRecto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📷 Photographier Recto"
+            android:layout_marginTop="8dp"/>
+
+        <!-- VERSO -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verso (optionnel)"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <ImageView
+            android:id="@+id/imgVerso"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="4dp"
+            android:background="#EEEEEE"
+            android:scaleType="centerCrop"/>
+
+        <Button
+            android:id="@+id/btnVerso"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📷 Photographier Verso"
+            android:layout_marginTop="8dp"/>
+
+        <!-- STATUT -->
+
+        <TextView
+            android:id="@+id/txtStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="16dp"/>
+
+        <!-- MOTIF REJET -->
+
+        <TextView
+            android:id="@+id/txtReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#F44336"
+            android:layout_marginTop="4dp"/>
+
+        <!-- ACTIONS -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnUpload"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="⬆ Envoyer"/>
+
+            <Button
+                android:id="@+id/btnUpdate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="✏ Mettre à jour"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
