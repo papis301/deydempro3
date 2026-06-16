@@ -93,7 +93,7 @@ public class PartnersActivity
         dialog.show();
 
         String url =
-                "https://pisco.alwaysdata.net/api_get_available_partners.php";
+                "BASE_URLapi_get_available_partners.php";
 
         RequestQueue queue =
                 Volley.newRequestQueue(this);

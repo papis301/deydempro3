@@ -25,7 +25,7 @@ public class DeliveryAdapter extends RecyclerView.Adapter<DeliveryAdapter.MyView
 
     Context context;
     List<Delivery> list;
-    String acceptUrl = "https://pisco.alwaysdata.net/accept_delivery.php";
+    String acceptUrl = "BASE_URLaccept_delivery.php";
 
     public DeliveryAdapter(Context context, List<Delivery> list) {
         this.context = context;

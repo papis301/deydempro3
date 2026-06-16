@@ -110,7 +110,7 @@ public class DriverDocumentsActivity extends AppCompatActivity {
 
     private void checkDocsStatus(int driverId) {
 
-        String url = "https://pisco.alwaysdata.net/check_docs_status.php?driver_id=" + driverId;
+        String url = "BASE_URLcheck_docs_status.php?driver_id=" + driverId;
 
         StringRequest req = new StringRequest(
                 Request.Method.GET,
@@ -215,7 +215,7 @@ public class DriverDocumentsActivity extends AppCompatActivity {
 
     private void markDocsAsSent(int driverId) {
 
-        String url = "https://pisco.alwaysdata.net/mark_docs_sent.php";
+        String url = "BASE_URLmark_docs_sent.php";
 
         StringRequest req = new StringRequest(
                 Request.Method.POST,

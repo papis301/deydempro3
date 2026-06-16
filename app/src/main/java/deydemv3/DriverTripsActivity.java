@@ -83,7 +83,7 @@ public class DriverTripsActivity extends AppCompatActivity {
     private void loadTrips(){
 
         String url =
-                "https://pisco.alwaysdata.net/get_driver_trips.php?driver_id="
+                "BASE_URLget_driver_trips.php?driver_id="
                         + userId;
 
         @SuppressLint("NotifyDataSetChanged") StringRequest request =

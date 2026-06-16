@@ -53,7 +53,7 @@ public class NotificationsActivity extends AppCompatActivity {
     }
 
     private void fetchNotifications() {
-        String url = "https://pisco.alwaysdata.net/get_notifications.php";
+        String url = "BASE_URLget_notifications.php";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 response -> {

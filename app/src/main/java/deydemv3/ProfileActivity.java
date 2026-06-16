@@ -67,7 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
     private void loadProfile(){
 
         StringRequest request = new StringRequest(Request.Method.POST,
-                "https://pisco.alwaysdata.net/get_profile.php",
+                "BASE_URLget_profile.php",
                 response -> {
                     try{
                         JSONObject json = new JSONObject(response);

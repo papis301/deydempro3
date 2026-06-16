@@ -30,7 +30,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     // 🔥 URL API
     private static final String URL_REGISTER =
-            "https://pisco.alwaysdata.net/register.php";
+            "BASE_URLregister.php";
 
     @SuppressLint("MissingInflatedId")
     @Override

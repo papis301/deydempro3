@@ -49,7 +49,7 @@ public class CguActivity extends AppCompatActivity {
 
         if (userId == null || userId.equals("0")) return;
 
-        String url = "https://pisco.alwaysdata.net/update_docs_statusclient.php";
+        String url = "BASE_URLupdate_docs_statusclient.php";
 
         StringRequest request = new StringRequest(
                 Request.Method.POST,

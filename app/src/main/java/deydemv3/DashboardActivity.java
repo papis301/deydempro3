@@ -38,7 +38,7 @@ public class DashboardActivity extends AppCompatActivity {
     MaterialButton btnAll, btnPending, btnOngoing;
 
     Handler handler = new Handler();
-    String url = "https://pisco.alwaysdata.net/get_my_courses.php";
+    String url = "BASE_URLget_my_courses.php";
 
     String currentFilter = "all";
     TextView txtEmpty;

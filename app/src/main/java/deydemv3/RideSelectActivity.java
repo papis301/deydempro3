@@ -195,7 +195,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 
 
         String url =
-                "https://pisco.alwaysdata.net/get_client_active_trip.php?client_id="
+                "BASE_URLget_client_active_trip.php?client_id="
                         + userId;
 
         StringRequest request =
@@ -495,7 +495,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 //
 private void sendRide() {
 
-    String url = "https://pisco.alwaysdata.net/create_ride.php"; // 🔥 remplace
+    String url = "BASE_URLcreate_ride.php"; // 🔥 remplace
 
     com.android.volley.RequestQueue queue =
             com.android.volley.toolbox.Volley.newRequestQueue(this);

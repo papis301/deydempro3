@@ -189,7 +189,8 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
             finish();
 
             return;
-        } Toast.makeText(this,"id"+ userId,Toast.LENGTH_SHORT).show();
+        }
+       // Toast.makeText(this,"id"+ userId,Toast.LENGTH_SHORT).show();
 
         loadDriverProfile();
 
@@ -521,6 +522,8 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
                                     txtDistance.setText(completed);
 
                                     txtHours.setText(rating);
+
+                                    checkDriverEligibility();
 
                                 }
 
@@ -1142,6 +1145,180 @@ public class DriverHomeActivity extends FragmentActivity implements OnMapReadyCa
         };
 
         Volley.newRequestQueue(this).add(req);
+    }
+
+    private void checkDriverEligibility() {
+
+        String url =
+                BASE_URL +
+                        "check_driver_eligibility.php?driver_id="
+                        + userId;
+
+        JsonObjectRequest request =
+                new JsonObjectRequest(
+                        Request.Method.GET,
+                        url,
+                        null,
+
+                        response -> {
+
+                            try {
+
+                                boolean success =
+                                        response.getBoolean(
+                                                "success"
+                                        );
+
+                                if(!success){
+
+                                    Toast.makeText(
+                                            this,
+                                            response.getString("message"),
+                                            Toast.LENGTH_LONG
+                                    ).show();
+
+                                    switchOnline.setChecked(false);
+
+                                    switchOnline.setEnabled(false);
+
+                                    return;
+                                }
+
+                                boolean eligible =
+                                        response.getBoolean(
+                                                "eligible"
+                                        );
+
+                                String message =
+                                        response.getString(
+                                                "message"
+                                        );
+
+                                if(eligible){
+
+                                    switchOnline.setEnabled(true);
+
+                                    Log.d(
+                                            "ELIGIBILITY",
+                                            "Chauffeur éligible"
+                                    );
+
+                                }else{
+
+                                    switchOnline.setChecked(false);
+
+                                    switchOnline.setEnabled(false);
+
+                                    JSONArray missingDocs = null;
+
+                                    if(response.has("missing_documents")){
+
+                                        missingDocs =
+                                                response.getJSONArray(
+                                                        "missing_documents"
+                                                );
+                                    }
+
+                                    showEligibilityDialog(
+                                            message,
+                                            missingDocs
+                                    );
+
+                                    Log.d(
+                                            "ELIGIBILITY",
+                                            response.toString()
+                                    );
+                                }
+
+                            } catch (Exception e){
+
+                                e.printStackTrace();
+                            }
+
+                        },
+
+                        error -> {
+
+                            Log.e(
+                                    "ELIGIBILITY_ERROR",
+                                    error.toString()
+                            );
+
+                            Toast.makeText(
+                                    this,
+                                    "Impossible de vérifier l'éligibilité",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+
+                );
+
+        Volley.newRequestQueue(this)
+                .add(request);
+    }
+
+    private void showEligibilityDialog(
+            String message,
+            JSONArray missingDocs
+    ) {
+
+        StringBuilder builder =
+                new StringBuilder();
+
+        builder.append(message);
+
+        if(missingDocs != null
+                && missingDocs.length() > 0){
+
+            builder.append("\n\nDocuments requis :\n");
+
+            for(int i = 0; i < missingDocs.length(); i++){
+
+                try {
+
+                    builder.append("• ")
+                            .append(
+                                    missingDocs.getString(i)
+                            )
+                            .append("\n");
+
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        new AlertDialog.Builder(this)
+
+                .setTitle(
+                        "Documents requis"
+                )
+
+                .setMessage(
+                        builder.toString()
+                )
+
+                .setCancelable(false)
+
+                .setPositiveButton(
+                        "Mes documents",
+                        (dialog, which) -> {
+
+                            startActivity(
+                                    new Intent(
+                                            DriverHomeActivity.this,
+                                            DriverDocumentsActivityV3.class
+                                    )
+                            );
+                        }
+                )
+
+                .setNegativeButton(
+                        "Fermer",
+                        null
+                )
+
+                .show();
     }
 
     // ================================

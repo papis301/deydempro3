@@ -287,7 +287,7 @@ public class DriverPickupActivity extends AppCompatActivity
     private void checkTripStatus(){
 
         String url =
-                "https://pisco.alwaysdata.net/check_trip_status.php?ride_id="
+                "BASE_URLcheck_trip_status.php?ride_id="
                         + rideId;
 
         StringRequest request =
@@ -543,7 +543,7 @@ public class DriverPickupActivity extends AppCompatActivity
     private void getClientInfo(){
 
         String url =
-                "https://pisco.alwaysdata.net/get_client_info.php?client_id="
+                "BASE_URLget_client_info.php?client_id="
                         + clientId;
 
         JsonObjectRequest request =
@@ -607,7 +607,7 @@ public class DriverPickupActivity extends AppCompatActivity
     private void cancelRide(){
 
         String url =
-                "https://pisco.alwaysdata.net/refuse_trip.php";
+                "BASE_URLrefuse_trip.php";
 
         Log.d(
                 "CANCEL_RIDE",
@@ -930,7 +930,7 @@ public class DriverPickupActivity extends AppCompatActivity
     ){
 
         String url =
-                "https://pisco.alwaysdata.net/update_driver_location.php";
+                "BASE_URLupdate_driver_location.php";
 
         StringRequest request =
                 new StringRequest(
@@ -1299,7 +1299,7 @@ public class DriverPickupActivity extends AppCompatActivity
     private void updateTripStatus(String status){
 
         String url =
-                "https://pisco.alwaysdata.net/update_trip_status.php";
+                "BASE_URLupdate_trip_status.php";
 
         Log.d(
                 "STATUS_DEBUG",

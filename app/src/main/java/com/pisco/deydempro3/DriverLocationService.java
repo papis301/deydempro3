@@ -29,7 +29,7 @@ public class DriverLocationService extends Service {
     FusedLocationProviderClient fused;
     LocationCallback locationCallback;
 
-    String UPDATE_URL = "https://pisco.alwaysdata.net/update_driver_position.php";
+    String UPDATE_URL = "BASE_URLupdate_driver_position.php";
 
     @Override
     public void onCreate() {

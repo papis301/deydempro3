@@ -111,7 +111,7 @@ public class StartActivity extends AppCompatActivity {
 
     private void checkUserFromServer(String userId) {
 
-        String url = "https://pisco.alwaysdata.net/get_user_by_id.php?user_id=" + userId;
+        String url = "BASE_URLget_user_by_id.php?user_id=" + userId;
 
         StringRequest request = new StringRequest(
                 Request.Method.GET,

@@ -106,7 +106,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     private void checkTripStatus(){
 
         String url =
-                "https://pisco.alwaysdata.net/check_trip_status.php?ride_id="
+                "BASE_URLcheck_trip_status.php?ride_id="
                         + rideId;
 
         StringRequest request =
@@ -218,7 +218,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     private void loadDriverProfile(){
 
         String url =
-                "https://pisco.alwaysdata.net/get_driver_profile.php?driver_id="
+                "BASE_URLget_driver_profile.php?driver_id="
                         + driverId;
 
         StringRequest request =
@@ -451,7 +451,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
 
     private void checkDriverStatus() {
 
-        String url = "https://pisco.alwaysdata.net/check_driver.php?ride_id=" + rideId;
+        String url = "BASE_URLcheck_driver.php?ride_id=" + rideId;
 
         StringRequest request = new StringRequest(
                 Request.Method.GET,
@@ -559,7 +559,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
 
     private void cancelRide() {
 
-        String url = "https://pisco.alwaysdata.net/cancel_ride.php";
+        String url = "BASE_URLcancel_ride.php";
 
         StringRequest request = new StringRequest(Request.Method.POST, url,
 

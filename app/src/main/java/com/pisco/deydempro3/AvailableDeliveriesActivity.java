@@ -20,7 +20,7 @@ public class AvailableDeliveriesActivity extends AppCompatActivity {
 
     RecyclerView recycler;
     ArrayList<Delivery> deliveries;
-    String URL = "https://pisco.alwaysdata.net/get_deliveries.php";
+    String URL = "BASE_URLget_deliveries.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

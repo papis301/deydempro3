@@ -29,7 +29,7 @@ public class RegisterActivitydriver extends AppCompatActivity {
     Spinner spVehicleType;
 
     // 🔥 Ton API LOCAL
-    String URL = "https://pisco.alwaysdata.net/register_driver.php";
+    String URL = "BASE_URLregister_driver.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

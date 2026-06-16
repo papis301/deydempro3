@@ -253,16 +253,41 @@ public class DriverDocumentsActivityV3
                 )
         );
 
-        documentList.add(
-                new DriverDocument(
-                        7,
-                        "Photo du véhicule",
-                        "",
-                        "",
-                        "pending",
-                        ""
-                )
-        );
+        documentList.add(new DriverDocument(
+                7,
+                "Photo véhicule avant",
+                "",
+                "",
+                "pending",
+                ""
+        ));
+
+        documentList.add(new DriverDocument(
+                8,
+                "Photo véhicule arrière",
+                "",
+                "",
+                "pending",
+                ""
+        ));
+
+        documentList.add(new DriverDocument(
+                9,
+                "Photo véhicule gauche",
+                "",
+                "",
+                "pending",
+                ""
+        ));
+
+        documentList.add(new DriverDocument(
+                10,
+                "Photo véhicule droite",
+                "",
+                "",
+                "pending",
+                ""
+        ));
     }
 
     @Override

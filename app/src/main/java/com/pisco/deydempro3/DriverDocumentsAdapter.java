@@ -55,7 +55,16 @@ public class DriverDocumentsAdapter
         DriverDocument doc =
                 list.get(position);
 
-        if(doc.getType().equals("Photo de profil")){
+        String type = doc.getType();
+
+        boolean noVerso =
+                type.equals("Photo de profil")
+                        || type.equals("Photo véhicule avant")
+                        || type.equals("Photo véhicule arrière")
+                        || type.equals("Photo véhicule gauche")
+                        || type.equals("Photo véhicule droite");
+
+        if(noVerso){
 
             holder.btnVerso.setVisibility(View.GONE);
             holder.imgVerso.setVisibility(View.GONE);

@@ -27,8 +27,8 @@ public class CoursesActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     CourseAdapter adapter;
     List<Course> courseList = new ArrayList<>();
-    String URL_GET = "https://pisco.alwaysdata.net/get_courses.php";
-    String URL_CANCEL = "https://pisco.alwaysdata.net/cancel_course.php";
+    String URL_GET = "BASE_URLget_courses.php";
+    String URL_CANCEL = "BASE_URLcancel_course.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

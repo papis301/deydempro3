@@ -309,7 +309,7 @@ public class PickupDeliveryActivity extends AppCompatActivity implements OnMapRe
 
     private void assignDelivery(int deliveryId){
 
-        String url = "https://pisco.alwaysdata.net/assign_delivery_auto.php";
+        String url = "BASE_URLassign_delivery_auto.php";
 
         StringRequest req = new StringRequest(Request.Method.POST, url,
                 response -> {
@@ -386,7 +386,7 @@ public class PickupDeliveryActivity extends AppCompatActivity implements OnMapRe
         //btnconfirme.setEnabled(false);
         tvPrice.setText("Calcul en cours...");
 
-        String url = "https://pisco.alwaysdata.net/calculate_price.php";
+        String url = "BASE_URLcalculate_price.php";
 
         StringRequest req = new StringRequest(
                 Request.Method.POST,
@@ -506,7 +506,7 @@ public class PickupDeliveryActivity extends AppCompatActivity implements OnMapRe
 //        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
 //        String clientId = sp.getString("user_id", "0");
 
-        String url = "https://pisco.alwaysdata.net/create_course.php";
+        String url = "BASE_URLcreate_course.php";
 
         StringRequest req = new StringRequest(Request.Method.POST, url,
                 response -> {
