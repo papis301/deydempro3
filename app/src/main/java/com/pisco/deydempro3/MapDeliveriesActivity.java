@@ -59,8 +59,8 @@ public class MapDeliveriesActivity extends FragmentActivity {
 
     private final HashMap<Marker, MapDelivery> markerDeliveries = new HashMap<>();
 
-    private final String URL_LIST = "BASE_URLget_deliveries_map.php";
-    private final String URL_ACCEPT = "BASE_URLaccept_delivery.php";
+    private final String URL_LIST = BASE_URL + "get_deliveries_map.php";
+    private final String URL_ACCEPT = BASE_URL + "accept_delivery.php";
 
     private final int REFRESH_INTERVAL = 3000;
     private final Handler handler = new Handler();

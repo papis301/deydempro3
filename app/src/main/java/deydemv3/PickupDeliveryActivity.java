@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import static com.pisco.deydempro3.Constants.BASE_URL;
 
 public class PickupDeliveryActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -309,7 +310,7 @@ public class PickupDeliveryActivity extends AppCompatActivity implements OnMapRe
 
     private void assignDelivery(int deliveryId){
 
-        String url = "BASE_URLassign_delivery_auto.php";
+        String url = BASE_URL + "assign_delivery_auto.php";
 
         StringRequest req = new StringRequest(Request.Method.POST, url,
                 response -> {
@@ -386,7 +387,7 @@ public class PickupDeliveryActivity extends AppCompatActivity implements OnMapRe
         //btnconfirme.setEnabled(false);
         tvPrice.setText("Calcul en cours...");
 
-        String url = "BASE_URLcalculate_price.php";
+        String url = BASE_URL + "calculate_price.php";
 
         StringRequest req = new StringRequest(
                 Request.Method.POST,
@@ -506,7 +507,7 @@ public class PickupDeliveryActivity extends AppCompatActivity implements OnMapRe
 //        SharedPreferences sp = getSharedPreferences("DeydemUser", MODE_PRIVATE);
 //        String clientId = sp.getString("user_id", "0");
 
-        String url = "BASE_URLcreate_course.php";
+        String url = BASE_URL + "create_course.php";
 
         StringRequest req = new StringRequest(Request.Method.POST, url,
                 response -> {

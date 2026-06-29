@@ -1,5 +1,7 @@
 package deydemv3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -67,7 +69,7 @@ public class ProfileActivity extends AppCompatActivity {
     private void loadProfile(){
 
         StringRequest request = new StringRequest(Request.Method.POST,
-                "BASE_URLget_profile.php",
+                BASE_URL + "get_profile.php",
                 response -> {
                     try{
                         JSONObject json = new JSONObject(response);

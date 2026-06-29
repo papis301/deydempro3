@@ -1,5 +1,7 @@
 package com.pisco.deydempro3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,7 +22,7 @@ public class AvailableDeliveriesActivity extends AppCompatActivity {
 
     RecyclerView recycler;
     ArrayList<Delivery> deliveries;
-    String URL = "BASE_URLget_deliveries.php";
+    String URL = BASE_URL + "get_deliveries.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

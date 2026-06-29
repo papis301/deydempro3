@@ -287,7 +287,7 @@ public class DriverPickupActivity extends AppCompatActivity
     private void checkTripStatus(){
 
         String url =
-                "BASE_URLcheck_trip_status.php?ride_id="
+                BASE_URL + "check_trip_status.php?ride_id="
                         + rideId;
 
         StringRequest request =
@@ -543,7 +543,7 @@ public class DriverPickupActivity extends AppCompatActivity
     private void getClientInfo(){
 
         String url =
-                "BASE_URLget_client_info.php?client_id="
+                BASE_URL + "get_client_info.php?client_id="
                         + clientId;
 
         JsonObjectRequest request =
@@ -607,7 +607,7 @@ public class DriverPickupActivity extends AppCompatActivity
     private void cancelRide(){
 
         String url =
-                "BASE_URLrefuse_trip.php";
+                BASE_URL + "refuse_trip.php";
 
         Log.d(
                 "CANCEL_RIDE",
@@ -930,7 +930,7 @@ public class DriverPickupActivity extends AppCompatActivity
     ){
 
         String url =
-                "BASE_URLupdate_driver_location.php";
+                BASE_URL + "update_driver_location.php";
 
         StringRequest request =
                 new StringRequest(
@@ -1299,7 +1299,7 @@ public class DriverPickupActivity extends AppCompatActivity
     private void updateTripStatus(String status){
 
         String url =
-                "BASE_URLupdate_trip_status.php";
+                BASE_URL + "update_trip_status.php";
 
         Log.d(
                 "STATUS_DEBUG",

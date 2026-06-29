@@ -1,5 +1,7 @@
 package deydemv3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,7 +33,7 @@ public class LoginActivityc extends AppCompatActivity {
 
     // 🔥 URL API
     private static final String URL_LOGIN =
-            "BASE_URLlogin.php";
+            BASE_URL + "login.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

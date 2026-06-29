@@ -1,5 +1,7 @@
 package deydemv3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -83,7 +85,7 @@ public class DriverTripsActivity extends AppCompatActivity {
     private void loadTrips(){
 
         String url =
-                "BASE_URLget_driver_trips.php?driver_id="
+                BASE_URL + "get_driver_trips.php?driver_id="
                         + userId;
 
         @SuppressLint("NotifyDataSetChanged") StringRequest request =

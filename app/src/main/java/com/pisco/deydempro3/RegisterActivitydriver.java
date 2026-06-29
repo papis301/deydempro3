@@ -1,5 +1,7 @@
 package com.pisco.deydempro3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
@@ -29,7 +31,7 @@ public class RegisterActivitydriver extends AppCompatActivity {
     Spinner spVehicleType;
 
     // 🔥 Ton API LOCAL
-    String URL = "BASE_URLregister_driver.php";
+    String URL = BASE_URL + "register_driver.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

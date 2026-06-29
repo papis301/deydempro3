@@ -1,5 +1,7 @@
 package com.pisco.deydempro3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -29,7 +31,7 @@ public class DriverLocationService extends Service {
     FusedLocationProviderClient fused;
     LocationCallback locationCallback;
 
-    String UPDATE_URL = "BASE_URLupdate_driver_position.php";
+    String UPDATE_URL = BASE_URL + "update_driver_position.php";
 
     @Override
     public void onCreate() {

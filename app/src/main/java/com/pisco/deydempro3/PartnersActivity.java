@@ -1,5 +1,7 @@
 package com.pisco.deydempro3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -93,7 +95,7 @@ public class PartnersActivity
         dialog.show();
 
         String url =
-                "BASE_URLapi_get_available_partners.php";
+                BASE_URL + "api_get_available_partners.php";
 
         RequestQueue queue =
                 Volley.newRequestQueue(this);

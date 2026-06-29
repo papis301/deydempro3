@@ -1,5 +1,7 @@
 package com.pisco.deydempro3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -53,7 +55,7 @@ public class NotificationsActivity extends AppCompatActivity {
     }
 
     private void fetchNotifications() {
-        String url = "BASE_URLget_notifications.php";
+        String url = BASE_URL + "get_notifications.php";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 response -> {

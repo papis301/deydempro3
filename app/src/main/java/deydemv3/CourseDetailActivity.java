@@ -1,7 +1,6 @@
 package deydemv3;
 
-
-import static deydemv3.Constants.BASE_URL;
+import static com.pisco.deydempro3.Constants.BASE_URL;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -203,7 +202,7 @@ public class CourseDetailActivity extends AppCompatActivity {
 
     private void cancelCourse(int courseId, String reason) {
 
-        String url = "BASE_URLcancel_course.php";
+        String url = BASE_URL + "cancel_course.php";
 
         StringRequest req = new StringRequest(
                 Request.Method.POST,

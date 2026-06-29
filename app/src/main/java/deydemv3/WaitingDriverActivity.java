@@ -1,5 +1,6 @@
 package deydemv3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -106,7 +107,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     private void checkTripStatus(){
 
         String url =
-                "BASE_URLcheck_trip_status.php?ride_id="
+                BASE_URL + "check_trip_status.php?ride_id="
                         + rideId;
 
         StringRequest request =
@@ -218,7 +219,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
     private void loadDriverProfile(){
 
         String url =
-                "BASE_URLget_driver_profile.php?driver_id="
+                BASE_URL + "get_driver_profile.php?driver_id="
                         + driverId;
 
         StringRequest request =
@@ -451,7 +452,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
 
     private void checkDriverStatus() {
 
-        String url = "BASE_URLcheck_driver.php?ride_id=" + rideId;
+        String url = BASE_URL + "check_driver.php?ride_id=" + rideId;
 
         StringRequest request = new StringRequest(
                 Request.Method.GET,
@@ -559,7 +560,7 @@ public class WaitingDriverActivity extends AppCompatActivity implements OnMapRea
 
     private void cancelRide() {
 
-        String url = "BASE_URLcancel_ride.php";
+        String url = BASE_URL + "cancel_ride.php";
 
         StringRequest request = new StringRequest(Request.Method.POST, url,
 

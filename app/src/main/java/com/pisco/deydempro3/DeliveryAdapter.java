@@ -1,5 +1,7 @@
 package com.pisco.deydempro3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Button;
@@ -25,7 +27,7 @@ public class DeliveryAdapter extends RecyclerView.Adapter<DeliveryAdapter.MyView
 
     Context context;
     List<Delivery> list;
-    String acceptUrl = "BASE_URLaccept_delivery.php";
+    String acceptUrl = BASE_URL + "accept_delivery.php";
 
     public DeliveryAdapter(Context context, List<Delivery> list) {
         this.context = context;

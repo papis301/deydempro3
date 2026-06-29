@@ -104,7 +104,7 @@ public class SelectRoleActivity extends AppCompatActivity {
     }
 //    private void switchModeAPI(String newMode) {
 //
-//        String url = "BASE_URLswitch_mode.php";
+//        String url = BASE_URL + "switch_mode.php";
 //
 //        StringRequest request = new StringRequest(Request.Method.POST, url,
 //

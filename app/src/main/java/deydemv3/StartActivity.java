@@ -1,5 +1,7 @@
 package deydemv3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -111,7 +113,7 @@ public class StartActivity extends AppCompatActivity {
 
     private void checkUserFromServer(String userId) {
 
-        String url = "BASE_URLget_user_by_id.php?user_id=" + userId;
+        String url = BASE_URL + "get_user_by_id.php?user_id=" + userId;
 
         StringRequest request = new StringRequest(
                 Request.Method.GET,

@@ -165,7 +165,8 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
         btnConfort.setOnClickListener(v -> selectVehicle("CONFORT"));
         btnMoto.setOnClickListener(v -> selectVehicle("MOTO"));
 
-        selectVehicle("PARTICULIER");
+        // 🔥 Seule la Moto est visible pour le moment : sélection par défaut
+        selectVehicle("MOTO");
 
         btnCommande.setOnClickListener(v -> {
 
@@ -195,7 +196,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
 
 
         String url =
-                "BASE_URLget_client_active_trip.php?client_id="
+                "https://pisco.alwaysdata.net/get_client_active_trip.php?client_id="
                         + userId;
 
         StringRequest request =
@@ -492,83 +493,83 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
         return String.valueOf(price);
     }
 
-//
-private void sendRide() {
+    //
+    private void sendRide() {
 
-    String url = "BASE_URLcreate_ride.php"; // 🔥 remplace
+        String url = "https://pisco.alwaysdata.net/create_ride.php"; // 🔥 remplace
 
-    com.android.volley.RequestQueue queue =
-            com.android.volley.toolbox.Volley.newRequestQueue(this);
+        com.android.volley.RequestQueue queue =
+                com.android.volley.toolbox.Volley.newRequestQueue(this);
 
-    com.android.volley.toolbox.StringRequest request =
-            new com.android.volley.toolbox.StringRequest(
-                    com.android.volley.Request.Method.POST,
-                    url,
+        com.android.volley.toolbox.StringRequest request =
+                new com.android.volley.toolbox.StringRequest(
+                        com.android.volley.Request.Method.POST,
+                        url,
 
-                    response -> {
-                        try {
-                            org.json.JSONObject json = new org.json.JSONObject(response);
+                        response -> {
+                            try {
+                                org.json.JSONObject json = new org.json.JSONObject(response);
 
-                            if (json.getBoolean("success")) {
+                                if (json.getBoolean("success")) {
 
-                                String rideId = json.getString("ride_id");
+                                    String rideId = json.getString("ride_id");
 
 //                                android.widget.Toast.makeText(this,
 //                                        "Commande envoyée 🚀 ID: " + rideId,
 //                                        android.widget.Toast.LENGTH_LONG).show();
 
-                                // 👉 ici tu peux passer à écran suivant
-                                // startActivity(new Intent(this, WaitingDriverActivity.class));
-                                Intent i = new Intent(this, WaitingDriverActivity.class);
-                                i.putExtra("ride_id", rideId);
-                                startActivity(i);
+                                    // 👉 ici tu peux passer à écran suivant
+                                    // startActivity(new Intent(this, WaitingDriverActivity.class));
+                                    Intent i = new Intent(this, WaitingDriverActivity.class);
+                                    i.putExtra("ride_id", rideId);
+                                    startActivity(i);
 
-                            } else {
-                                android.widget.Toast.makeText(this,
-                                        "Erreur serveur",
-                                        android.widget.Toast.LENGTH_SHORT).show();
+                                } else {
+                                    android.widget.Toast.makeText(this,
+                                            "Erreur serveur",
+                                            android.widget.Toast.LENGTH_SHORT).show();
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
+                        },
 
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        error -> {
+                            android.widget.Toast.makeText(this,
+                                    "Erreur réseau ❌",
+                                    android.widget.Toast.LENGTH_SHORT).show();
+
+                            android.util.Log.e("API_ERROR", error.toString());
                         }
-                    },
+                ) {
 
-                    error -> {
-                        android.widget.Toast.makeText(this,
-                                "Erreur réseau ❌",
-                                android.widget.Toast.LENGTH_SHORT).show();
+                    @Override
+                    protected java.util.Map<String, String> getParams() {
 
-                        android.util.Log.e("API_ERROR", error.toString());
+                        java.util.Map<String, String> params = new java.util.HashMap<>();
+
+                        params.put("client_id", String.valueOf(userId)); // 🔥 adapte
+                        params.put("trip_type", "taxi"); // ou livraison
+
+                        params.put("pickup_address", tvadress1.getText().toString());
+                        params.put("pickup_lat", String.valueOf(pickupLatLng.latitude));
+                        params.put("pickup_lng", String.valueOf(pickupLatLng.longitude));
+
+                        params.put("dropoff_address", tvadress2.getText().toString());
+                        params.put("dropoff_lat", String.valueOf(dropoffLatLng.latitude));
+                        params.put("dropoff_lng", String.valueOf(dropoffLatLng.longitude));
+
+                        params.put("price", getSelectedPrice());
+                        params.put("distance_km", String.valueOf(distanceValue));
+                        params.put("vehicle_type", selectedVehicle.toLowerCase());
+
+                        return params;
                     }
-            ) {
+                };
 
-                @Override
-                protected java.util.Map<String, String> getParams() {
-
-                    java.util.Map<String, String> params = new java.util.HashMap<>();
-
-                    params.put("client_id", String.valueOf(userId)); // 🔥 adapte
-                    params.put("trip_type", "taxi"); // ou livraison
-
-                    params.put("pickup_address", tvadress1.getText().toString());
-                    params.put("pickup_lat", String.valueOf(pickupLatLng.latitude));
-                    params.put("pickup_lng", String.valueOf(pickupLatLng.longitude));
-
-                    params.put("dropoff_address", tvadress2.getText().toString());
-                    params.put("dropoff_lat", String.valueOf(dropoffLatLng.latitude));
-                    params.put("dropoff_lng", String.valueOf(dropoffLatLng.longitude));
-
-                    params.put("price", getSelectedPrice());
-                    params.put("distance_km", String.valueOf(distanceValue));
-                    params.put("vehicle_type", selectedVehicle.toLowerCase());
-
-                    return params;
-                }
-            };
-
-    queue.add(request);
-}
+        queue.add(request);
+    }
 
     private String detectCity(LatLng latLng) {
         try {
@@ -608,14 +609,14 @@ private void sendRide() {
         // 🔥 TARIFS PAR VILLE
         if (city.equals("DAKAR")) {
 
-             baseParticulier = 700;
-             perKmParticulier = 300;
+            baseParticulier = 700;
+            perKmParticulier = 300;
 
-             baseTaxi = 1000;
-             perKmTaxi = 350;
+            baseTaxi = 1000;
+            perKmTaxi = 350;
 
-             baseConfort = 900;
-             perKmConfort = 350;
+            baseConfort = 900;
+            perKmConfort = 350;
 
             baseMoto = 500;
             perKmMoto = 105;
@@ -634,7 +635,7 @@ private void sendRide() {
             baseMoto = 300;
             perKmMoto = 50;
 
-        } 
+        }
 
         // 🔥 CALCUL
         int prixParticulier =
@@ -661,10 +662,10 @@ private void sendRide() {
         //if (prixTaxi < 1000) prixTaxi = 1000;
         //if (prixConfort < 900) prixConfort = 900;
 
-         finalPrixParticulier = prixParticulier;
-         finalPrixTaxi = prixTaxi;
-         finalPrixConfort = prixConfort;
-         finalPrixMoto = prixMoto;
+        finalPrixParticulier = prixParticulier;
+        finalPrixTaxi = prixTaxi;
+        finalPrixConfort = prixConfort;
+        finalPrixMoto = prixMoto;
         runOnUiThread(() -> {
 
             TextView p1 = findViewById(R.id.priceParticulier);
@@ -686,79 +687,79 @@ private void sendRide() {
         );
     }
 
-private void drawOSRMRoute(LatLng origin, LatLng destination) {
-    new Thread(() -> {
-        try {
+    private void drawOSRMRoute(LatLng origin, LatLng destination) {
+        new Thread(() -> {
+            try {
 
-            String url = "http://router.project-osrm.org/route/v1/driving/"
-                    + origin.longitude + "," + origin.latitude + ";"
-                    + destination.longitude + "," + destination.latitude
-                    + "?overview=full&geometries=geojson";
+                String url = "http://router.project-osrm.org/route/v1/driving/"
+                        + origin.longitude + "," + origin.latitude + ";"
+                        + destination.longitude + "," + destination.latitude
+                        + "?overview=full&geometries=geojson";
 
-            Log.d("ROUTE_URL", url);
+                Log.d("ROUTE_URL", url);
 
-            URL obj = new URL(url);
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            con.setRequestMethod("GET");
+                URL obj = new URL(url);
+                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                con.setRequestMethod("GET");
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream())
-            );
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream())
+                );
 
-            StringBuilder response = new StringBuilder();
-            String line;
+                StringBuilder response = new StringBuilder();
+                String line;
 
-            while ((line = in.readLine()) != null) {
-                response.append(line);
-            }
+                while ((line = in.readLine()) != null) {
+                    response.append(line);
+                }
 
-            in.close();
+                in.close();
 
-            JSONObject json = new JSONObject(response.toString());
+                JSONObject json = new JSONObject(response.toString());
 
-            JSONArray coords = json.getJSONArray("routes")
-                    .getJSONObject(0)
-                    .getJSONObject("geometry")
-                    .getJSONArray("coordinates");
+                JSONArray coords = json.getJSONArray("routes")
+                        .getJSONObject(0)
+                        .getJSONObject("geometry")
+                        .getJSONArray("coordinates");
 
-            PolylineOptions polylineOptions = new PolylineOptions()
-                    .width(10f)
-                    .color(Color.BLUE);
+                PolylineOptions polylineOptions = new PolylineOptions()
+                        .width(10f)
+                        .color(Color.BLUE);
 
-            for (int i = 0; i < coords.length(); i++) {
-                JSONArray c = coords.getJSONArray(i);
-                double lng = c.getDouble(0);
-                double lat = c.getDouble(1);
-                polylineOptions.add(new LatLng(lat, lng));
-            }
+                for (int i = 0; i < coords.length(); i++) {
+                    JSONArray c = coords.getJSONArray(i);
+                    double lng = c.getDouble(0);
+                    double lat = c.getDouble(1);
+                    polylineOptions.add(new LatLng(lat, lng));
+                }
 
-            JSONObject route = json.getJSONArray("routes").getJSONObject(0);
+                JSONObject route = json.getJSONArray("routes").getJSONObject(0);
 
-            double distanceMeters = route.getDouble("distance");
-            double durationSec = route.getDouble("duration");
+                double distanceMeters = route.getDouble("distance");
+                double durationSec = route.getDouble("duration");
 
 // 🔥 conversion
-            double distanceKm = distanceMeters / 1000.0;
-            int durationMin = (int) (durationSec / 60);
+                double distanceKm = distanceMeters / 1000.0;
+                int durationMin = (int) (durationSec / 60);
 
-            distanceValue = distanceKm;
-            durationValue = durationMin;
+                distanceValue = distanceKm;
+                durationValue = durationMin;
 
-            runOnUiThread(() -> {
-                if (mMap != null) {
-                    mMap.addPolyline(polylineOptions);
-                }
-                tvdistance.setText(
-                        String.format("%.2f km • %d min", distanceKm, durationMin)
-                );
-                Log.e("distance",  String.format(Locale.getDefault(), "%.2f km • %d min", distanceKm, durationMin));
-            });
+                runOnUiThread(() -> {
+                    if (mMap != null) {
+                        mMap.addPolyline(polylineOptions);
+                    }
+                    tvdistance.setText(
+                            String.format("%.2f km • %d min", distanceKm, durationMin)
+                    );
+                    Log.e("distance",  String.format(Locale.getDefault(), "%.2f km • %d min", distanceKm, durationMin));
+                });
 
-        } catch (Exception e) {
-            Log.e("ROUTE_ERROR", e.toString());
-        }
-    }).start();
-}
+            } catch (Exception e) {
+                Log.e("ROUTE_ERROR", e.toString());
+            }
+        }).start();
+    }
 
 
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

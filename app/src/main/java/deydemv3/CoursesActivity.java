@@ -1,5 +1,7 @@
 package deydemv3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -27,8 +29,8 @@ public class CoursesActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     CourseAdapter adapter;
     List<Course> courseList = new ArrayList<>();
-    String URL_GET = "BASE_URLget_courses.php";
-    String URL_CANCEL = "BASE_URLcancel_course.php";
+    String URL_GET = BASE_URL + "get_courses.php";
+    String URL_CANCEL = BASE_URL + "cancel_course.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

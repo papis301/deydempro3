@@ -1,5 +1,8 @@
 package deydemv3;
 
+
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -49,7 +52,7 @@ public class CguActivity extends AppCompatActivity {
 
         if (userId == null || userId.equals("0")) return;
 
-        String url = "BASE_URLupdate_docs_statusclient.php";
+        String url = BASE_URL + "update_docs_statusclient.php";
 
         StringRequest request = new StringRequest(
                 Request.Method.POST,

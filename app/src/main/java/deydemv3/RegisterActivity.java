@@ -1,5 +1,7 @@
 package deydemv3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -30,7 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     // 🔥 URL API
     private static final String URL_REGISTER =
-            "BASE_URLregister.php";
+            BASE_URL + "register.php";
 
     @SuppressLint("MissingInflatedId")
     @Override

@@ -1,5 +1,7 @@
 package deydemv3;
 
+import static com.pisco.deydempro3.Constants.BASE_URL;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -38,7 +40,7 @@ public class DashboardActivity extends AppCompatActivity {
     MaterialButton btnAll, btnPending, btnOngoing;
 
     Handler handler = new Handler();
-    String url = "BASE_URLget_my_courses.php";
+    String url = BASE_URL + "get_my_courses.php";
 
     String currentFilter = "all";
     TextView txtEmpty;
