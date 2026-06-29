@@ -619,7 +619,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
             perKmConfort = 350;
 
             baseMoto = 500;
-            perKmMoto = 105;
+            perKmMoto = 175;
 
         } else if (city.equals("THIES")) {
 
@@ -633,7 +633,7 @@ public class RideSelectActivity extends AppCompatActivity implements OnMapReadyC
             perKmConfort = 150;
 
             baseMoto = 300;
-            perKmMoto = 50;
+            perKmMoto = 75;
 
         }
 

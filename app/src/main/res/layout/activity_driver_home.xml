@@ -262,14 +262,33 @@
                     android:text="0 CFA"
                     android:textColor="#111111"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Gagne"
                     android:textColor="#888888"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/txtTodayEarnings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="0 CFA"
+                    android:textColor="#00A152"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Aujourd'hui"
+                    android:textColor="#888888"
+                    android:textSize="11sp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -298,7 +317,7 @@
                     android:src="@drawable/ic_clock" />
 
                 <TextView
-                    android:id="@+id/txtHours"
+                    android:id="@+id/txtRating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
@@ -310,7 +329,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="HOURS ONLINE"
+                    android:text="RATING"
                     android:textColor="#333333"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -330,11 +349,11 @@
                     android:tint="@color/black" />
 
                 <TextView
-                    android:id="@+id/txtDistance"
+                    android:id="@+id/txtCompleted"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="0 KM"
+                    android:text="0"
                     android:textColor="#111111"
                     android:textSize="18sp"
                     android:textStyle="bold"/>
@@ -342,7 +361,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TOTAL DISTANCE"
+                    android:text="COMPLETED"
                     android:textColor="#333333"
                     android:textSize="10sp"/>
             </LinearLayout>
