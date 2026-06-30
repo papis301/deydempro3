@@ -32,6 +32,26 @@
         android:theme="@style/Theme.DeyDemPro3"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".RideSelectActivityCompose"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivitycCompose"
+            android:exported="false"
+            tools:ignore="MissingClass" />
+        <activity
+            android:name=".SelectRoleActivityCompose"
+            android:exported="false" />
+        <activity
+            android:name=".SplashActivityCompose"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".DriverDocumentsActivityV3"
             android:exported="false" />
         <activity
@@ -67,13 +87,7 @@
             android:exported="false" />
         <activity
             android:name=".SplashActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
         <activity
             android:name="deydemv3.HomeActivity"
             android:exported="false" />

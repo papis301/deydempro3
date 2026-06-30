@@ -146,5 +146,6 @@
     <string name="cgu_continue">
         Continuer
     </string>
+    <string name="title_activity_compose_demo">ComposeDemoActivity</string>
 
 </resources>
