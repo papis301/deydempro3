@@ -9,15 +9,18 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,8 +28,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -39,11 +49,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -72,7 +84,6 @@ import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.pisco.deydempro3.compose.DeydemTheme
-import com.pisco.deydempro3.LoginActivitycCompose
 import deydemv3.WaitingDriverActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -88,18 +99,17 @@ import java.util.Locale
 
 /**
  * 🔥 RideSelectActivity migrée en Jetpack Compose
- *
  * Reproduit TOUTES les fonctionnalités de l'original (deydemv3.RideSelectActivity) :
- *  - Vérification de session (SharedPreferences "DeydemUser"), sinon retour login
- *  - Vérification d'une course active (get_client_active_trip.php) -> WaitingDriverActivity
- *  - Carte Google Maps (via AndroidView/MapView), position utilisateur, cercle bleu
- *  - Activation GPS (SettingsClient + dialog de résolution), permission de localisation
- *  - Géocodage inverse de la position de départ (Geocoder)
- *  - Champs Prise/Dépôt -> Google Places Autocomplete (Sénégal uniquement)
- *  - Tracé automatique de l'itinéraire via l'API OSRM dès que les 2 adresses sont choisies
- *  - Calcul distance/durée + détection de ville (Dakar/Thiès) + tarification dynamique
- *  - Sélection du véhicule (seule la carte "Moto" est visible pour le moment, comme l'original)
- *  - Envoi de la commande (create_ride.php) -> WaitingDriverActivity
+ * - Vérification de session (SharedPreferences "DeydemUser"), sinon retour login
+ * - Vérification d'une course active (get_client_active_trip.php) -> WaitingDriverActivity
+ * - Carte Google Maps (via AndroidView/MapView), position utilisateur, cercle bleu
+ * - Activation GPS (SettingsClient + dialog de résolution), permission de localisation
+ * - Géocodage inverse de la position de départ (Geocoder)
+ * - Champs Prise/Dépôt -> Google Places Autocomplete (Sénégal uniquement)
+ * - Tracé automatique de l'itinéraire via l'API OSRM dès que les 2 adresses sont choisies
+ * - Calcul distance/durée + détection de ville (Dakar/Thiès) + tarification dynamique
+ * - Sélection du véhicule (seule la carte "Moto" est visible pour le moment, comme l'original)
+ * - Envoi de la commande (create_ride.php) -> WaitingDriverActivity
  *
  * L'ancienne deydemv3.RideSelectActivity reste intacte et non supprimée.
  */
@@ -125,13 +135,13 @@ class RideSelectActivityCompose : ComponentActivity() {
                 RideSelectScreen(
                     userId = userId,
                     onActiveRideFound = { rideId ->
-                        val i = Intent(this, WaitingDriverActivity::class.java)
+                        val i = Intent(this, WaitingDriverActivityCompose::class.java)
                         i.putExtra("ride_id", rideId)
                         startActivity(i)
                         finish()
                     },
                     onRideCreated = { rideId ->
-                        val i = Intent(this, WaitingDriverActivity::class.java)
+                        val i = Intent(this, WaitingDriverActivityCompose::class.java)
                         i.putExtra("ride_id", rideId)
                         startActivity(i)
                     }
@@ -141,6 +151,10 @@ class RideSelectActivityCompose : ComponentActivity() {
     }
 }
 
+// =============================================
+// DATA CLASSES
+// =============================================
+
 private data class VehiclePrices(
     var moto: Int = 0,
     var particulier: Int = 0,
@@ -148,14 +162,24 @@ private data class VehiclePrices(
     var confort: Int = 0
 )
 
+private data class OsrmResult(
+    val points: List<LatLng>,
+    val distanceKm: Double,
+    val durationMin: Int
+)
+
+// =============================================
+// COMPOSABLES
+// =============================================
+
 @Composable
 private fun rememberMapViewWithLifecycle(): MapView {
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply { id = android.view.View.generateViewId() }
     }
-
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+
     DisposableEffect(lifecycle, mapView) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -169,9 +193,10 @@ private fun rememberMapViewWithLifecycle(): MapView {
             }
         }
         lifecycle.addObserver(observer)
-        onDispose { lifecycle.removeObserver(observer) }
+        onDispose {
+            lifecycle.removeObserver(observer)
+        }
     }
-
     return mapView
 }
 
@@ -196,11 +221,11 @@ fun RideSelectScreen(
     var distanceValue by remember { mutableStateOf(0.0) }
 
     // 🔥 LANCEUR : AUTOCOMPLETE PICKUP
-    val pickupLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+    val pickupLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            val place = Autocomplete.getPlaceFromIntent(result.data!!)
+            val place = Autocomplete.getPlaceFromIntent(result.data!!) ?: return@rememberLauncherForActivityResult
             pickupLatLng = place.latLng
             pickupAddress = place.address ?: pickupAddress
             val drop = dropoffLatLng
@@ -220,7 +245,7 @@ fun RideSelectScreen(
     }
 
     // 🔥 LANCEUR : AUTOCOMPLETE DROPOFF
-    val dropoffLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+    val dropoffLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
@@ -245,18 +270,19 @@ fun RideSelectScreen(
 
     fun openAutocomplete(forPickup: Boolean) {
         val fields = listOf(
-            Place.Field.ID, Place.Field.NAME,
-            Place.Field.ADDRESS, Place.Field.LAT_LNG
+            Place.Field.ID,
+            Place.Field.NAME,
+            Place.Field.ADDRESS,
+            Place.Field.LAT_LNG
         )
         val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
             .setCountries(listOf("SN"))
             .build(context)
-
         if (forPickup) pickupLauncher.launch(intent) else dropoffLauncher.launch(intent)
     }
 
     // 🔥 LANCEUR : RÉSOLUTION GPS (dialog "Activer le GPS")
-    val gpsResolutionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+    val gpsResolutionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -270,7 +296,7 @@ fun RideSelectScreen(
     }
 
     // 🔥 LANCEUR : PERMISSION LOCALISATION
-    val locationPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
@@ -318,7 +344,6 @@ fun RideSelectScreen(
         }
 
         Toast.makeText(context, "Commande envoyée ($selectedVehicle)", Toast.LENGTH_SHORT).show()
-
         val price = when (selectedVehicle) {
             "PARTICULIER" -> prices.particulier
             "TAXI" -> prices.taxi
@@ -341,12 +366,11 @@ fun RideSelectScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-
-        // 🔥 CARTE + PANNEAU DE RECHERCHE
+        // 🔥 CARTE + PANNEAU DE RECHERCHE — prend tout l'espace disponible
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
+                .weight(1f)
         ) {
             AndroidView(
                 factory = { mapView },
@@ -354,9 +378,9 @@ fun RideSelectScreen(
             ) { mv ->
                 mv.getMapAsync { map ->
                     googleMap = map
-
                     if (ActivityCompat.checkSelfPermission(
-                            context, Manifest.permission.ACCESS_FINE_LOCATION
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         map.isMyLocationEnabled = true
@@ -373,53 +397,133 @@ fun RideSelectScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White)
-                    .padding(12.dp)
+                    .padding(4.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp)) // Ajout d'ombre
             ) {
-                Text(
-                    text = distanceText,
-                    fontSize = 15.sp,
-                    color = Color(0xFF2196F3),
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(bottom = 10.dp)
-                )
-
-                Row(modifier = Modifier.clickable { openAutocomplete(true) }) {
-                    Text(
-                        text = "Prise",
-                        color = Color(0xFF2196F3),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(80.dp)
-                    )
-                    Text(text = pickupAddress, color = Color(0xFF333333))
-                }
-
-                Box(
+                // Distance avec icône
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(1.dp)
-                        .padding(vertical = 8.dp)
-                        .background(Color(0xFFEEEEEE))
+                        .padding(bottom = 12.dp)
+                        .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Route,
+                        contentDescription = "Distance",
+                        tint = Color(0xFF2196F3),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = distanceText,
+                        fontSize = 14.sp,
+                        color = Color(0xFF2196F3),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // Prise - avec icône et fond
+                Row(
+                    modifier = Modifier
+                        .clickable { openAutocomplete(true) }
+                        .fillMaxWidth()
+                        .background(Color(0xFFE3F2FD), RoundedCornerShape(8.dp)) // Fond bleu clair
+                        .padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Icône de localisation
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color(0xFF2196F3), RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.LocationOn,
+                            contentDescription = "Prise",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Column {
+                        Text(
+                            text = "Point de prise",
+                            fontSize = 12.sp,
+                            color = Color(0xFF2196F3),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = pickupAddress,
+                            color = Color(0xFF333333),
+                            fontSize = 14.sp,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                // Ligne de séparation avec animation
+                Divider(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    color = Color(0xFFE0E0E0),
+                    thickness = 1.dp
                 )
 
-                Row(modifier = Modifier.clickable { openAutocomplete(false) }) {
-                    Text(
-                        text = "Dépôt",
-                        color = Color(0xFF4CAF50),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(80.dp)
-                    )
-                    Text(text = dropoffAddress)
+                // Dépôt - avec icône et fond
+                Row(
+                    modifier = Modifier
+                        .clickable { openAutocomplete(false) }
+                        .fillMaxWidth()
+                        .background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp)) // Fond vert clair
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Icône de destination
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color(0xFF4CAF50), RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Flag,
+                            contentDescription = "Dépôt",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Column {
+                        Text(
+                            text = "Dépôt",
+                            fontSize = 12.sp,
+                            color = Color(0xFF4CAF50),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = dropoffAddress,
+                            color = Color(0xFF333333),
+                            fontSize = 14.sp,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
 
-        // 🔥 PANNEAU DU BAS : véhicules + commande
+        // 🔥 PANNEAU DU BAS : véhicules + commande — taille naturelle
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .padding(16.dp)
+                .padding(16.dp, bottom = 48.dp)
         ) {
             // 🔥 Seule la carte Moto est visible pour le moment (comme l'original)
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -476,10 +580,9 @@ private fun VehicleCard(
     }
 }
 
-// ============================================================
-// 🔥 LOGIQUE RÉSEAU / GPS / CALCULS (équivalents des méthodes
-// privées de l'Activity Java d'origine)
-// ============================================================
+// =============================================
+// LOGIQUE RÉSEAU / GPS / CALCULS
+// =============================================
 
 private fun checkActiveRide(
     context: Context,
@@ -487,7 +590,6 @@ private fun checkActiveRide(
     onActiveRideFound: (String) -> Unit
 ) {
     val url = Constants.BASE_URL + "get_client_active_trip.php?client_id=$userId"
-
     val request = StringRequest(
         Request.Method.GET,
         url,
@@ -501,9 +603,10 @@ private fun checkActiveRide(
                 e.printStackTrace()
             }
         },
-        { error -> android.util.Log.e("ACTIVE_RIDE", error.toString()) }
+        { error ->
+            android.util.Log.e("ACTIVE_RIDE", error.toString())
+        }
     )
-
     Volley.newRequestQueue(context).add(request)
 }
 
@@ -517,7 +620,9 @@ private fun checkGps(
     val client = LocationServices.getSettingsClient(context)
 
     client.checkLocationSettings(builder.build())
-        .addOnSuccessListener { onAlreadyEnabled() }
+        .addOnSuccessListener {
+            onAlreadyEnabled()
+        }
         .addOnFailureListener { e ->
             if (e is ResolvableApiException) {
                 try {
@@ -535,7 +640,8 @@ private fun getUserLocation(
     onLocation: (LatLng) -> Unit
 ) {
     if (ActivityCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
         ) != PackageManager.PERMISSION_GRANTED
     ) return
 
@@ -544,7 +650,6 @@ private fun getUserLocation(
         .addOnSuccessListener { location ->
             if (location != null) {
                 val userLocation = LatLng(location.latitude, location.longitude)
-
                 map?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 16f))
                 map?.addCircle(
                     CircleOptions()
@@ -554,7 +659,6 @@ private fun getUserLocation(
                         .fillColor(0x220000FF)
                         .strokeWidth(2f)
                 )
-
                 onLocation(userLocation)
             }
         }
@@ -584,7 +688,6 @@ private fun updateRoute(
     onPrices: (VehiclePrices) -> Unit
 ) {
     map?.clear()
-
     map?.addMarker(
         MarkerOptions().position(pickup).title("Départ")
             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
@@ -595,7 +698,8 @@ private fun updateRoute(
     map?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
 
     val straightLineKm = calculateDistance(
-        pickup.latitude, pickup.longitude, dropoff.latitude, dropoff.longitude
+        pickup.latitude, pickup.longitude,
+        dropoff.latitude, dropoff.longitude
     )
     onDistanceValue(straightLineKm)
     onDistanceText("Distance : %.2f km".format(straightLineKm))
@@ -618,12 +722,6 @@ private fun updateRoute(
     }
 }
 
-private data class OsrmResult(
-    val points: List<LatLng>,
-    val distanceKm: Double,
-    val durationMin: Int
-)
-
 private suspend fun drawOsrmRoute(origin: LatLng, destination: LatLng): OsrmResult? =
     withContext(Dispatchers.IO) {
         try {
@@ -634,9 +732,7 @@ private suspend fun drawOsrmRoute(origin: LatLng, destination: LatLng): OsrmResu
 
             val con = URL(url).openConnection() as HttpURLConnection
             con.requestMethod = "GET"
-
             val response = BufferedReader(InputStreamReader(con.inputStream)).use { it.readText() }
-
             val json = JSONObject(response)
             val route = json.getJSONArray("routes").getJSONObject(0)
             val coords: JSONArray = route.getJSONObject("geometry").getJSONArray("coordinates")
@@ -648,7 +744,6 @@ private suspend fun drawOsrmRoute(origin: LatLng, destination: LatLng): OsrmResu
 
             val distanceKm = route.getDouble("distance") / 1000.0
             val durationMin = (route.getDouble("duration") / 60).toInt()
-
             OsrmResult(points, distanceKm, durationMin)
         } catch (e: Exception) {
             android.util.Log.e("ROUTE_ERROR", e.toString())
@@ -673,7 +768,6 @@ private suspend fun detectCity(context: Context, latLng: LatLng): String =
             @Suppress("DEPRECATION")
             val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
             val city = addresses?.firstOrNull()?.locality?.lowercase()
-
             when {
                 city == null -> "OTHER"
                 city.contains("dakar") -> "DAKAR"
@@ -689,23 +783,35 @@ private suspend fun detectCity(context: Context, latLng: LatLng): String =
 private fun roundPrice(price: Int): Int = Math.round(price / 50.0).toInt() * 50
 
 private fun computePrices(city: String, distanceKm: Double): VehiclePrices {
-    var baseParticulier = 0.0; var perKmParticulier = 0.0
-    var baseTaxi = 0.0; var perKmTaxi = 0.0
-    var baseConfort = 0.0; var perKmConfort = 0.0
-    var baseMoto = 0.0; var perKmMoto = 0.0
+    var baseParticulier = 0.0
+    var perKmParticulier = 0.0
+    var baseTaxi = 0.0
+    var perKmTaxi = 0.0
+    var baseConfort = 0.0
+    var perKmConfort = 0.0
+    var baseMoto = 0.0
+    var perKmMoto = 0.0
 
     when (city) {
         "DAKAR" -> {
-            baseParticulier = 700.0; perKmParticulier = 300.0
-            baseTaxi = 1000.0; perKmTaxi = 350.0
-            baseConfort = 900.0; perKmConfort = 350.0
-            baseMoto = 500.0; perKmMoto = 175.0
+            baseParticulier = 700.0
+            perKmParticulier = 300.0
+            baseTaxi = 1000.0
+            perKmTaxi = 350.0
+            baseConfort = 900.0
+            perKmConfort = 350.0
+            baseMoto = 500.0
+            perKmMoto = 175.0
         }
         "THIES" -> {
-            baseParticulier = 500.0; perKmParticulier = 100.0
-            baseTaxi = 600.0; perKmTaxi = 150.0
-            baseConfort = 600.0; perKmConfort = 150.0
-            baseMoto = 300.0; perKmMoto = 75.0
+            baseParticulier = 500.0
+            perKmParticulier = 100.0
+            baseTaxi = 600.0
+            perKmTaxi = 150.0
+            baseConfort = 600.0
+            perKmConfort = 150.0
+            baseMoto = 300.0
+            perKmMoto = 75.0
         }
     }
 
@@ -730,7 +836,6 @@ private fun sendRide(
     onSuccess: (String) -> Unit
 ) {
     val url = Constants.BASE_URL + "create_ride.php"
-
     val request = object : StringRequest(
         Request.Method.POST,
         url,
@@ -767,6 +872,5 @@ private fun sendRide(
             )
         }
     }
-
     Volley.newRequestQueue(context).add(request)
 }

@@ -42,6 +42,9 @@
             android:name=".SelectRoleActivityCompose"
             android:exported="false" />
         <activity
+            android:name=".WaitingDriverActivityCompose"
+            android:exported="false" />
+        <activity
             android:name=".SplashActivityCompose"
             android:exported="true">
             <intent-filter>
